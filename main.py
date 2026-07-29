@@ -2,12 +2,8 @@ from fastapi import FastAPI, Query
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-import httpx
-import re
-import json
 import logging
-from datetime import datetime
-from typing import List, Dict, Any
+from app.services.aggregator import AccountAggregator
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
@@ -25,123 +21,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# In-memory storage for aggregated accounts
-CACHE = {
-    "last_updated": None,
-    "accounts": [],
-    "sources_stat": {}
-}
-
-# --- ADAPTERS ---
-
-async def fetch_dabaoid_accounts() -> List[Dict[str, Any]]:
-    """Fetch accounts from qingfeng888 / dabaoid"""
-    url = "https://id.dabaoid.top/share/vjBrzNCdmZ"
-    headers = {
-        "Referer": "https://id.qingfeng888.com/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    }
-    accounts = []
-    try:
-        async with httpx.AsyncClient(timeout=10.0, verify=False) as client:
-            res = await client.get(url, headers=headers)
-            if res.status_code == 200:
-                html = res.text
-                cards = html.split('<div class="col-xs-3 col-md-3">')
-                for card in cards[1:]:
-                    user_match = re.search(r'id="username_\d+"[^>]*data-clipboard-text="([^"]+)"', card)
-                    pass_match = re.search(r'id="password_\d+"[^>]*data-clipboard-text="([^"]+)"', card)
-                    region_match = re.search(r'<span class="badge bg-indigo text-indigo-fg">([^<]+)</span>', card)
-                    status_match = re.search(r'状态:[^<]*<span[^>]*>([^<]+)</span>', card)
-                    check_match = re.search(r'上次检查:\s*([^<]+)', card)
-                    
-                    if user_match and pass_match:
-                        accounts.append({
-                            "username": user_match.group(1).strip(),
-                            "password": pass_match.group(1).strip(),
-                            "region": region_match.group(1).strip() if region_match else "未知",
-                            "status": "normal" if (status_match and "正常" in status_match.group(1)) else "error",
-                            "status_text": status_match.group(1).strip() if status_match else "未知",
-                            "last_check": check_match.group(1).strip() if check_match else "",
-                            "source": "dabaoid"
-                        })
-    except Exception as e:
-        logging.error(f"Error fetching dabaoid accounts: {e}")
-    return accounts
-
-async def fetch_appstore_autos_accounts() -> List[Dict[str, Any]]:
-    """Fetch accounts from appstore.autos API"""
-    url = "https://appstore.autos/shareapi/xxyunAPP"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    }
-    accounts = []
-    try:
-        async with httpx.AsyncClient(timeout=10.0, verify=False) as client:
-            res = await client.get(url, headers=headers)
-            if res.status_code == 200:
-                data = res.json()
-                for acc in data.get("accounts", []):
-                    is_ok = acc.get("status") and acc.get("message") == "正常"
-                    accounts.append({
-                        "username": acc.get("username", "").strip(),
-                        "password": acc.get("password", "").strip(),
-                        "region": acc.get("region_display", "").strip(),
-                        "status": "normal" if is_ok else "error",
-                        "status_text": "正常" if is_ok else acc.get("message", "异常"),
-                        "last_check": acc.get("last_check", ""),
-                        "source": "appstore_autos"
-                    })
-    except Exception as e:
-        logging.error(f"Error fetching appstore_autos accounts: {e}")
-    return accounts
-
-# --- AGGREGATION ENGINE ---
-
-async def refresh_accounts_job():
-    """Sync accounts from all upstreams and update in-memory cache"""
-    logging.info("Starting background update job...")
-    dabaoid_accs = await fetch_dabaoid_accounts()
-    appstore_accs = await fetch_appstore_autos_accounts()
-    
-    all_raw = dabaoid_accs + appstore_accs
-    
-    # Deduplicate by username (case-insensitive)
-    unique_map = {}
-    sources_stat = {"dabaoid": len(dabaoid_accs), "appstore_autos": len(appstore_accs)}
-    
-    for acc in all_raw:
-        uname = acc["username"].lower()
-        # Keep normal status over error status if duplicated
-        if uname not in unique_map or (unique_map[uname]["status"] != "normal" and acc["status"] == "normal"):
-            unique_map[uname] = acc
-            
-    aggregated = list(unique_map.values())
-    
-    CACHE["accounts"] = aggregated
-    CACHE["last_updated"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    CACHE["sources_stat"] = sources_stat
-    logging.info(f"Update complete! Total unique accounts: {len(aggregated)}")
-
-# --- SCHEDULER ---
+aggregator = AccountAggregator()
 scheduler = AsyncIOScheduler()
 
 @app.on_event("startup")
 async def startup_event():
-    await refresh_accounts_job()
-    # Schedule every 5 minutes
-    scheduler.add_job(refresh_accounts_job, "interval", minutes=5)
+    await aggregator.refresh()
+    scheduler.add_job(aggregator.refresh, "interval", minutes=5)
     scheduler.start()
-
-# --- API ENDPOINTS ---
 
 @app.get("/api/v1/accounts")
 async def get_accounts(
     region: str = Query(None, description="Filter by region (e.g. 美国, 台湾)"),
     status: str = Query("normal", description="Filter by status ('normal' or 'all')")
 ):
-    """Get aggregated Apple ID accounts"""
-    accounts = CACHE["accounts"]
+    cache = aggregator.cache
+    accounts = cache["accounts"]
     
     if status == "normal":
         accounts = [a for a in accounts if a["status"] == "normal"]
@@ -152,25 +47,24 @@ async def get_accounts(
         "code": 200,
         "msg": "success",
         "total": len(accounts),
-        "last_updated": CACHE["last_updated"],
-        "sources_stat": CACHE["sources_stat"],
+        "last_updated": cache["last_updated"],
+        "sources_stat": cache["sources_stat"],
         "data": accounts
     })
 
 @app.get("/api/v1/stats")
 async def get_stats():
-    """Get system statistics"""
+    cache = aggregator.cache
     return JSONResponse(content={
         "code": 200,
-        "total_accounts": len(CACHE["accounts"]),
-        "valid_accounts": len([a for a in CACHE["accounts"] if a["status"] == "normal"]),
-        "last_updated": CACHE["last_updated"],
-        "sources": CACHE["sources_stat"]
+        "total_accounts": len(cache["accounts"]),
+        "valid_accounts": len([a for a in cache["accounts"] if a["status"] == "normal"]),
+        "last_updated": cache["last_updated"],
+        "sources": cache["sources_stat"]
     })
 
 @app.get("/", response_class=HTMLResponse)
 async def home_page():
-    """Web Front-end Page"""
     html_content = """<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
