@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  appleid-autoshare:
+    build: .
+    container_name: appleid-autoshare
+    ports:
+      - "8000:8000"
+    restart: always
