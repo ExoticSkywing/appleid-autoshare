@@ -1,0 +1,16 @@
+# Environment and generated artifacts
+.env
+.env.*
+!.env.example
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+**/__pycache__/
+*.py[cod]
+.coverage
+htmlcov/
+
+# Runtime/test artifacts
+*.log
+artifacts/
