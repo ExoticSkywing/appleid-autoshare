@@ -20,8 +20,9 @@ const state = {
   leftForAttempt: false,
   pendingAction: null,
   toastTimer: null,
+  mode: "novice", // 默认新手引导
   intent: "",
-  loginSucceeded: false,
+  verified: false,
   resultsVisible: false,
 };
 
@@ -102,7 +103,8 @@ function restoreSession() {
     };
     state.usernameEntered = Boolean(payload.usernameEntered) || Boolean(state.copied.password);
     state.feedbackLocked = Boolean(payload.feedbackLocked);
-    state.intent = payload.intent === "other_app" ? "other_app" : "target_app";
+    state.intent = payload.intent === "other_app" ? "other_app" : (payload.intent === "expert" ? "expert" : "target_app");
+    state.mode = state.intent === "expert" ? "expert" : "novice";
     state.loginSucceeded = Boolean(payload.loginSucceeded);
     state.resultsVisible = Boolean(payload.resultsVisible);
     updateIntentUI();
@@ -186,24 +188,25 @@ function updateVerifyAction() {
   const label = byId("verifyButtonLabel");
   const hint = byId("verifyActionHint");
   const onVerifyView = !state.account && document.body.dataset.phase === "verify";
+  const isExpert = state.mode === "expert";
   let reason = "";
   let buttonLabel = "获取账号";
 
-  if (!state.intent) {
+  if (!isExpert && !state.intent) {
     reason = "请先选择上方的下载目标；选择后才会显示人机验证。";
     buttonLabel = "先选择下载目标";
   } else if (!state.token) {
-    reason = "目标已选择，请完成上方的人机验证。";
+    reason = isExpert ? "请完成上方的人机验证。" : "目标已选择，请完成上方的人机验证。";
     buttonLabel = "完成验证后获取";
   }
 
   const blocked = Boolean(reason) || state.busy;
   button.classList.toggle("is-blocked", blocked);
   button.setAttribute("aria-disabled", String(blocked));
-  label.textContent = state.busy ? "正在获取账号" : buttonLabel;
+  label.textContent = state.busy ? "正在获取账号" : (isExpert && !blocked ? "获取账号（极速）" : buttonLabel);
   hint.textContent = state.busy ? "正在为你分配账号，请稍候。" : reason;
   hint.classList.toggle("hidden", !state.busy && !reason);
-  byId("turnstileWidget").classList.toggle("hidden", !state.intent);
+  byId("turnstileWidget").classList.toggle("hidden", (!isExpert && !state.intent) || Boolean(state.account));
 
   if (!onVerifyView) return;
   if (state.busy) {
@@ -212,16 +215,16 @@ function updateVerifyAction() {
     byId("verifyHint").textContent = "请保持页面打开，很快就好。";
     return;
   }
-  if (state.token && state.intent) {
+  if (state.token && (isExpert || state.intent)) {
     byId("credentialState").textContent = "验证已通过";
-    byId("verifyTitle").textContent = "可以获取账号";
-    byId("verifyHint").textContent = "目标与验证都已完成，点击下方按钮获取账号。";
+    byId("verifyTitle").textContent = isExpert ? "老玩家极速通道" : "可以获取账号";
+    byId("verifyHint").textContent = isExpert ? "验证已完成，点击下方按钮直接获取账号。" : "目标与验证都已完成，点击下方按钮获取账号。";
     byId("headerState").textContent = "验证已通过";
     byId("statusLight").classList.add("is-ready");
-  } else if (state.intent) {
+  } else if (isExpert || state.intent) {
     byId("credentialState").textContent = "等待访问验证";
-    byId("verifyTitle").textContent = "完成访问验证";
-    byId("verifyHint").textContent = "验证完成后即可获取账号。";
+    byId("verifyTitle").textContent = isExpert ? "老玩家极速通道" : "完成访问验证";
+    byId("verifyHint").textContent = "验证完成后即可直接获取账号。";
     byId("headerState").textContent = "等待访问验证";
     byId("statusLight").classList.remove("is-ready");
   } else {
@@ -257,14 +260,36 @@ function showRecovery(title, text, action) {
 }
 
 function updateIntentUI() {
+  const isExpert = state.mode === "expert";
+  document.querySelectorAll("[data-mode]").forEach((btn) => {
+    const active = btn.dataset.mode === state.mode;
+    btn.classList.toggle("is-selected", active);
+    btn.setAttribute("aria-selected", String(active));
+  });
+  document.querySelectorAll(".page-flow-progress").forEach((el) => {
+    el.classList.toggle("hidden", isExpert);
+  });
+  byId("intentPanel").classList.toggle("hidden", isExpert);
   document.querySelectorAll("[data-intent]").forEach((button) => {
-    const selected = button.dataset.intent === state.intent;
+    const selected = !isExpert && button.dataset.intent === state.intent;
     button.setAttribute("aria-pressed", String(selected));
     button.classList.toggle("is-selected", selected);
   });
   byId("intentPanel").classList.toggle("is-locked", Boolean(state.account));
-  document.querySelectorAll("[data-intent]").forEach((button) => { button.disabled = Boolean(state.account); });
+  document.querySelectorAll("[data-intent], [data-mode]").forEach((button) => { button.disabled = Boolean(state.account); });
   updateVerifyAction();
+}
+
+function selectMode(mode) {
+  if (state.account || state.busy) return;
+  state.mode = mode === "expert" ? "expert" : "novice";
+  state.intent = state.mode === "expert" ? "expert" : "";
+  try { localStorage.setItem("autoshare_mode", state.mode); } catch (_) {}
+  updateIntentUI();
+  updateVerifyAction();
+  if (state.token && state.mode === "expert") {
+    byId("verifyButton").focus({ preventScroll: true });
+  }
 }
 
 function selectIntent(intent) {
@@ -329,7 +354,6 @@ function showResultChoices({ returned = false } = {}) {
   document.querySelectorAll("[data-login-result], [data-result]").forEach((button) => {
     button.disabled = state.busy || state.feedbackLocked;
   });
-  updateCopyUI();
   saveSession();
   if (returned) window.setTimeout(() => byId("feedbackTitle").focus({ preventScroll: true }), 80);
 }
@@ -358,10 +382,12 @@ function showTargetAppCheck() {
 }
 
 function updateCopyUI() {
+  const isExpert = state.mode === "expert";
   const usernameCopied = Boolean(state.copied.username);
   const usernameEntered = Boolean(state.usernameEntered);
   const passwordCopied = Boolean(state.copied.password);
   const copiedCount = Number(usernameCopied) + Number(passwordCopied);
+
   document.querySelectorAll("[data-copy]").forEach((button) => {
     const key = button.dataset.copy;
     const copied = Boolean(state.copied[key]);
@@ -376,21 +402,41 @@ function updateCopyUI() {
   const title = byId("feedbackTitle");
   const progress = byId("copyProgress");
   const step = byId("feedbackStep");
-  panel.classList.toggle("is-ready", usernameCopied);
+  panel.classList.toggle("is-ready", isExpert || usernameCopied);
   byId("targetAppCheck").classList.toggle("hidden", !state.loginSucceeded);
 
-  byId("accountStep").classList.toggle("is-current", !usernameEntered);
-  byId("accountStep").classList.toggle("is-complete", usernameEntered);
-  byId("accountStep").querySelector("span").textContent = usernameEntered ? "✓" : "1";
-  byId("passwordStep").classList.toggle("is-current", usernameEntered && !passwordCopied);
-  byId("passwordStep").classList.toggle("is-complete", passwordCopied);
-  byId("passwordStep").querySelector("span").textContent = passwordCopied ? "✓" : "2";
-  byId("resultStep").classList.toggle("is-current", passwordCopied);
+  byId("accountStep").classList.toggle("is-current", !isExpert && !usernameEntered);
+  byId("accountStep").classList.toggle("is-complete", isExpert || usernameEntered);
+  byId("accountStep").querySelector("span").textContent = (isExpert || usernameEntered) ? "✓" : "1";
+  byId("passwordStep").classList.toggle("is-current", !isExpert && usernameEntered && !passwordCopied);
+  byId("passwordStep").classList.toggle("is-complete", isExpert || passwordCopied);
+  byId("passwordStep").querySelector("span").textContent = (isExpert || passwordCopied) ? "✓" : "2";
+  byId("resultStep").classList.toggle("is-current", isExpert || passwordCopied);
 
   const usernameButton = document.querySelector('[data-copy="username"]');
   const passwordButton = document.querySelector('[data-copy="password"]');
   usernameButton.classList.toggle("is-primary-copy", !usernameCopied);
-  passwordButton.classList.toggle("is-primary-copy", usernameCopied && !passwordCopied);
+  passwordButton.classList.toggle("is-primary-copy", (isExpert && !passwordCopied) || (usernameCopied && !passwordCopied));
+
+  if (isExpert) {
+    byId("appStoreInstruction").classList.add("hidden");
+    byId("showResultsButton").classList.add("hidden");
+    byId("feedbackPanel").classList.toggle("is-ready", passwordCopied);
+    byId("resultActions").classList.toggle("hidden", !passwordCopied || state.loginSucceeded);
+    if (!passwordCopied) {
+      step.textContent = "极速通道";
+      title.textContent = "复制账号与密码";
+      progress.textContent = "复制完成后去 App Store 登录，登录后再回来确认结果。";
+    } else {
+      step.textContent = "极速通道";
+      title.textContent = "登录结果确认";
+      progress.textContent = "登录成功直接结束；登录不上立即换号。";
+    }
+    document.querySelectorAll("[data-login-result], [data-result]").forEach((button) => {
+      button.disabled = state.busy || state.feedbackLocked || !passwordCopied;
+    });
+    return;
+  }
 
   byId("appStoreInstruction").classList.toggle("hidden", !usernameCopied || passwordCopied || state.resultsVisible);
   byId("accountEnteredButton").classList.toggle("hidden", usernameEntered);
@@ -616,7 +662,15 @@ function showVerify(hint = "完成下方验证，账号只会在本次会话中�
 }
 
 async function initializeTurnstile() {
-  if (restoreSession()) return;
+  try {
+    const savedMode = localStorage.getItem("autoshare_mode");
+    if (savedMode === "expert" || savedMode === "novice") {
+      state.mode = savedMode;
+      state.intent = state.mode === "expert" ? "expert" : "";
+    }
+  } catch (_) {}
+  const restored = restoreSession();
+  if (restored) return;
   try {
     state.config = await jsonRequest("/api/v2/config", { method: "GET", headers: {} });
     if (!state.config.turnstile_script_url || !state.config.turnstile_site_key) throw new Error("configuration_missing");
@@ -713,6 +767,9 @@ byId("verifyButton").addEventListener("click", () => {
 });
 byId("restartButton").addEventListener("click", restartFlow);
 byId("returnHomeButton").addEventListener("click", returnHome);
+document.querySelectorAll("[data-mode]").forEach((btn) => {
+  btn.addEventListener("click", () => selectMode(btn.dataset.mode));
+});
 document.querySelectorAll("[data-intent]").forEach((button) => {
   button.addEventListener("click", () => selectIntent(button.dataset.intent));
 });
@@ -776,12 +833,16 @@ byId("differentPageButton").addEventListener("click", () => {
 });
 
 document.querySelectorAll("[data-login-result]").forEach((button) => {
-  button.addEventListener("click", () => {
-    if (button.dataset.loginResult !== "success" || state.busy) return;
+  button.addEventListener("click", async () => {
+    if (button.dataset.loginResult !== "success" || state.busy || state.feedbackLocked) return;
+    if (state.intent === "expert") {
+      await submitFeedback("login_success");
+      return;
+    }
     if (state.intent === "target_app") {
       showTargetAppCheck();
     } else {
-      submitFeedback("login_success");
+      await submitFeedback("login_success");
     }
   });
 });
@@ -797,7 +858,7 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
     const target = byId(key);
     try {
       await copyText(target.textContent || "");
-      if (key === "password" && !state.copied.username) {
+      if (key === "password" && !state.copied.username && state.intent !== "expert") {
         showRecovery("请先复制 Apple ID", "先复制 Apple ID 并在 App Store 输入，再回来复制密码。", null);
         return;
       }
@@ -809,7 +870,10 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
       const fieldName = key === "username" ? "Apple ID" : "密码";
       const confirmation = wasCopied ? `${fieldName}再次复制成功` : `${fieldName}复制成功`;
       showCopyConfirmation(confirmation, button);
-      if (!wasCopied && key === "username") announce("Apple ID 已复制。现在打开 App Store，进入账户页并粘贴。" );
+      if (!wasCopied && key === "username" && state.mode === "novice") {
+        announce("Apple ID 已复制。现在打开 App Store，进入账户页并粘贴。" );
+        window.setTimeout(() => byId("feedbackPanel").scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+      }
       if (!wasCopied && key === "password") announce("密码复制成功。返回 App Store 输入密码，登录后回来确认结果。" );
     } catch (_) {
       showRecovery("没有复制成功", "长按文字可手动选择复制，当前账号不会消失。", null);

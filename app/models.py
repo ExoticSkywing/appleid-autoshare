@@ -58,7 +58,7 @@ class RevealRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     ticket: str = Field(min_length=32, max_length=256)
-    intent: Literal["target_app", "other_app"] = "target_app"
+    intent: Literal["target_app", "other_app", "expert"] = "target_app"
 
 
 class FeedbackRequest(BaseModel):

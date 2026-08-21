@@ -21,8 +21,29 @@
       <p class="masthead-state"><span id="statusLight" class="status-light"></span><span id="headerState">安全通道准备中</span></p>
     </header>
 
-    <section id="intentPanel" class="intent-panel" aria-labelledby="intentTitle">
-      <p class="intent-kicker">开始前选择目标</p>
+    <section class="mode-switch-panel" aria-label="操作模式选择">
+      <div class="mode-switch" role="tablist">
+        <button type="button" class="mode-tab is-selected" data-mode="novice" role="tab" aria-selected="true">
+          <img class="mode-tab-icon" src="/assets/assets/mode-novice.png" alt="" aria-hidden="true">
+          <div class="mode-tab-text">
+            <strong>我是新手</strong>
+            <small>首次使用 · 全程指引</small>
+          </div>
+          <span class="mode-tab-check" aria-hidden="true">✓</span>
+        </button>
+        <button type="button" class="mode-tab" data-mode="expert" role="tab" aria-selected="false">
+          <img class="mode-tab-icon" src="/assets/assets/mode-expert.png" alt="" aria-hidden="true">
+          <div class="mode-tab-text">
+            <strong>我是老玩家</strong>
+            <small>直接出号 · 无需提示</small>
+          </div>
+          <span class="mode-tab-check" aria-hidden="true">✓</span>
+        </button>
+      </div>
+    </section>
+
+    <section id="intentPanel" class="intent-panel hidden" aria-labelledby="intentTitle">
+      <p class="intent-kicker">新手引导 · 选择目标</p>
       <h2 id="intentTitle">你准备下载什么？</h2>
       <p class="intent-copy">选择后，系统会优先分配更适合的账号。</p>
       <div class="intent-options">
