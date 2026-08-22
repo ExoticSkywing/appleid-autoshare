@@ -22,6 +22,8 @@ const state = {
   preflightAcknowledged: false,
   securityAcknowledged: false,
   lightboxTrigger: null,
+  pendingNoviceExitResult: "",
+  signOutGuideOpened: false,
   toastTimer: null,
   mode: "novice", // 默认新手引导
   intent: "",
@@ -79,6 +81,8 @@ function saveSession() {
       usernameEntered: state.usernameEntered,
       preflightAcknowledged: state.preflightAcknowledged,
       securityAcknowledged: state.securityAcknowledged,
+      pendingNoviceExitResult: state.pendingNoviceExitResult,
+      signOutGuideOpened: state.signOutGuideOpened,
       feedbackLocked: state.feedbackLocked,
       intent: state.intent,
       loginSucceeded: state.loginSucceeded,
@@ -109,6 +113,8 @@ function restoreSession() {
     state.usernameEntered = Boolean(payload.usernameEntered) || Boolean(state.copied.password);
     state.preflightAcknowledged = Boolean(payload.preflightAcknowledged);
     state.securityAcknowledged = Boolean(payload.securityAcknowledged);
+    state.pendingNoviceExitResult = ["shadowrocket_available", "shadowrocket_missing", "login_success"].includes(payload.pendingNoviceExitResult) ? payload.pendingNoviceExitResult : "";
+    state.signOutGuideOpened = Boolean(payload.signOutGuideOpened);
     state.feedbackLocked = Boolean(payload.feedbackLocked);
     state.intent = payload.intent === "other_app" ? "other_app" : (payload.intent === "expert" ? "expert" : "target_app");
     state.mode = state.intent === "expert" ? "expert" : "novice";
@@ -116,7 +122,12 @@ function restoreSession() {
     state.resultsVisible = Boolean(payload.resultsVisible);
     updateIntentUI();
     showAccount(state.account, { restored: true, feedbackLocked: state.feedbackLocked, resultsVisible: state.resultsVisible });
-    if (state.resultsVisible) showResultChoices();
+    if (state.pendingNoviceExitResult && state.mode === "novice") {
+      const pendingResult = state.pendingNoviceExitResult;
+      showNoviceExitGate(pendingResult, { restored: true });
+    } else if (state.resultsVisible) {
+      showResultChoices();
+    }
     return true;
   } catch (_) {
     clearSession();
@@ -532,6 +543,7 @@ function showAccount(account, options = {}) {
 
 function showSuccess() {
   hideCopyConfirmation();
+  byId("noviceExitPanel").classList.add("hidden");
   setPhase("success", "successView");
   byId("resultStep").classList.add("is-complete");
   byId("resultStep").classList.remove("is-current");
@@ -546,6 +558,8 @@ function showSuccess() {
   state.usernameEntered = false;
   state.preflightAcknowledged = false;
   state.securityAcknowledged = false;
+  state.pendingNoviceExitResult = "";
+  state.signOutGuideOpened = false;
   state.loginSucceeded = false;
   state.resultsVisible = false;
   clearSession();
@@ -562,6 +576,8 @@ function showExhausted(purchaseLink) {
   state.usernameEntered = false;
   state.preflightAcknowledged = false;
   state.securityAcknowledged = false;
+  state.pendingNoviceExitResult = "";
+  state.signOutGuideOpened = false;
   state.loginSucceeded = false;
   state.resultsVisible = false;
   clearSession();
@@ -603,11 +619,14 @@ async function revealOne({ replacement = false } = {}) {
     }
 
     if (replacement) {
+      byId("noviceExitPanel").classList.add("hidden");
       state.attempt += 1;
       state.copied = { username: false, password: false };
       state.usernameEntered = false;
       state.preflightAcknowledged = false;
       state.securityAcknowledged = false;
+      state.pendingNoviceExitResult = "";
+      state.signOutGuideOpened = false;
       state.loginSucceeded = false;
       state.resultsVisible = false;
       byId("relayStage").classList.add("is-handoff");
@@ -651,6 +670,41 @@ async function verifyAndReveal() {
   } finally {
     setBusy(false);
   }
+}
+
+function showNoviceExitGate(result, options = {}) {
+  hideCopyConfirmation();
+  const restored = Boolean(options.restored);
+  const guideWasOpened = restored && state.signOutGuideOpened;
+  state.pendingNoviceExitResult = result;
+  state.signOutGuideOpened = guideWasOpened;
+  byId("signOutGuideLink").classList.remove("needs-confirmation");
+  byId("signOutCheck").checked = false;
+  byId("finishAfterSignOutButton").disabled = true;
+  byId("replaceAfterSignOutButton").disabled = true;
+  byId("signOutError").classList.add("hidden");
+  const isReplacement = result === "shadowrocket_missing";
+  byId("noviceExitPanel").classList.toggle("is-replacement", isReplacement);
+  byId("signoutPurposeLabel").textContent = isReplacement ? "尝试下一组前" : "关闭页面前";
+  byId("signoutPurposeTitle").textContent = isReplacement ? "先退出当前共享账号" : "还需要完成最后的收尾";
+  byId("signoutPurposeCopy").textContent = isReplacement
+    ? "退出后再登录下一组账号，避免两个共享账号在 App Store 中混用。"
+    : "退出当前共享账号后，你就可以重新登录自己的 App Store 账号。";
+  byId("downloadWindowNote").classList.toggle("hidden", isReplacement);
+  byId("finishAfterSignOutButton").classList.toggle("hidden", isReplacement);
+  byId("replaceAfterSignOutButton").classList.toggle("hidden", !isReplacement);
+  byId("targetAppCheck").classList.add("hidden");
+  byId("resultActions").classList.add("hidden");
+  byId("showResultsButton").classList.add("hidden");
+  byId("noviceExitPanel").classList.remove("hidden");
+  byId("feedbackStep").textContent = isReplacement ? "换号前" : "退出账号前";
+  byId("feedbackTitle").textContent = isReplacement ? "先退出当前 App Store 账号" : "你还有些必要且值得做的事情";
+  byId("copyProgress").textContent = isReplacement
+    ? "不会换？点击下方自助更换"
+    : "点击下方应用直接下载吧";
+  byId("feedbackPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+  announce(isReplacement ? "请先退出当前 App Store 账号，再尝试下一组。" : "请先下载所需应用，并在完成前退出共享账号。" );
+  saveSession();
 }
 
 async function submitFeedback(result) {
@@ -973,6 +1027,49 @@ byId("appStoreHomeLink").addEventListener("click", (event) => {
   saveSession();
   announce("正在打开 App Store Today 首页。若未正常打开，请返回并按手动步骤继续。" );
 });
+byId("needAccountButton").addEventListener("click", () => {
+  if (!state.purchaseLink) {
+    announce("专属账号入口暂不可用。" );
+    return;
+  }
+  window.open(state.purchaseLink, "_blank", "noopener,noreferrer");
+  announce("正在打开专属账号店铺。" );
+});
+
+byId("signOutGuideLink").addEventListener("click", () => {
+  state.signOutGuideOpened = true;
+  byId("signOutError").classList.add("hidden");
+  announce("退出教程已打开。完成后返回并勾选确认。" );
+});
+
+byId("signOutCheck").addEventListener("change", (event) => {
+  const checked = Boolean(event.currentTarget.checked);
+  byId("signOutError").classList.add("hidden");
+  byId("finishAfterSignOutButton").disabled = !checked;
+  byId("replaceAfterSignOutButton").disabled = !checked;
+});
+
+async function completeNoviceExit(expectedReplacement) {
+  const result = state.pendingNoviceExitResult;
+  const isReplacement = result === "shadowrocket_missing";
+  if (!result || isReplacement !== expectedReplacement) return;
+  if (!state.signOutGuideOpened || !byId("signOutCheck").checked) {
+    byId("signOutError").classList.remove("hidden");
+    byId("signOutGuideLink").classList.add("needs-confirmation");
+    byId("signOutCheck").focus({ preventScroll: true });
+    byId("signOutCheck").scrollIntoView({ behavior: "smooth", block: "center" });
+    announce("请先打开退出教程，并确认已经退出当前 App Store 账号。" );
+    return;
+  }
+  byId("signOutGuideLink").classList.remove("needs-confirmation");
+  await submitFeedback(result);
+  state.pendingNoviceExitResult = "";
+  state.signOutGuideOpened = false;
+}
+
+byId("finishAfterSignOutButton").addEventListener("click", () => completeNoviceExit(false));
+byId("replaceAfterSignOutButton").addEventListener("click", () => completeNoviceExit(true));
+
 byId("targetAppLink").addEventListener("click", () => {
   state.leftForAttempt = true;
   saveSession();
@@ -991,20 +1088,27 @@ byId("differentPageButton").addEventListener("click", () => {
 document.querySelectorAll("[data-login-result]").forEach((button) => {
   button.addEventListener("click", async () => {
     if (button.dataset.loginResult !== "success" || state.busy || state.feedbackLocked) return;
-    if (state.intent === "expert") {
+    if (state.mode === "expert") {
       await submitFeedback("login_success");
       return;
     }
     if (state.intent === "target_app") {
       showTargetAppCheck();
     } else {
-      await submitFeedback("login_success");
+      showNoviceExitGate("login_success");
     }
   });
 });
 
 resultButtons().forEach((button) => {
-  button.addEventListener("click", () => submitFeedback(button.dataset.result));
+  button.addEventListener("click", () => {
+    const result = button.dataset.result;
+    if (state.mode === "novice" && (result === "shadowrocket_available" || result === "shadowrocket_missing")) {
+      showNoviceExitGate(result);
+      return;
+    }
+    submitFeedback(result);
+  });
 });
 
 document.querySelectorAll("[data-copy]").forEach((button) => {

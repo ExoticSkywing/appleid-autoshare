@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#050606">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>获取可用账号</title>
-  <link rel="stylesheet" href="/assets/app.css?v=20260821-15">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260821-15">
+  <link rel="stylesheet" href="/assets/app.css?v=20260821-42">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260821-42">
 </head>
 <body data-phase="boot">
   <a class="skip-link" href="#workspace">跳到账号操作</a>
@@ -325,9 +325,53 @@
         </a>
         <div class="target-result-actions">
           <button type="button" data-result="shadowrocket_available" class="target-result target-success"><span>可以下载</span></button>
-          <button type="button" data-result="shadowrocket_missing" class="target-result"><span>无法下载</span></button>
+          <button id="targetMissingButton" type="button" data-result="shadowrocket_missing" class="target-result"><span>无法下载</span></button>
         </div>
       </div>
+
+      <section id="noviceExitPanel" class="novice-exit-panel hidden" aria-labelledby="feedbackTitle">
+        <section id="downloadWindowNote" class="download-window-note app-download-window hidden" aria-labelledby="downloadWindowTitle">
+          <div class="app-download-heading">
+            <strong id="downloadWindowTitle">点应用，直达 App Store</strong>
+          </div>
+          <div class="app-download-grid" aria-label="可直接下载的应用">
+            <a class="app-download-item" href="https://apps.apple.com/us/app/turrit-a-plus-messenger/id6471781238" aria-label="打开 Turrit App Store 页面"><img src="/assets/assets/social-apps/turrit.jpg" alt=""><span>Turrit</span></a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/telegram-messenger/id686449807" aria-label="打开 Telegram App Store 页面"><img src="/assets/assets/social-apps/telegram.gif" alt=""><span>Telegram</span></a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/x/id333903271" aria-label="打开 X App Store 页面"><img src="/assets/assets/social-apps/x.svg" alt=""><span>X</span></a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/instagram/id389801252" aria-label="打开 Instagram App Store 页面"><img src="/assets/assets/social-apps/instagram.webp" alt=""><span>Instagram</span></a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/tiktok-videos-shop-live/id835599320" aria-label="打开 TikTok App Store 页面"><img src="/assets/assets/social-apps/tiktok.webp" alt=""><span>TikTok</span></a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/youtube/id544007664" aria-label="打开 YouTube App Store 页面"><img src="/assets/assets/social-apps/youtube.png" alt=""><span>YouTube</span></a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/discord-talk-play-hang-out/id985746746" aria-label="打开 Discord App Store 页面"><img src="/assets/assets/social-apps/discord.webp" alt=""><span>Discord</span></a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/spotify-music-and-podcasts/id324684580" aria-label="打开 Spotify App Store 页面"><img src="/assets/assets/social-apps/spotify.jpg" alt=""><span>Spotify</span></a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/gmail-email-by-google/id422689480" aria-label="打开 Gmail App Store 页面"><img src="/assets/assets/social-apps/gmail.png" alt=""><span>Gmail</span></a>
+          </div>
+          <button id="needAccountButton" class="need-account-action" type="button" aria-label="没有账号，打开专属账号店铺">
+            <img src="/assets/assets/store-logo.png" alt="" aria-hidden="true">
+            <span><small>没有账号？</small><strong>获取专属账号</strong></span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-9 9"/></svg>
+          </button>
+        </section>
+        <div class="signout-purpose" aria-labelledby="signoutPurposeTitle">
+          <span id="signoutPurposeLabel">关闭页面前</span>
+          <strong id="signoutPurposeTitle">还需要完成最后的收尾</strong>
+          <p id="signoutPurposeCopy">退出当前共享账号后，你就可以重新登录自己的 App Store 账号。</p>
+        </div>
+        <a id="signOutGuideLink" class="signout-guide-link" href="https://newfree.tsmoe.com/" rel="noopener noreferrer nofollow" target="_blank">
+          <span><strong>查看快速退出教程</strong><small>在新页面按步骤退出当前 App Store 账号</small></span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-9 9M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+        </a>
+        <label class="signout-confirm" for="signOutCheck">
+          <input id="signOutCheck" type="checkbox">
+          <span>我已退出当前 App Store 账号</span>
+        </label>
+        <p id="signOutError" class="signout-error hidden" role="alert">请先查看退出教程并确认已退出。</p>
+        <div class="update-tradeoff">
+          <strong>更新提醒</strong>
+          <p>当前方式应用不会及时得到更新，长期使用建议底部的专属账号</p>
+        </div>
+        <button id="finishAfterSignOutButton" class="primary-action" type="button">已退出，完成本次使用</button>
+        <button id="replaceAfterSignOutButton" class="primary-action hidden" type="button">已退出，尝试下一个账号</button>
+      </section>
     </section>
 
     <section id="recoveryPanel" class="recovery-panel hidden" aria-live="polite">
@@ -361,6 +405,6 @@
     <p id="message" class="sr-status" role="status" aria-live="polite"></p>
   </main>
 
-  <script src="/assets/app.js?v=20260821-14" defer></script>
+  <script src="/assets/app.js?v=20260821-41" defer></script>
 </body>
 </html>
