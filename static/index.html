@@ -6,7 +6,8 @@
   <meta name="theme-color" content="#050606">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>获取可用账号</title>
-  <link rel="stylesheet" href="/assets/app.css">
+  <link rel="stylesheet" href="/assets/app.css?v=20260821-4">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260821-4">
 </head>
 <body data-phase="boot">
   <a class="skip-link" href="#workspace">跳到账号操作</a>
@@ -47,20 +48,21 @@
       <h2 id="intentTitle">你准备下载什么？</h2>
       <p class="intent-copy">选择后，系统会优先分配更适合的账号。</p>
       <div class="intent-options">
-        <button type="button" class="intent-option" data-intent="target_app" aria-pressed="false" aria-label="下载目标应用">
+        <button type="button" class="intent-option intent-target" data-intent="target_app" aria-pressed="false" aria-label="下载目标应用">
           <img src="/assets/assets/target-app-icon.webp" alt="" draggable="false">
+          <span class="intent-option-copy"><strong>Shadowrocket</strong></span>
           <span class="intent-check" aria-hidden="true">✓</span>
         </button>
         <button type="button" class="intent-option intent-other" data-intent="other_app" aria-pressed="false">
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 12h8M12 8v8"/></svg>
-          <span>其他应用</span>
+          <span class="intent-option-copy"><strong>其他应用</strong></span>
           <span class="intent-check" aria-hidden="true">✓</span>
         </button>
       </div>
     </section>
 
     <section class="safety-rule" aria-labelledby="safetyTitle">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5.5 5.7v5.7c0 4.2 2.7 7.8 6.5 9.6 3.8-1.8 6.5-5.4 6.5-9.6V5.7L12 3Z"/><path d="M9.2 12.2 11 14l3.8-4"/></svg>
+      <img class="safety-appstore-icon" src="/assets/assets/appstore-app-icon.png" alt="" aria-hidden="true">
       <div>
         <h1 id="safetyTitle">仅在 App Store 登录</h1>
         <p>不要在“设置”或 iCloud 登录此账号。</p>
@@ -108,7 +110,8 @@
             <p id="verifyHint">选择目标后，再完成访问验证。</p>
           </div>
           <div id="turnstileWidget" class="turnstile-host" aria-label="人机验证"></div>
-          <button id="verifyButton" class="primary-action" type="button" aria-describedby="verifyActionHint">
+          <button id="verifyButton" class="primary-action gooey-action" type="button" aria-describedby="verifyActionHint">
+            <span class="gooey-action-particles" aria-hidden="true"></span>
             <span id="verifyButtonLabel">获取账号</span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
           </button>
@@ -207,26 +210,21 @@
       </div>
 
       <div id="appStoreInstruction" class="app-store-instruction hidden">
-        <div class="account-target-line">
-          <span>进入后点右上角</span>
-          <img src="/assets/assets/appstore-account-guide.png" alt="" aria-hidden="true">
-          <strong>账户图标</strong>
-        </div>
         <div class="appstore-home-action-wrap">
           <a id="appStoreHomeLink" class="appstore-home-action" href="itms-apps://itunes.apple.com/today">
             <img src="/assets/assets/appstore-app-icon.png" alt="" aria-hidden="true">
-            <span><strong>打开 App Store 首页</strong><small>直接进入 Today 页面</small></span>
+            <span><strong>打开 App Store</strong><small>进入后点右上角 <img class="inline-account-icon" src="/assets/assets/appstore-account-guide.png" alt="" aria-hidden="true"> 账户头像，粘贴账号</small></span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
           </a>
           <button id="accountEnteredButton" class="account-entered-action" type="button">
             <svg class="account-copy-glyph" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
             <span class="account-copy-check hidden" aria-hidden="true">✓</span>
-            <span id="accountEnteredLabel">已输入账号，一键复制密码</span>
+            <span id="accountEnteredLabel">已填好账号，复制密码</span>
           </button>
         </div>
         <div class="manual-fallback">
           <details>
-            <summary>没有正常打开？查看手动方法</summary>
+            <summary>无法打开？查看手动操作指引</summary>
             <div class="manual-fallback-steps">
               <div class="instruction-step">
                 <span>1</span>
@@ -250,7 +248,7 @@
       <div id="resultActions" class="result-actions hidden">
         <button type="button" data-login-result="success" class="result-action result-success">
           <span class="result-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span>
-          <span><strong>登录成功</strong><small>继续确认下载结果</small></span>
+          <span><strong>登录成功</strong><small id="loginSuccessHint">继续确认下载结果</small></span>
           <svg class="result-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
         </button>
         <button type="button" data-result="login_failed" class="result-action">
@@ -268,6 +266,7 @@
         </div>
         <p class="target-app-hint">在应用页面寻找右侧的云朵下载图标。</p>
         <a id="targetAppLink" class="appstore-action target-app-link" href="https://apps.apple.com/us/app/id932747118">
+          <img class="target-link-icon" src="/assets/assets/appstore-app-icon.png" alt="" aria-hidden="true">
           <span><strong>前往应用商店查看</strong><small>点击跳转核对下载状态</small></span>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
         </a>
@@ -287,11 +286,12 @@
     </section>
 
     <div id="copyToast" class="copy-toast hidden" role="status" aria-live="polite">
-      <span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span>
+      <svg class="copy-toast-glyph" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
       <strong id="copyToastText">复制成功</strong>
     </div>
 
     <a id="storeLink" class="store-link hidden" rel="noopener noreferrer nofollow" target="_blank">
+      <img class="store-brand-icon" src="/assets/assets/store-logo.png" alt="星小芽">
       <span><strong>不想继续尝试？</strong><small>购买专属账号，一次解决</small></span>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-9 9M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
     </a>
@@ -299,6 +299,6 @@
     <p id="message" class="sr-status" role="status" aria-live="polite"></p>
   </main>
 
-  <script src="/assets/app.js" defer></script>
+  <script src="/assets/app.js?v=20260821-5" defer></script>
 </body>
 </html>

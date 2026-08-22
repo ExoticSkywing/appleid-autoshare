@@ -208,7 +208,9 @@
     background: #171918;
     box-shadow: 0 0 0 1px rgba(255,255,255,.09);
     text-align: left;
-    transition: all .2s ease;
+    transition-property: color, background-color, box-shadow, transform;
+    transition-duration: .2s;
+    transition-timing-function: ease;
   }
   .mode-tab-icon {
     width: 38px;
@@ -439,6 +441,76 @@
     background: #d8f6e0 !important;
     box-shadow: 0 10px 28px rgba(82,154,101,.26) !important;
   }
+  #verifyButton.primary-action:not(.is-blocked),
+  #returnHomeButton.primary-action:not(.is-blocked) {
+    position: relative;
+    isolation: isolate;
+    overflow: visible;
+    color: #0b0d11 !important;
+    background: #ffffff !important;
+    border: 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,.32) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  #returnHomeButton.primary-action:not(.is-blocked) > svg { color: #0b0d11 !important; }
+  #verifyButton.primary-action:not(.is-blocked)::before { content: none; }
+  #verifyButton > :not(.gooey-action-particles) { position: relative; z-index: 3; }
+  .gooey-action-particles {
+    position: absolute !important;
+    z-index: 1 !important;
+    inset: -18px;
+    overflow: hidden;
+    border-radius: 28px;
+    display: none;
+    pointer-events: none;
+    filter: blur(7px) contrast(100);
+    mix-blend-mode: lighten;
+  }
+  .gooey-action.is-gooey-active .gooey-action-particles { display: block; }
+  .gooey-action-particles::after {
+    position: absolute;
+    z-index: -1;
+    inset: 18px;
+    border-radius: 12px;
+    content: "";
+    background: #ffffff;
+  }
+  .gooey-particle,
+  .gooey-point {
+    display: block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    transform-origin: center;
+  }
+  .gooey-particle {
+    position: absolute;
+    top: calc(50% - 9px);
+    left: calc(50% - 9px);
+    opacity: 0;
+  }
+  .gooey-action.is-gooey-active .gooey-particle {
+    animation: gooey-particle var(--time, 900ms) ease 1;
+  }
+  .gooey-point {
+    background: var(--color, #fff);
+    opacity: 0;
+  }
+  .gooey-action.is-gooey-active .gooey-point {
+    animation: gooey-point var(--time, 900ms) ease 1;
+  }
+  @keyframes gooey-particle {
+    0% { transform: rotate(0deg) translate(var(--start-x), var(--start-y)); opacity: 1; }
+    70% { transform: rotate(calc(var(--rotate) * .5)) translate(calc(var(--end-x) * 1.18), calc(var(--end-y) * 1.18)); opacity: 1; }
+    100% { transform: rotate(calc(var(--rotate) * 1.2)) translate(calc(var(--end-x) * .5), calc(var(--end-y) * .5)); opacity: 0; }
+  }
+  @keyframes gooey-point {
+    0% { transform: scale(0); opacity: 0; }
+    28% { opacity: 1; }
+    65% { transform: scale(var(--scale)); opacity: 1; }
+    100% { transform: scale(0); opacity: 0; }
+  }
   .primary-action:active { transform: scale(.985); }
   .primary-action.is-blocked { color: #c8d0cb; background: #242825; box-shadow: 0 0 0 1px rgba(255,255,255,.12); }
   .verify-action-hint {
@@ -514,8 +586,10 @@
     border-color: rgba(200,240,210,.34);
     opacity: 1;
   }
-  .copy-action.is-copied .copy-glyph { opacity: 0; transform: scale(.65); }
-  .copy-action.is-copied .check-glyph { opacity: 1; transform: scale(1); }
+  .copy-action.is-copied .copy-glyph { opacity: 1; transform: scale(1); }
+  .copy-action.is-copied .check-glyph { opacity: 0; transform: scale(.65); }
+  .copy-action.is-copy-confirmed .copy-glyph { opacity: 0; transform: scale(.65); }
+  .copy-action.is-copy-confirmed .check-glyph { opacity: 1; transform: scale(1); }
   .credential.is-result-mode .copy-action.is-copied {
     color: #b9c9be;
     background: #252b27;

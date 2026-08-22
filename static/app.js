@@ -58,7 +58,7 @@ function showCopyConfirmation(text, sourceButton = null) {
   state.toastTimer = window.setTimeout(() => {
     toast.classList.add("hidden");
     toast.classList.remove("is-visible");
-  }, 2600);
+  }, 4200);
   announce(text);
 }
 
@@ -255,8 +255,10 @@ function showRecovery(title, text, action) {
   byId("recoveryText").textContent = text;
   byId("recoveryPanel").classList.remove("hidden");
   state.pendingAction = action;
-  document.documentElement.dataset.phase = "error";
-  document.body.dataset.phase = "error";
+  if (!state.account) {
+    document.documentElement.dataset.phase = "error";
+    document.body.dataset.phase = "error";
+  }
 }
 
 function updateIntentUI() {
@@ -269,7 +271,7 @@ function updateIntentUI() {
   document.querySelectorAll(".page-flow-progress").forEach((el) => {
     el.classList.toggle("hidden", isExpert);
   });
-  byId("intentPanel").classList.toggle("hidden", isExpert);
+  byId("intentPanel").classList.toggle("hidden", isExpert || Boolean(state.account));
   document.querySelectorAll("[data-intent]").forEach((button) => {
     const selected = !isExpert && button.dataset.intent === state.intent;
     button.setAttribute("aria-pressed", String(selected));
@@ -330,9 +332,12 @@ function setStoreLink(url, exhausted = false) {
 function showResultChoices({ returned = false } = {}) {
   hideCopyConfirmation();
   state.resultsVisible = true;
+  byId("credential").classList.remove("is-result-mode");
+  byId("accountView").classList.remove("is-summary");
+  byId("attemptCount").classList.remove("hidden");
+  byId("resultCredentialHeading").classList.add("hidden");
   const panel = byId("feedbackPanel");
   panel.classList.add("is-ready", "is-results");
-  byId("credential").classList.add("is-result-mode");
   panel.classList.toggle("is-returned", returned);
   byId("feedbackStep").textContent = returned ? "欢迎回来" : "请选择结果";
   byId("feedbackTitle").textContent = "能否登录 App Store？";
@@ -344,9 +349,6 @@ function showResultChoices({ returned = false } = {}) {
   byId("passwordStep").classList.remove("is-current");
   byId("passwordStep").querySelector("span").textContent = "✓";
   byId("resultStep").classList.add("is-current");
-  byId("accountView").classList.add("is-summary");
-  byId("attemptCount").classList.add("hidden");
-  byId("resultCredentialHeading").classList.remove("hidden");
   byId("appStoreInstruction").classList.add("hidden");
   byId("showResultsButton").classList.add("hidden");
   byId("targetAppCheck").classList.add("hidden");
@@ -364,10 +366,10 @@ function showTargetAppCheck() {
   state.resultsVisible = true;
   byId("feedbackPanel").classList.add("is-ready", "is-results");
   byId("intentPanel").classList.add("hidden");
-  byId("credential").classList.add("is-result-mode");
-  byId("accountView").classList.add("is-summary");
-  byId("attemptCount").classList.add("hidden");
-  byId("resultCredentialHeading").classList.remove("hidden");
+  byId("credential").classList.remove("is-result-mode");
+  byId("accountView").classList.remove("is-summary");
+  byId("attemptCount").classList.remove("hidden");
+  byId("resultCredentialHeading").classList.add("hidden");
   byId("feedbackStep").textContent = "最后一步";
   byId("feedbackTitle").textContent = "检查下载按钮";
   byId("copyProgress").textContent = "打开应用页面；看到云朵下载图标表示目标已达成。";
@@ -393,9 +395,15 @@ function updateCopyUI() {
     const copied = Boolean(state.copied[key]);
     button.classList.toggle("is-copied", copied);
     const label = button.querySelector(".copy-label");
-    const resultMode = state.resultsVisible || state.loginSucceeded;
-    label.textContent = resultMode ? "再次复制" : (copied ? "已复制" : "复制");
-    button.setAttribute("aria-label", resultMode ? `再次复制${key === "username" ? " Apple ID" : "密码"}` : (copied ? `${key === "username" ? "Apple ID" : "密码"}已复制` : `复制${key === "username" ? " Apple ID" : "密码"}`));
+    const credentialsComplete = passwordCopied;
+    const confirmedStep = !isExpert && copied && !credentialsComplete;
+    button.classList.toggle("is-copy-confirmed", confirmedStep);
+    const copyLabel = isExpert
+      ? (copied ? "可再次复制" : "复制")
+      : (credentialsComplete ? "可再次复制" : (copied ? "已复制" : "复制"));
+    label.textContent = copyLabel;
+    const fieldName = key === "username" ? " Apple ID" : "密码";
+    button.setAttribute("aria-label", copyLabel === "已复制" ? `${key === "username" ? "Apple ID" : "密码"}已复制` : `${copyLabel}${fieldName}`);
   });
 
   const panel = byId("feedbackPanel");
@@ -403,6 +411,7 @@ function updateCopyUI() {
   const progress = byId("copyProgress");
   const step = byId("feedbackStep");
   panel.classList.toggle("is-ready", isExpert || usernameCopied);
+  byId("loginSuccessHint").textContent = isExpert ? "完成并结束" : (state.intent === "target_app" ? "继续确认下载结果" : "完成并结束");
   byId("targetAppCheck").classList.toggle("hidden", !state.loginSucceeded);
 
   byId("accountStep").classList.toggle("is-current", !isExpert && !usernameEntered);
@@ -442,6 +451,12 @@ function updateCopyUI() {
   byId("accountEnteredButton").classList.toggle("hidden", usernameEntered);
   byId("showResultsButton").classList.toggle("hidden", !passwordCopied || state.resultsVisible);
   byId("resultActions").classList.toggle("hidden", !state.resultsVisible || state.loginSucceeded);
+  if (state.resultsVisible) {
+    document.querySelectorAll("[data-login-result], [data-result]").forEach((button) => {
+      button.disabled = state.busy || state.feedbackLocked || !passwordCopied;
+    });
+    return;
+  }
   document.querySelectorAll("[data-login-result], [data-result]").forEach((button) => {
     button.disabled = state.busy || state.feedbackLocked || !passwordCopied;
   });
@@ -451,9 +466,9 @@ function updateCopyUI() {
     title.textContent = "复制 Apple ID";
     progress.textContent = "复制后，打开 App Store 并进入账户登录页。";
   } else if (!usernameEntered) {
-    step.textContent = "下一步";
-    title.textContent = "打开 App Store 输入账号";
-    progress.textContent = "Apple ID 已复制。打开 App Store 后，点右上角账户图标粘贴。";
+    step.textContent = "第 1 步 · 共 2 步";
+    title.textContent = "在 App Store 中登录账号";
+    progress.textContent = "账号已复制到剪贴板。";
   } else if (!passwordCopied) {
     step.textContent = "现在";
     title.textContent = "一键复制密码";
@@ -750,6 +765,41 @@ function restartFlow() {
   window.location.reload();
 }
 
+function playVerifyGooey() {
+  const button = byId("verifyButton");
+  const host = button.querySelector(".gooey-action-particles");
+  if (!host || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  host.replaceChildren();
+  button.classList.remove("is-gooey-active");
+  const colors = ["#ffffff", "#ffffff", "#e5e7eb", "#f3f4f6"];
+  const count = 15;
+  for (let i = 0; i < count; i += 1) {
+    const angle = ((Math.PI * 2) / count) * i + (Math.random() - .5) * .14;
+    const startDistance = 22 + Math.random() * 14;
+    const endDistance = 5 + Math.random() * 8;
+    const particle = document.createElement("span");
+    const point = document.createElement("span");
+    particle.className = "gooey-particle";
+    point.className = "gooey-point";
+    particle.style.setProperty("--start-x", `${Math.cos(angle) * startDistance}px`);
+    particle.style.setProperty("--start-y", `${Math.sin(angle) * startDistance}px`);
+    particle.style.setProperty("--end-x", `${Math.cos(angle) * endDistance}px`);
+    particle.style.setProperty("--end-y", `${Math.sin(angle) * endDistance}px`);
+    particle.style.setProperty("--time", `${650 + Math.round(Math.random() * 260)}ms`);
+    particle.style.setProperty("--scale", `${.75 + Math.random() * .42}`);
+    particle.style.setProperty("--rotate", `${(Math.random() - .5) * 190}deg`);
+    point.style.setProperty("--color", colors[Math.floor(Math.random() * colors.length)]);
+    particle.appendChild(point);
+    host.appendChild(particle);
+  }
+  void button.offsetWidth;
+  button.classList.add("is-gooey-active");
+  window.setTimeout(() => {
+    button.classList.remove("is-gooey-active");
+    host.replaceChildren();
+  }, 1100);
+}
+
 byId("verifyButton").addEventListener("click", () => {
   if (state.busy) return;
   if (!state.intent) {
@@ -763,7 +813,8 @@ byId("verifyButton").addEventListener("click", () => {
     announce("请先完成人机验证。" );
     return;
   }
-  verifyAndReveal();
+  playVerifyGooey();
+  window.setTimeout(() => verifyAndReveal(), 140);
 });
 byId("restartButton").addEventListener("click", restartFlow);
 byId("returnHomeButton").addEventListener("click", returnHome);
@@ -857,14 +908,22 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
     const key = button.dataset.copy;
     const target = byId(key);
     try {
-      await copyText(target.textContent || "");
       if (key === "password" && !state.copied.username && state.intent !== "expert") {
         showRecovery("请先复制 Apple ID", "先复制 Apple ID 并在 App Store 输入，再回来复制密码。", null);
+        announce("请先复制 Apple ID，再复制密码。当前账号不会消失。" );
         return;
       }
+      await copyText(target.textContent || "");
       const wasCopied = Boolean(state.copied[key]);
       state.copied[key] = true;
       state.leftForAttempt = key === "username";
+      hideRecovery();
+      if (state.resultsVisible) {
+        const fieldName = key === "username" ? "Apple ID" : "密码";
+        saveSession();
+        showCopyConfirmation(`${fieldName}再次复制成功`, button);
+        return;
+      }
       updateCopyUI();
       saveSession();
       const fieldName = key === "username" ? "Apple ID" : "密码";
