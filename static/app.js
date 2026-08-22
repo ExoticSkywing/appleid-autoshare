@@ -34,6 +34,43 @@ const state = {
 const byId = (id) => document.getElementById(id);
 const views = ["bootView", "verifyView", "accountView", "successView", "emptyView"];
 const resultButtons = () => document.querySelectorAll("[data-result]");
+const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+function replayMotion(element, className = "motion-enter") {
+  if (!element || motionQuery.matches) return;
+  element.classList.remove(className);
+  void element.offsetWidth;
+  element.classList.add(className);
+  window.setTimeout(() => element.classList.remove(className), 620);
+}
+
+function replayTextMotion(container) {
+  if (!container || motionQuery.matches) return;
+  container.classList.remove("motion-text-enter");
+  void container.offsetWidth;
+  container.classList.add("motion-text-enter");
+  window.setTimeout(() => container.classList.remove("motion-text-enter"), 560);
+}
+
+function replayStepMotion(element) {
+  replayMotion(element, "motion-step-complete");
+}
+
+function replayErrorMotion(element) {
+  replayMotion(element, "motion-error");
+}
+
+function syncDetailsMotion(details) {
+  if (!details) return;
+  details.dataset.motionOpen = String(details.open);
+}
+
+function setupDetailsMotion() {
+  document.querySelectorAll("details").forEach((details) => {
+    syncDetailsMotion(details);
+    details.addEventListener("toggle", () => syncDetailsMotion(details));
+  });
+}
 
 function announce(text) {
   byId("message").textContent = text;
@@ -175,10 +212,18 @@ function loadScript(url) {
 }
 
 function setPhase(phase, viewId) {
+  const previousView = views.find((id) => !byId(id).classList.contains("hidden"));
   document.documentElement.dataset.phase = phase;
   document.body.dataset.phase = phase;
   byId("relayStage").dataset.phase = phase;
   views.forEach((id) => byId(id).classList.toggle("hidden", id !== viewId));
+  const activeView = byId(viewId);
+  if (previousView !== viewId) {
+    window.requestAnimationFrame(() => {
+      replayMotion(activeView, "motion-phase-enter");
+      replayTextMotion(activeView);
+    });
+  }
   const labels = {
     boot: "安全通道准备中",
     verify: "等待访问验证",
@@ -272,6 +317,7 @@ function showRecovery(title, text, action) {
   byId("recoveryTitle").textContent = title;
   byId("recoveryText").textContent = text;
   byId("recoveryPanel").classList.remove("hidden");
+  replayErrorMotion(byId("recoveryPanel"));
   state.pendingAction = action;
   if (!state.account) {
     document.documentElement.dataset.phase = "error";
@@ -307,6 +353,8 @@ function selectMode(mode) {
   state.intent = state.mode === "expert" ? "expert" : "";
   try { localStorage.setItem("autoshare_mode", state.mode); } catch (_) {}
   updateIntentUI();
+  replayMotion(document.querySelector(`[data-mode="${state.mode}"]`), "motion-select");
+  replayMotion(byId("intentPanel"), "motion-panel-enter");
   updateVerifyAction();
   if (state.token && state.mode === "expert") {
     byId("verifyButton").focus({ preventScroll: true });
@@ -318,6 +366,7 @@ function selectIntent(intent) {
   state.intent = intent === "other_app" ? "other_app" : "target_app";
   byId("intentPanel").classList.remove("needs-attention");
   updateIntentUI();
+  replayMotion(document.querySelector(`[data-intent="${state.intent}"]`), "motion-select");
   if (state.token) {
     updateVerifyAction();
     byId("verifyButton").focus({ preventScroll: true });
@@ -373,6 +422,9 @@ function showResultChoices({ returned = false } = {}) {
   byId("showResultsButton").classList.add("hidden");
   byId("targetAppCheck").classList.add("hidden");
   byId("resultActions").classList.remove("hidden");
+  replayMotion(panel, "motion-panel-enter");
+  replayTextMotion(panel);
+  replayStepMotion(byId("resultStep"));
   document.querySelectorAll("[data-login-result], [data-result]").forEach((button) => {
     button.disabled = state.busy || state.feedbackLocked;
   });
@@ -399,6 +451,9 @@ function showTargetAppCheck() {
   byId("showResultsButton").classList.add("hidden");
   byId("targetAppCheck").classList.remove("hidden");
   byId("resultStep").classList.add("is-current");
+  replayMotion(byId("targetAppCheck"), "motion-panel-enter");
+  replayTextMotion(byId("feedbackPanel"));
+  replayStepMotion(byId("resultStep"));
   updateCopyUI();
   saveSession();
   announce("登录成功。现在检查是否可以下载目标应用。" );
@@ -533,6 +588,11 @@ function showAccount(account, options = {}) {
   updateIntentUI();
   byId("archiveEdge").classList.remove("hidden");
   setPhase("ready", "accountView");
+  replayMotion(byId("credential"), "motion-credential-ready");
+  document.querySelectorAll(".credential-field").forEach((field, index) => {
+    field.style.setProperty("--motion-index", String(index));
+    replayMotion(field, "motion-field-enter");
+  });
   updateCopyUI();
   setStoreLink(state.purchaseLink);
   saveSession();
@@ -548,6 +608,9 @@ function showSuccess() {
   byId("resultStep").classList.add("is-complete");
   byId("resultStep").classList.remove("is-current");
   byId("resultStep").querySelector("span").textContent = "✓";
+  replayStepMotion(byId("resultStep"));
+  replayMotion(byId("successView"), "motion-success-enter");
+  replayTextMotion(byId("successView"));
   byId("intentPanel").classList.add("hidden");
   byId("credentialState").textContent = "反馈已记录";
   byId("feedbackPanel").classList.add("hidden");
@@ -585,6 +648,8 @@ function showExhausted(purchaseLink) {
   byId("credentialState").textContent = "没有更多共享凭证";
   byId("attemptCount").textContent = `已尝试 ${state.attempt} 组`;
   setPhase("empty", "emptyView");
+  replayMotion(byId("emptyView"), "motion-empty-enter");
+  replayTextMotion(byId("emptyView"));
   setStoreLink(purchaseLink, true);
   hideRecovery();
   announce(purchaseLink ? "共享账号已试完，可以购买专属账号。" : "共享账号已试完，请稍后再试。" );
@@ -697,6 +762,8 @@ function showNoviceExitGate(result, options = {}) {
   byId("resultActions").classList.add("hidden");
   byId("showResultsButton").classList.add("hidden");
   byId("noviceExitPanel").classList.remove("hidden");
+  replayMotion(byId("noviceExitPanel"), "motion-panel-enter");
+  replayTextMotion(byId("noviceExitPanel"));
   byId("feedbackStep").textContent = isReplacement ? "换号前" : "退出账号前";
   byId("feedbackTitle").textContent = isReplacement ? "先退出当前 App Store 账号" : "你还有些必要且值得做的事情";
   byId("copyProgress").textContent = isReplacement
@@ -969,6 +1036,8 @@ async function copyPasswordAndContinue(button) {
     state.copied.password = true;
     state.leftForAttempt = true;
     updateCopyUI();
+    replayMotion(button, "motion-copy-done");
+    replayStepMotion(byId("passwordStep"));
     saveSession();
     const message = "密码复制成功，请返回 App Store 粘贴";
     const label = byId("accountEnteredLabel");
@@ -1080,9 +1149,11 @@ byId("retryButton").addEventListener("click", () => {
 });
 byId("differentPageButton").addEventListener("click", () => {
   const button = byId("differentPageButton");
+  const panel = byId("differentPageHelp");
   const expanded = button.getAttribute("aria-expanded") === "true";
   button.setAttribute("aria-expanded", String(!expanded));
-  byId("differentPageHelp").classList.toggle("hidden", expanded);
+  panel.classList.toggle("hidden", expanded);
+  if (!expanded) replayMotion(panel, "motion-disclosure-enter");
 });
 
 document.querySelectorAll("[data-login-result]").forEach((button) => {
@@ -1135,6 +1206,8 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
         return;
       }
       updateCopyUI();
+      replayMotion(button, "motion-copy-done");
+      if (!wasCopied) replayStepMotion(key === "username" ? byId("accountStep") : byId("passwordStep"));
       saveSession();
       const fieldName = key === "username" ? "Apple ID" : "密码";
       const confirmation = wasCopied ? `${fieldName}再次复制成功` : `${fieldName}复制成功`;
@@ -1170,4 +1243,5 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
+setupDetailsMotion();
 initializeTurnstile();

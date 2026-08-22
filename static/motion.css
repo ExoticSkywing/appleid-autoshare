@@ -1,0 +1,249 @@
+@layer motion {
+  :root {
+    --motion-fast: 160ms;
+    --motion-base: 260ms;
+    --motion-slow: 420ms;
+    --motion-enter-y: 10px;
+    --motion-enter-x: 8px;
+    --motion-blur: 3px;
+    --motion-ease-out: cubic-bezier(.22, 1, .36, 1);
+    --motion-ease-spring: cubic-bezier(.34, 1.25, .64, 1);
+  }
+
+  .motion-phase-enter {
+    animation: motion-phase-enter var(--motion-slow) var(--motion-ease-out) both;
+  }
+
+  .motion-panel-enter,
+  .motion-disclosure-enter {
+    animation: motion-panel-enter var(--motion-base) var(--motion-ease-out) both;
+  }
+
+  .motion-credential-ready {
+    animation: motion-credential-ready 480ms var(--motion-ease-out) both;
+  }
+
+  .motion-field-enter {
+    animation: motion-field-enter 380ms var(--motion-ease-out) both;
+    animation-delay: calc(var(--motion-index, 0) * 55ms + 50ms);
+  }
+
+  .motion-select {
+    animation: motion-select 280ms var(--motion-ease-spring) both;
+  }
+
+  .motion-copy-done {
+    animation: motion-copy-done 320ms var(--motion-ease-spring) both;
+  }
+
+  .motion-step-complete > span {
+    animation: motion-step-complete 360ms var(--motion-ease-spring) both;
+  }
+
+  .motion-success-enter .success-seal {
+    animation:
+      motion-success-seal 520ms var(--motion-ease-spring) both,
+      motion-success-fade 320ms var(--motion-ease-out) both;
+  }
+  .motion-success-enter .success-seal svg path {
+    stroke-dasharray: 32;
+    stroke-dashoffset: 32;
+    animation: motion-success-draw 420ms var(--motion-ease-out) 100ms forwards;
+  }
+  .motion-success-enter .success-seal svg circle {
+    stroke-dasharray: 120;
+    stroke-dashoffset: 120;
+    animation: motion-success-draw 500ms var(--motion-ease-out) forwards;
+  }
+
+  .motion-empty-enter {
+    animation: motion-empty-enter 420ms var(--motion-ease-out) both;
+  }
+
+  .motion-error {
+    animation: motion-error 360ms cubic-bezier(.36,.07,.19,.97) both;
+  }
+
+  .motion-text-enter > h2,
+  .motion-text-enter > h3,
+  .motion-text-enter > p,
+  .motion-text-enter .feedback-heading > *,
+  .motion-text-enter .novice-exit-heading > * {
+    animation: motion-text-enter 420ms var(--motion-ease-out) both;
+  }
+  .motion-text-enter > p,
+  .motion-text-enter .feedback-heading > *:nth-child(2),
+  .motion-text-enter .novice-exit-heading > *:nth-child(2) { animation-delay: 35ms; }
+  .motion-text-enter .feedback-heading > *:nth-child(3),
+  .motion-text-enter .novice-exit-heading > *:nth-child(3) { animation-delay: 70ms; }
+
+  .phase-view,
+  .intent-panel,
+  .feedback-panel,
+  .novice-exit-panel,
+  .recovery-panel,
+  .help-content,
+  .credential-field {
+    transform-origin: center top;
+  }
+
+  .mode-tab,
+  .intent-option,
+  .copy-action,
+  .primary-action,
+  .secondary-action,
+  .result-action,
+  .signout-guide-link,
+  .need-account-action {
+    transition:
+      transform var(--motion-fast) var(--motion-ease-out),
+      background-color var(--motion-fast) ease,
+      color var(--motion-fast) ease,
+      box-shadow var(--motion-fast) ease,
+      opacity var(--motion-fast) ease;
+  }
+
+  .mode-tab:active,
+  .intent-option:active,
+  .primary-action:active,
+  .secondary-action:active,
+  .result-action:active,
+  .signout-guide-link:active,
+  .need-account-action:active {
+    transform: scale(.975);
+  }
+
+  .copy-icon {
+    position: relative;
+    display: inline-grid;
+  }
+  .copy-icon > svg {
+    grid-area: 1 / 1;
+    opacity: 1;
+    transform: scale(1) rotate(0);
+    filter: blur(0);
+    transition:
+      opacity 220ms ease-in-out,
+      transform 220ms ease-in-out,
+      filter 220ms ease-in-out;
+  }
+  .copy-action:not(.is-copied) .copy-glyph,
+  .copy-action.is-copied .check-glyph {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+    filter: blur(0);
+  }
+  .copy-action.is-copied .copy-glyph,
+  .copy-action:not(.is-copied) .check-glyph {
+    opacity: 0;
+    transform: scale(.55) rotate(-12deg);
+    filter: blur(2px);
+  }
+
+  .flow-step,
+  .flow-step > span,
+  .flow-line {
+    transition:
+      color var(--motion-base) var(--motion-ease-out),
+      background-color var(--motion-base) var(--motion-ease-out),
+      box-shadow var(--motion-base) var(--motion-ease-out),
+      transform var(--motion-base) var(--motion-ease-spring),
+      opacity var(--motion-base) ease;
+  }
+
+  details > summary::after,
+  details > summary svg,
+  .help-toggle svg {
+    transition: transform 250ms var(--motion-ease-out);
+    transform-origin: center;
+  }
+  details[data-motion-open="true"] > summary::after,
+  details[data-motion-open="true"] > summary svg {
+    transform: rotate(180deg);
+  }
+
+  input[type="checkbox"] {
+    transition:
+      transform 160ms var(--motion-ease-spring),
+      box-shadow 160ms var(--motion-ease-out),
+      background-color 160ms var(--motion-ease-out);
+  }
+  input[type="checkbox"]:checked {
+    transform: scale(1.08);
+  }
+
+  @keyframes motion-phase-enter {
+    from { opacity: 0; transform: translateY(var(--motion-enter-y)); filter: blur(var(--motion-blur)); }
+    to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+  @keyframes motion-panel-enter {
+    from { opacity: 0; transform: translateY(8px) scale(.992); filter: blur(2px); }
+    to { opacity: 1; transform: none; filter: blur(0); }
+  }
+  @keyframes motion-credential-ready {
+    from { opacity: 0; transform: translateX(var(--motion-enter-x)) scale(.992); filter: blur(3px); }
+    to { opacity: 1; transform: none; filter: blur(0); }
+  }
+  @keyframes motion-field-enter {
+    from { opacity: 0; transform: translateY(8px); filter: blur(2px); }
+    to { opacity: 1; transform: none; filter: blur(0); }
+  }
+  @keyframes motion-select {
+    0% { transform: scale(1); }
+    48% { transform: scale(.965); }
+    100% { transform: scale(1); }
+  }
+  @keyframes motion-copy-done {
+    0% { transform: scale(1); }
+    45% { transform: scale(.955); }
+    100% { transform: scale(1); }
+  }
+  @keyframes motion-step-complete {
+    0% { transform: scale(.72); opacity: .4; }
+    62% { transform: scale(1.14); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes motion-success-seal {
+    from { transform: translateY(12px) scale(.72) rotate(-12deg); filter: blur(5px); }
+    to { transform: none; filter: blur(0); }
+  }
+  @keyframes motion-success-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes motion-success-draw { to { stroke-dashoffset: 0; } }
+  @keyframes motion-empty-enter {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes motion-error {
+    0%, 100% { transform: translateX(0); }
+    24% { transform: translateX(-5px); }
+    48% { transform: translateX(4px); }
+    72% { transform: translateX(-2px); }
+  }
+  @keyframes motion-text-enter {
+    from { opacity: 0; transform: translateY(8px); filter: blur(2px); }
+    to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .motion-phase-enter,
+    .motion-panel-enter,
+    .motion-disclosure-enter,
+    .motion-credential-ready,
+    .motion-field-enter,
+    .motion-select,
+    .motion-copy-done,
+    .motion-success-enter,
+    .motion-empty-enter,
+    .motion-error,
+    .motion-text-enter,
+    .motion-step-complete > span,
+    .motion-success-enter .success-seal,
+    .motion-success-enter .success-seal svg path,
+    .motion-success-enter .success-seal svg circle {
+      animation: none !important;
+    }
+    *, *::before, *::after {
+      scroll-behavior: auto !important;
+    }
+  }
+}
