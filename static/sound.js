@@ -36,7 +36,7 @@
     if (!context) {
       context = new AudioContextCtor();
       master = context.createGain();
-      master.gain.value = 0.055;
+      master.gain.value = 1;
       master.connect(context.destination);
     }
     if (context.state === "suspended") context.resume().catch(() => {});
@@ -128,5 +128,5 @@
   }, { once: true });
 
   reducedMotionQuery.addEventListener?.("change", syncToggle);
-  window.RelaySound = { play, unlock, toggle: handleSoundToggle, isEnabled: () => enabled, activeVoices: () => activeVoices, contextState: () => context ? context.state : "uninitialized" };
+  window.RelaySound = { play, unlock, toggle: handleSoundToggle, isEnabled: () => enabled, activeVoices: () => activeVoices, contextState: () => context ? context.state : "uninitialized", masterGain: () => master ? master.gain.value : null };
 })();
