@@ -6,16 +6,18 @@
   <meta name="theme-color" content="#050606">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>获取可用账号</title>
-  <link rel="stylesheet" href="/assets/app.css?v=20260822-1">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260822-2">
-  <link rel="stylesheet" href="/assets/motion.css?v=20260822-1">
+  <link rel="stylesheet" href="/assets/app.css?v=20260823-7">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260823-6">
+  <link rel="stylesheet" href="/assets/motion.css?v=20260823-1">
 </head>
 <body data-phase="boot">
-  <a class="skip-link" href="#workspace">跳到账号操作</a>
-
   <div class="ambient-media" aria-hidden="true">
-    <img src="/assets/assets/relay-orbit-original.webp" alt="" draggable="false">
+    <picture>
+      <source media="(max-width: 700px)" srcset="/assets/assets/beams-cinematic-mobile.webp">
+      <img src="/assets/assets/beams-cinematic-desktop.webp" alt="" draggable="false">
+    </picture>
   </div>
+  <a class="skip-link" href="#workspace">跳到账号操作</a>
 
   <main id="workspace" class="shell">
     <header class="masthead">
@@ -324,9 +326,10 @@
           <span><strong>前往应用商店查看</strong><small>点击跳转核对下载状态</small></span>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
         </a>
-        <div class="target-result-actions">
-          <button type="button" data-result="shadowrocket_available" class="target-result target-success"><span>可以下载</span></button>
-          <button id="targetMissingButton" type="button" data-result="shadowrocket_missing" class="target-result"><span>无法下载</span></button>
+        <p id="targetResultQuestion" class="target-result-question">你看到云朵下载图标了吗？</p>
+        <div class="target-result-actions" aria-labelledby="targetResultQuestion">
+          <button type="button" data-result="shadowrocket_available" class="target-result target-success"><span class="target-result-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.5 18H6a4 4 0 0 1-.5-7.97A6.5 6.5 0 0 1 18.2 8.9 4.5 4.5 0 0 1 18 18h-1.5M12 11v9m0 0-3-3m3 3 3-3"/></svg></span><span class="target-result-copy"><strong>看到云朵，可以下载</strong><small>目标已经达成</small></span></button>
+          <button id="targetMissingButton" type="button" data-result="shadowrocket_missing" class="target-result target-missing"><span class="target-result-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7.5 18H6a4 4 0 0 1-.5-7.97A6.5 6.5 0 0 1 18.2 8.9 4.5 4.5 0 0 1 18 18h-1.5M4 4l16 16"/></svg></span><span class="target-result-copy"><strong>没看到云朵</strong><small>继续处理无法下载</small></span></button>
         </div>
       </div>
 
@@ -339,10 +342,10 @@
             <a class="app-download-item" href="https://apps.apple.com/us/app/turrit-a-plus-messenger/id6471781238" aria-label="打开 Turrit App Store 页面"><img src="/assets/assets/social-apps/turrit.jpg" alt=""><span>Turrit</span></a>
             <a class="app-download-item" href="https://apps.apple.com/us/app/telegram-messenger/id686449807" aria-label="打开 Telegram App Store 页面"><img src="/assets/assets/social-apps/telegram.gif" alt=""><span>Telegram</span></a>
             <a class="app-download-item" href="https://apps.apple.com/us/app/x/id333903271" aria-label="打开 X App Store 页面"><img src="/assets/assets/social-apps/x.svg" alt=""><span>X</span></a>
-            <a class="app-download-item" href="https://apps.apple.com/us/app/instagram/id389801252" aria-label="打开 Instagram App Store 页面"><img src="/assets/assets/social-apps/instagram.webp" alt=""><span>Instagram</span></a>
-            <a class="app-download-item" href="https://apps.apple.com/us/app/tiktok-videos-shop-live/id835599320" aria-label="打开 TikTok App Store 页面"><img src="/assets/assets/social-apps/tiktok.webp" alt=""><span>TikTok</span></a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/instagram/id389801252" aria-label="打开 Instagram App Store 页面"><img src="/assets/assets/social-apps/instagram.png" alt=""><span>Instagram</span></a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/tiktok-videos-shop-live/id835599320" aria-label="打开 TikTok App Store 页面"><img src="/assets/assets/social-apps/tiktok.png" alt=""><span>TikTok</span></a>
             <a class="app-download-item" href="https://apps.apple.com/us/app/youtube/id544007664" aria-label="打开 YouTube App Store 页面"><img src="/assets/assets/social-apps/youtube.png" alt=""><span>YouTube</span></a>
-            <a class="app-download-item" href="https://apps.apple.com/us/app/discord-talk-play-hang-out/id985746746" aria-label="打开 Discord App Store 页面"><img src="/assets/assets/social-apps/discord.webp" alt=""><span>Discord</span></a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/discord-talk-play-hang-out/id985746746" aria-label="打开 Discord App Store 页面"><img src="/assets/assets/social-apps/discord.png" alt=""><span>Discord</span></a>
             <a class="app-download-item" href="https://apps.apple.com/us/app/spotify-music-and-podcasts/id324684580" aria-label="打开 Spotify App Store 页面"><img src="/assets/assets/social-apps/spotify.jpg" alt=""><span>Spotify</span></a>
             <a class="app-download-item" href="https://apps.apple.com/us/app/gmail-email-by-google/id422689480" aria-label="打开 Gmail App Store 页面"><img src="/assets/assets/social-apps/gmail.png" alt=""><span>Gmail</span></a>
           </div>
@@ -358,10 +361,12 @@
           <p id="signoutPurposeCopy">退出当前共享账号后，你就可以重新登录自己的 App Store 账号。</p>
         </div>
         <a id="signOutGuideLink" class="signout-guide-link" href="https://newfree.tsmoe.com/" rel="noopener noreferrer nofollow" target="_blank">
-          <span><strong>查看快速退出教程</strong><small>在新页面按步骤退出当前 App Store 账号</small></span>
+          <span class="signout-guide-step" aria-hidden="true">1</span>
+          <span class="signout-guide-copy"><strong>查看快速退出教程</strong><small>在新页面按步骤退出当前 App Store 账号</small></span>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-9 9M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
         </a>
         <label class="signout-confirm" for="signOutCheck">
+          <span class="signout-confirm-step" aria-hidden="true">2</span>
           <input id="signOutCheck" type="checkbox">
           <span>我已退出当前 App Store 账号</span>
         </label>
@@ -406,6 +411,6 @@
     <p id="message" class="sr-status" role="status" aria-live="polite"></p>
   </main>
 
-  <script src="/assets/app.js?v=20260822-1" defer></script>
+  <script src="/assets/app.js?v=20260823-1" defer></script>
 </body>
 </html>

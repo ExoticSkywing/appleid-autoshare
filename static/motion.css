@@ -28,8 +28,9 @@
     animation-delay: calc(var(--motion-index, 0) * 55ms + 50ms);
   }
 
-  .motion-select {
-    animation: motion-select 280ms var(--motion-ease-spring) both;
+  .motion-mode-switch {
+    transform-origin: center;
+    animation: motion-mode-switch 320ms cubic-bezier(.2,.9,.3,1) both;
   }
 
   .motion-copy-done {
@@ -41,24 +42,32 @@
   }
 
   .motion-success-enter .success-seal {
+    transform-origin: center;
     animation:
-      motion-success-seal 520ms var(--motion-ease-spring) both,
-      motion-success-fade 320ms var(--motion-ease-out) both;
+      motion-success-stamp 1520ms cubic-bezier(.2,.85,.25,1) both,
+      motion-success-fade 840ms var(--motion-ease-out) both;
   }
   .motion-success-enter .success-seal svg path {
     stroke-dasharray: 32;
     stroke-dashoffset: 32;
-    animation: motion-success-draw 420ms var(--motion-ease-out) 100ms forwards;
+    animation: motion-success-draw 1040ms var(--motion-ease-out) 560ms forwards;
   }
   .motion-success-enter .success-seal svg circle {
     stroke-dasharray: 120;
     stroke-dashoffset: 120;
-    animation: motion-success-draw 500ms var(--motion-ease-out) forwards;
+    animation: motion-success-draw 1240ms var(--motion-ease-out) 160ms forwards;
   }
 
-  .motion-empty-enter {
-    animation: motion-empty-enter 420ms var(--motion-ease-out) both;
+  .motion-success-enter > .success-label,
+  .motion-success-enter > h2,
+  .motion-success-enter > p,
+  .motion-success-enter > .success-actions {
+    animation: motion-success-text-enter 1040ms var(--motion-ease-out) both;
   }
+  .motion-success-enter > .success-label { animation-delay: 1040ms; }
+  .motion-success-enter > h2 { animation-delay: 1360ms; }
+  .motion-success-enter > p { animation-delay: 1680ms; }
+  .motion-success-enter > .success-actions { animation-delay: 2000ms; }
 
   .motion-error {
     animation: motion-error 360ms cubic-bezier(.36,.07,.19,.97) both;
@@ -188,10 +197,12 @@
     from { opacity: 0; transform: translateY(8px); filter: blur(2px); }
     to { opacity: 1; transform: none; filter: blur(0); }
   }
-  @keyframes motion-select {
-    0% { transform: scale(1); }
-    48% { transform: scale(.965); }
-    100% { transform: scale(1); }
+  @keyframes motion-mode-switch {
+    0%, 100% { transform: translateX(0); }
+    22% { transform: translateX(-2px); }
+    46% { transform: translateX(2.5px); }
+    68% { transform: translateX(-1.25px); }
+    84% { transform: translateX(.5px); }
   }
   @keyframes motion-copy-done {
     0% { transform: scale(1); }
@@ -203,12 +214,20 @@
     62% { transform: scale(1.14); opacity: 1; }
     100% { transform: scale(1); opacity: 1; }
   }
-  @keyframes motion-success-seal {
-    from { transform: translateY(12px) scale(.72) rotate(-12deg); filter: blur(5px); }
-    to { transform: none; filter: blur(0); }
+  @keyframes motion-success-stamp {
+    0% { transform: scale(1.55); filter: blur(7px); }
+    45% { transform: scale(.91); filter: blur(0); }
+    64% { transform: scale(1.045); }
+    79% { transform: scale(.985); }
+    100% { transform: scale(1); filter: blur(0); }
   }
   @keyframes motion-success-fade { from { opacity: 0; } to { opacity: 1; } }
   @keyframes motion-success-draw { to { stroke-dashoffset: 0; } }
+  @keyframes motion-success-text-enter {
+    0% { opacity: 0; transform: translateY(14px) scale(.97); filter: blur(3px); }
+    66% { opacity: 1; transform: translateY(-2px) scale(1.012); filter: blur(0); }
+    100% { opacity: 1; transform: none; filter: blur(0); }
+  }
   @keyframes motion-empty-enter {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: none; }
@@ -230,7 +249,7 @@
     .motion-disclosure-enter,
     .motion-credential-ready,
     .motion-field-enter,
-    .motion-select,
+    .motion-mode-switch,
     .motion-copy-done,
     .motion-success-enter,
     .motion-empty-enter,
@@ -239,8 +258,15 @@
     .motion-step-complete > span,
     .motion-success-enter .success-seal,
     .motion-success-enter .success-seal svg path,
-    .motion-success-enter .success-seal svg circle {
+    .motion-success-enter .success-seal svg circle,
+    .motion-success-enter > .success-label,
+    .motion-success-enter > h2,
+    .motion-success-enter > p,
+    .motion-success-enter > .success-actions {
       animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+      filter: none !important;
     }
     *, *::before, *::after {
       scroll-behavior: auto !important;

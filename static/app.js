@@ -328,7 +328,7 @@ function showRecovery(title, text, action) {
 function updateIntentUI() {
   const isExpert = state.mode === "expert";
   document.body.dataset.mode = state.mode;
-  document.querySelectorAll("[data-mode]").forEach((btn) => {
+  document.querySelectorAll(".mode-switch [data-mode]").forEach((btn) => {
     const active = btn.dataset.mode === state.mode;
     btn.classList.toggle("is-selected", active);
     btn.setAttribute("aria-selected", String(active));
@@ -343,7 +343,7 @@ function updateIntentUI() {
     button.classList.toggle("is-selected", selected);
   });
   byId("intentPanel").classList.toggle("is-locked", Boolean(state.account));
-  document.querySelectorAll("[data-intent], [data-mode]").forEach((button) => { button.disabled = Boolean(state.account); });
+  document.querySelectorAll("[data-intent], .mode-switch [data-mode]").forEach((button) => { button.disabled = Boolean(state.account); });
   updateVerifyAction();
 }
 
@@ -353,7 +353,8 @@ function selectMode(mode) {
   state.intent = state.mode === "expert" ? "expert" : "";
   try { localStorage.setItem("autoshare_mode", state.mode); } catch (_) {}
   updateIntentUI();
-  replayMotion(document.querySelector(`[data-mode="${state.mode}"]`), "motion-select");
+  const modeSwitch = document.querySelector(".mode-switch");
+  replayMotion(modeSwitch, "motion-mode-switch");
   replayMotion(byId("intentPanel"), "motion-panel-enter");
   updateVerifyAction();
   if (state.token && state.mode === "expert") {
@@ -532,9 +533,9 @@ function updateCopyUI() {
   byId("securityGuide").classList.toggle("hidden", isExpert || passwordCopied || state.resultsVisible || state.loginSucceeded || !usernameCopied);
   const securityCheck = byId("securityGuideCheck");
   if (securityCheck) securityCheck.checked = state.securityAcknowledged;
-  byId("accountEnteredButton").classList.toggle("is-gated", !state.securityAcknowledged && !passwordCopied);
+  byId("accountEnteredButton").classList.toggle("is-gated", (!state.preflightAcknowledged || !state.securityAcknowledged) && !passwordCopied);
   const passwordGateButton = document.querySelector('[data-copy="password"]');
-  if (passwordGateButton) passwordGateButton.classList.toggle("is-security-gated", !isExpert && !passwordCopied && !state.securityAcknowledged);
+  if (passwordGateButton) passwordGateButton.classList.toggle("is-security-gated", !isExpert && !passwordCopied && (!state.preflightAcknowledged || !state.securityAcknowledged));
   byId("showResultsButton").classList.toggle("hidden", !passwordCopied || state.resultsVisible);
   byId("resultActions").classList.toggle("hidden", !state.resultsVisible || state.loginSucceeded);
   if (state.resultsVisible) {
@@ -965,7 +966,7 @@ byId("verifyButton").addEventListener("click", () => {
 });
 byId("restartButton").addEventListener("click", restartFlow);
 byId("returnHomeButton").addEventListener("click", returnHome);
-document.querySelectorAll("[data-mode]").forEach((btn) => {
+document.querySelectorAll(".mode-switch [data-mode]").forEach((btn) => {
   btn.addEventListener("click", () => selectMode(btn.dataset.mode));
 });
 document.querySelectorAll("[data-intent]").forEach((button) => {
@@ -1007,6 +1008,20 @@ document.addEventListener("keydown", (event) => {
 byId("showResultsButton").addEventListener("click", () => {
   if (state.account && state.copied.password) showResultChoices();
 });
+function requireAccountPreflightAcknowledgement() {
+  if (state.mode === "expert" || state.preflightAcknowledged) return true;
+  const preflight = byId("accountPreflight");
+  const example = byId("accountPreflightExample");
+  preflight.classList.add("needs-confirmation");
+  example.open = true;
+  syncDetailsMotion(example);
+  byId("accountPreflightError").classList.remove("hidden");
+  byId("accountPreflightCheck").focus({ preventScroll: true });
+  byId("accountPreflightCheck").scrollIntoView({ behavior: "smooth", block: "center" });
+  announce("请先查看 App Store 第二项示例，并勾选确认后再继续。" );
+  return false;
+}
+
 function requireSecurityAcknowledgement() {
   if (state.mode === "expert" || state.copied.password || state.securityAcknowledged) return true;
   const guide = byId("securityGuide");
@@ -1030,6 +1045,7 @@ byId("securityGuideCheck").addEventListener("change", (event) => {
 });
 
 async function copyPasswordAndContinue(button) {
+  if (!requireAccountPreflightAcknowledgement()) return false;
   if (!requireSecurityAcknowledgement()) return false;
   try {
     await copyText(byId("password").textContent || "");
@@ -1061,6 +1077,7 @@ async function copyPasswordAndContinue(button) {
 byId("accountEnteredButton").addEventListener("click", () => {
   const button = document.querySelector('[data-copy="password"]');
   if (button && !state.copied.password) {
+    if (!requireAccountPreflightAcknowledgement()) return;
     if (!requireSecurityAcknowledgement()) return;
     state.usernameEntered = true;
     updateCopyUI();
@@ -1070,9 +1087,12 @@ byId("accountEnteredButton").addEventListener("click", () => {
 });
 byId("accountPreflightCheck").addEventListener("change", (event) => {
   state.preflightAcknowledged = Boolean(event.currentTarget.checked);
-  byId("accountPreflightError").classList.add("hidden");
-  byId("accountPreflight").classList.remove("needs-confirmation");
+  if (state.preflightAcknowledged) {
+    byId("accountPreflightError").classList.add("hidden");
+    byId("accountPreflight").classList.remove("needs-confirmation");
+  }
   byId("appStoreHomeLink").classList.toggle("is-gated", !state.preflightAcknowledged);
+  updateCopyUI();
   saveSession();
   announce(state.preflightAcknowledged ? "已确认 App Store 账户提示的正确操作。" : "打开 App Store 前需要查看示例并勾选确认。" );
 });
@@ -1193,6 +1213,7 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
         announce("请先复制 Apple ID，再复制密码。当前账号不会消失。" );
         return;
       }
+      if (key === "password" && !requireAccountPreflightAcknowledgement()) return;
       if (key === "password" && !requireSecurityAcknowledgement()) return;
       await copyText(target.textContent || "");
       const wasCopied = Boolean(state.copied[key]);
