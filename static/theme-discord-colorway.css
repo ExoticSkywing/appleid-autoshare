@@ -1,4 +1,5 @@
 :root {
+  --discord-blurple: #5865f2;
   --discord-green: #35ed7e;
   --discord-magenta: #ec48bd;
   --discord-on-bright: #0a0d18;
@@ -17,8 +18,17 @@ body[data-phase="success"] .status-light {
   box-shadow: 0 0 0 4px rgba(53,237,126,.16);
 }
 
-.mode-tab.is-selected,
 .intent-option.is-selected {
+  background: var(--neutral-750);
+  border: 2px solid #5865f2 !important;
+  box-shadow: none;
+}
+.intent-option.is-selected .intent-check {
+  color: #fff;
+  background: #5865f2;
+}
+
+.mode-tab.is-selected {
   background: var(--neutral-750);
   box-shadow: 0 0 0 2px var(--discord-blurple), 0 4px 14px rgba(0,0,0,.42);
 }

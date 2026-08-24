@@ -8,6 +8,10 @@
   let master = null;
   let enabled = true;
   let activeVoices = 0;
+  let silentSwitchBridge = null;
+  let silentSwitchBridgeState = "idle";
+  const isTouchWebKit = /(?:iPhone|iPad|iPod)/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 0 && /AppleWebKit/i.test(navigator.userAgent));
+  const bridgeNeeded = isTouchWebKit;
 
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
@@ -31,8 +35,98 @@
     if (icon) icon.dataset.state = enabled ? "on" : "off";
   }
 
+  function configurePlaybackSession() {
+    try {
+      if (navigator.audioSession && navigator.audioSession.type !== "playback") {
+        navigator.audioSession.type = "playback";
+      }
+    } catch (_) {
+      // Audio Session is experimental; the HTML audio bridge below remains the fallback.
+    }
+    if (isTouchWebKit) window.setTimeout(ensureSilentSwitchBridge, 0);
+  }
+
+  function createSilentAudioDataUri() {
+    const sampleRate = 8000;
+    const frameCount = 800;
+    const bytes = new Uint8Array(44 + frameCount);
+    const view = new DataView(bytes.buffer);
+    const writeText = (offset, text) => {
+      for (let index = 0; index < text.length; index += 1) bytes[offset + index] = text.charCodeAt(index);
+    };
+    writeText(0, "RIFF");
+    view.setUint32(4, 36 + frameCount, true);
+    writeText(8, "WAVEfmt ");
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate, true);
+    view.setUint16(32, 1, true);
+    view.setUint16(34, 8, true);
+    writeText(36, "data");
+    view.setUint32(40, frameCount, true);
+    bytes.fill(128, 44);
+    let binary = "";
+    for (let index = 0; index < bytes.length; index += 1) binary += String.fromCharCode(bytes[index]);
+    return `data:audio/wav;base64,${window.btoa(binary)}`;
+  }
+
+  function startSilentSwitchBridge(audio) {
+    silentSwitchBridgeState = "pending";
+    const playback = audio.play();
+    if (!playback || typeof playback.then !== "function") {
+      silentSwitchBridgeState = "running";
+      return;
+    }
+    playback.then(() => { silentSwitchBridgeState = "running"; }).catch(() => {
+      silentSwitchBridgeState = "ready";
+      audio.pause();
+      audio.currentTime = 0;
+    });
+  }
+
+  function ensureSilentSwitchBridge() {
+    if (!bridgeNeeded || silentSwitchBridgeState === "pending") return;
+    if (silentSwitchBridge) {
+      if (!silentSwitchBridge.paused) {
+        silentSwitchBridgeState = "running";
+        return;
+      }
+      startSilentSwitchBridge(silentSwitchBridge);
+      return;
+    }
+    const audio = document.createElement("audio");
+    audio.setAttribute("x-webkit-airplay", "deny");
+    audio.setAttribute("aria-hidden", "true");
+    audio.preload = "auto";
+    audio.loop = true;
+    audio.muted = false;
+    audio.playsInline = true;
+    audio.volume = 1;
+    audio.src = createSilentAudioDataUri();
+    audio.load();
+    document.body.appendChild(audio);
+    silentSwitchBridge = audio;
+    silentSwitchBridgeState = "ready";
+  }
+
+  function stopSilentSwitchBridge() {
+    if (!silentSwitchBridge) {
+      silentSwitchBridgeState = "idle";
+      return;
+    }
+    silentSwitchBridge.pause();
+    silentSwitchBridge.removeAttribute("src");
+    silentSwitchBridge.load();
+    silentSwitchBridge.remove();
+    silentSwitchBridge = null;
+    silentSwitchBridgeState = "idle";
+  }
+
   function ensureContext() {
     if (!AudioContextCtor) return null;
+    configurePlaybackSession();
     if (!context) {
       context = new AudioContextCtor();
       master = context.createGain();
@@ -46,6 +140,7 @@
   function unlock() {
     if (!enabled || reducedMotionQuery.matches) return;
     const ctx = ensureContext();
+    ensureSilentSwitchBridge();
     if (ctx && ctx.state === "suspended") ctx.resume().catch(() => {});
   }
 
@@ -115,18 +210,39 @@
     enabled = !enabled;
     try { window.localStorage.setItem(STORAGE_KEY, enabled ? "1" : "0"); } catch (_) {}
     syncToggle();
-    if (!enabled && context && context.state === "running") context.suspend().catch(() => {});
-    if (enabled) play("press");
+    if (!enabled) {
+      stopSilentSwitchBridge();
+      if (context && context.state === "running") context.suspend().catch(() => {});
+      return;
+    }
+    unlock();
+    play("press");
   }
 
   window.addEventListener("pointerdown", unlock, { capture: true, passive: true });
+  window.addEventListener("touchend", unlock, { capture: true, passive: true });
+  window.addEventListener("click", unlock, { capture: true, passive: true });
   window.addEventListener("keydown", unlock, { capture: true, passive: true });
   document.addEventListener("DOMContentLoaded", () => {
     syncToggle();
+    if (enabled && !reducedMotionQuery.matches) ensureSilentSwitchBridge();
     const toggleButton = document.getElementById("soundToggle");
     if (toggleButton) toggleButton.addEventListener("click", handleSoundToggle);
   }, { once: true });
 
-  reducedMotionQuery.addEventListener?.("change", syncToggle);
-  window.RelaySound = { play, unlock, toggle: handleSoundToggle, isEnabled: () => enabled, activeVoices: () => activeVoices, contextState: () => context ? context.state : "uninitialized", masterGain: () => master ? master.gain.value : null };
+  reducedMotionQuery.addEventListener?.("change", () => {
+    if (reducedMotionQuery.matches) stopSilentSwitchBridge();
+    syncToggle();
+  });
+  window.RelaySound = {
+    play,
+    unlock,
+    toggle: handleSoundToggle,
+    isEnabled: () => enabled,
+    activeVoices: () => activeVoices,
+    contextState: () => context ? context.state : "uninitialized",
+    masterGain: () => master ? master.gain.value : null,
+    audioSessionType: () => navigator.audioSession?.type || "unsupported",
+    silentSwitchBridgeState: () => silentSwitchBridgeState,
+  };
 })();

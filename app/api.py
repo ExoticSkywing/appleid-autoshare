@@ -50,7 +50,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         self.csp = (
             "default-src 'self'; "
             f"script-src {script_src}; "
-            "style-src 'self'; img-src 'self' data:; connect-src 'self'; "
+            "style-src 'self'; img-src 'self' data:; media-src 'self' data:; connect-src 'self'; "
             f"frame-src {frame_src}; object-src 'none'; base-uri 'none'; "
             "form-action 'self'; frame-ancestors 'none'"
         )
