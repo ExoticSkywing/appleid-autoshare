@@ -1,8 +1,18 @@
-# Apple ID AutoShare — Production v2
+# Apple ID AutoShare — v1.0
 
-生产级双源聚合、短时保鲜、人机验证、单账号披露与用户结果反馈服务。公开的 v1 明文接口已移除。
+面向非技术用户的移动优先自助账号中继：生产级双源聚合、短时保鲜、人机验证、单账号披露、按序安全引导与用户结果反馈。公开的旧版明文接口已移除。
 
-## 已实现
+## v1.0 用户体验
+
+- 顶层分为“我是新手”和“我是老玩家”：新手执行完整安全引导，老玩家使用极速出号与结果双态。
+- 新手先选下载目标，再按“复制 Apple ID → App Store 账户页 → 两道首次安全门槛 → 复制密码 → 确认结果”独立完成任务。
+- 目标应用路径以“看到云朵，可以下载”为成功证据；失败会引导退出当前共享账号后再换号。
+- 关闭页面或换号前必须先打开快速退出教程，再勾选确认，避免共享账号混用。
+- 深色精密界面使用静态电影感 Beams 背景；生产端没有 Canvas、Video 或 WebGL 背景循环。
+- 有界交互动效配套原生 Web Audio 提示音；无自动播放、无循环，支持持久静音，并尊重 `prefers-reduced-motion`。
+- 主要目标是 iOS Safari/WebKit，同时覆盖 Firefox 与桌面视口。
+
+## 后端与运维能力
 
 | 能力 | 实现 |
 |---|---|
@@ -115,6 +125,32 @@ uv pip install --python .venv/bin/python -r requirements.txt -r requirements-dev
 ```
 
 所有测试数据使用 `.invalid` 域名和合成密码；禁止把真实凭据写进 fixture、日志或报告。
+
+## 正式版验收
+
+发布候选需执行：
+
+```bash
+.venv/bin/pytest -q
+.venv/bin/ruff check app main.py tests
+.venv/bin/mypy app main.py
+node --check static/app.js
+node --check static/sound.js
+git diff --check
+curl -fsS http://127.0.0.1:${APP_HOST_PORT:-18740}/healthz
+curl -fsS http://127.0.0.1:${APP_HOST_PORT:-18740}/readyz
+```
+
+浏览器验收还必须覆盖：
+
+- 新手两道门槛不可绕过，纠正后自动清除错误；
+- 老玩家复制与成功/换号双态；
+- 退出教程首次门槛、换号、耗尽与恢复；
+- 角色切换时背景几何不动；
+- 393px WebKit、1440px 桌面视口无横向溢出；
+- 背景 `Canvas=0 / Video=0 / WebGL=0`；
+- 提示音首次用户手势解锁、结束后 active voices 为 0，静音后 AudioContext 挂起；
+- Reduced Motion 下不初始化音频且所有任务状态仍可见。
 
 ## 故障处理
 
