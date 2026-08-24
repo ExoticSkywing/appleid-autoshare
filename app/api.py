@@ -15,8 +15,11 @@ from redis.asyncio import Redis
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.types import ASGIApp, Receive, Scope, Send
 
+from app.adapters.authenticated_dom_source import AuthenticatedDomSourceAdapter
+from app.adapters.base import BaseAdapter
 from app.adapters.dom_source import DomSourceAdapter
 from app.adapters.json_source import JsonSourceAdapter
+from app.adapters.ikuuu_source import IkuuuSourceAdapter
 from app.config import Settings
 from app.models import (
     PublicAccount,
@@ -146,12 +149,47 @@ def _build_aggregator(settings: Settings, store: RedisStore) -> AccountAggregato
         max_response_bytes=settings.upstream_max_response_bytes,
         unhealthy_markers=settings.unhealthy_markers,
     )
+    adapters: list[tuple[BaseAdapter, int]] = [
+        (source_a, settings.source_a_interval_seconds),
+        (source_b, settings.source_b_interval_seconds),
+    ]
+    if settings.source_c_enabled:
+        adapters.append(
+            (
+                AuthenticatedDomSourceAdapter(
+                    alias="reserve_c",
+                    url=settings.source_c_url,
+                    cookie=settings.source_c_cookie,
+                    timeout_seconds=settings.upstream_timeout_seconds,
+                    max_response_bytes=settings.upstream_max_response_bytes,
+                    unhealthy_markers=settings.unhealthy_markers,
+                    sample_count=settings.source_c_sample_count,
+                    sample_jitter_ms=settings.source_c_sample_jitter_ms,
+                    source_timezone=settings.source_c_timezone,
+                    upstream_max_age_seconds=settings.source_c_upstream_max_age_seconds,
+                    auth_failure_alert_threshold=settings.source_c_auth_failure_alert_threshold,
+                ),
+                settings.source_c_interval_seconds,
+            )
+        )
+    if settings.source_d_enabled:
+        adapters.append(
+            (
+                IkuuuSourceAdapter(
+                    alias="reserve_d",
+                    url=settings.source_d_url,
+                    cookie=settings.source_d_cookie,
+                    referer=settings.source_d_referer,
+                    timeout_seconds=settings.upstream_timeout_seconds,
+                    max_response_bytes=settings.upstream_max_response_bytes,
+                    unhealthy_markers=settings.unhealthy_markers,
+                ),
+                settings.source_d_interval_seconds,
+            )
+        )
     return AccountAggregator(
         store=store,
-        adapters=[
-            (source_a, settings.source_a_interval_seconds),
-            (source_b, settings.source_b_interval_seconds),
-        ],
+        adapters=adapters,
         id_secret=settings.id_hmac_secret,
     )
 
@@ -407,7 +445,17 @@ def create_app(
         return RevealResponse(
             total=1,
             updated_at=pool.updated_at,
-            accounts=[PublicAccount(**selected.model_dump())],
+            accounts=[
+                PublicAccount(
+                    id=selected.id,
+                    username=selected.username,
+                    password=selected.password,
+                    region=selected.region,
+                    status=selected.status,
+                    last_synced_at=selected.last_synced_at,
+                    features=selected.features,
+                )
+            ],
             exhausted=False,
             purchase_link=runtime_settings.store_url or None,
         )

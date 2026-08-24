@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from typing import Any
 from urllib.parse import urlparse
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
 class ConfigurationError(ValueError):
@@ -70,6 +71,26 @@ class Settings:
     source_b_referer: str = ""
     source_a_interval_seconds: int = 45
     source_b_interval_seconds: int = 90
+    source_c_enabled: bool = False
+    source_c_url: str = field(default="", repr=False)
+    source_c_cookie: str = field(default="", repr=False)
+    source_c_interval_seconds: int = 300
+    source_c_sample_count: int = 3
+    source_c_sample_jitter_min_ms: int = 250
+    source_c_sample_jitter_max_ms: int = 750
+    source_c_freshness_seconds: int = 600
+    source_c_upstream_max_age_seconds: int = 900
+    source_c_slice_ttl_seconds: int = 1200
+    source_c_timezone: str = "UTC"
+    source_c_auth_failure_alert_threshold: int = 3
+    source_d_enabled: bool = False
+    source_d_url: str = field(default="", repr=False)
+    source_d_cookie: str = field(default="", repr=False)
+    source_d_referer: str = field(default="", repr=False)
+    source_d_interval_seconds: int = 300
+    source_d_freshness_seconds: int = 300
+    source_d_slice_ttl_seconds: int = 600
+    delivery_source_mode: str = "all"
     upstream_timeout_seconds: float = 8.0
     upstream_max_response_bytes: int = 1_000_000
     unhealthy_markers: tuple[str, ...] = (
@@ -113,6 +134,10 @@ class Settings:
     store_url: str = ""
     start_pollers: bool = True
 
+    @property
+    def source_c_sample_jitter_ms(self) -> tuple[int, int]:
+        return (self.source_c_sample_jitter_min_ms, self.source_c_sample_jitter_max_ms)
+
     @classmethod
     def from_env(cls) -> Settings:
         return cls(
@@ -126,6 +151,26 @@ class Settings:
             source_b_referer=os.getenv("SOURCE_B_REFERER", ""),
             source_a_interval_seconds=_int("SOURCE_A_POLL_SECONDS", 45),
             source_b_interval_seconds=_int("SOURCE_B_POLL_SECONDS", 90),
+            source_c_enabled=_bool("SOURCE_C_ENABLED", False),
+            source_c_url=os.getenv("SOURCE_C_URL", ""),
+            source_c_cookie=os.getenv("SOURCE_C_COOKIE", ""),
+            source_c_interval_seconds=_int("SOURCE_C_POLL_SECONDS", 300),
+            source_c_sample_count=_int("SOURCE_C_SAMPLE_COUNT", 3),
+            source_c_sample_jitter_min_ms=_int("SOURCE_C_SAMPLE_JITTER_MIN_MS", 250),
+            source_c_sample_jitter_max_ms=_int("SOURCE_C_SAMPLE_JITTER_MAX_MS", 750),
+            source_c_freshness_seconds=_int("SOURCE_C_FRESHNESS_SECONDS", 600),
+            source_c_upstream_max_age_seconds=_int("SOURCE_C_UPSTREAM_MAX_AGE_SECONDS", 900),
+            source_c_slice_ttl_seconds=_int("SOURCE_C_SLICE_TTL_SECONDS", 1200),
+            source_c_timezone=os.getenv("SOURCE_C_TIMEZONE", "UTC"),
+            source_c_auth_failure_alert_threshold=_int("SOURCE_C_AUTH_FAILURE_ALERT_THRESHOLD", 3),
+            source_d_enabled=_bool("SOURCE_D_ENABLED", False),
+            source_d_url=os.getenv("SOURCE_D_URL", ""),
+            source_d_cookie=os.getenv("SOURCE_D_COOKIE", ""),
+            source_d_referer=os.getenv("SOURCE_D_REFERER", ""),
+            source_d_interval_seconds=_int("SOURCE_D_POLL_SECONDS", 300),
+            source_d_freshness_seconds=_int("SOURCE_D_FRESHNESS_SECONDS", 300),
+            source_d_slice_ttl_seconds=_int("SOURCE_D_SLICE_TTL_SECONDS", 600),
+            delivery_source_mode=os.getenv("DELIVERY_SOURCE_MODE", "all").strip().lower(),
             upstream_timeout_seconds=_float("UPSTREAM_TIMEOUT_SECONDS", 8.0),
             upstream_max_response_bytes=_int("UPSTREAM_MAX_RESPONSE_BYTES", 1_000_000),
             unhealthy_markers=_markers(os.getenv("UNHEALTHY_MARKERS")),
@@ -174,6 +219,30 @@ class Settings:
             raise ConfigurationError("SOURCE_A_POLL_SECONDS must exceed UPSTREAM_TIMEOUT_SECONDS")
         if self.source_b_interval_seconds <= self.upstream_timeout_seconds:
             raise ConfigurationError("SOURCE_B_POLL_SECONDS must exceed UPSTREAM_TIMEOUT_SECONDS")
+        if self.source_c_enabled:
+            if not 1 <= self.source_c_sample_count <= 5:
+                raise ConfigurationError("SOURCE_C_SAMPLE_COUNT must be between 1 and 5")
+            if not 0 <= self.source_c_sample_jitter_min_ms <= self.source_c_sample_jitter_max_ms <= 10_000:
+                raise ConfigurationError("source C sample jitter range is invalid")
+            if self.source_c_interval_seconds <= self.upstream_timeout_seconds * self.source_c_sample_count:
+                raise ConfigurationError("SOURCE_C_POLL_SECONDS must exceed the bounded network budget")
+            if self.source_c_freshness_seconds <= 0 or self.source_c_upstream_max_age_seconds <= 0:
+                raise ConfigurationError("source C freshness limits must be positive")
+            if self.source_c_slice_ttl_seconds <= self.source_c_freshness_seconds:
+                raise ConfigurationError("source C diagnostic TTL must exceed freshness")
+            if self.source_c_auth_failure_alert_threshold <= 0:
+                raise ConfigurationError("source C auth alert threshold must be positive")
+            try:
+                ZoneInfo(self.source_c_timezone)
+            except ZoneInfoNotFoundError as exc:
+                raise ConfigurationError("SOURCE_C_TIMEZONE is invalid") from exc
+        if self.source_d_enabled:
+            if self.source_d_interval_seconds <= self.upstream_timeout_seconds:
+                raise ConfigurationError("SOURCE_D_POLL_SECONDS must exceed UPSTREAM_TIMEOUT_SECONDS")
+            if self.source_d_freshness_seconds <= 0:
+                raise ConfigurationError("SOURCE_D_FRESHNESS_SECONDS must be positive")
+            if self.source_d_slice_ttl_seconds <= self.source_d_freshness_seconds:
+                raise ConfigurationError("SOURCE_D_SLICE_TTL_SECONDS must exceed freshness")
         if not 1 <= self.source_freshness_seconds <= 60:
             raise ConfigurationError("source freshness must be between 1 and 60 seconds")
         if not 1 <= self.pool_ttl_seconds <= 60 or not 1 <= self.pool_freshness_seconds <= 60:
@@ -211,10 +280,40 @@ class Settings:
             if not self.cookie_name.startswith("__Host-"):
                 raise ConfigurationError("production COOKIE_NAME must use the __Host- prefix")
 
+        if self.delivery_source_mode not in {
+            "all",
+            "primary_only",
+            "source_a_only",
+            "source_b_only",
+            "reserve_only",
+            "source_d_only",
+            "ikuuu_only",
+        }:
+            raise ConfigurationError("DELIVERY_SOURCE_MODE is invalid")
+        if self.delivery_source_mode == "reserve_only" and not self.source_c_enabled:
+            raise ConfigurationError("reserve_only requires SOURCE_C_ENABLED=true")
+        if self.delivery_source_mode in {"source_d_only", "ikuuu_only"} and not self.source_d_enabled:
+            raise ConfigurationError("source_d_only requires SOURCE_D_ENABLED=true")
         require_upstreams = self.start_pollers
         _https_url("SOURCE_A_URL", self.source_a_url, require_upstreams)
         _https_url("SOURCE_B_URL", self.source_b_url, require_upstreams)
         _https_url("SOURCE_B_REFERER", self.source_b_referer, False)
+        _https_url("SOURCE_C_URL", self.source_c_url, self.source_c_enabled)
+        if self.source_c_enabled and not self.source_c_cookie:
+            raise ConfigurationError("SOURCE_C_COOKIE is required")
+        _https_url("SOURCE_D_URL", self.source_d_url, self.source_d_enabled)
+        _https_url("SOURCE_D_REFERER", self.source_d_referer, self.source_d_enabled)
+        if self.source_d_enabled:
+            referer = urlparse(self.source_d_referer)
+            endpoint = urlparse(self.source_d_url)
+            if (referer.scheme, referer.hostname, referer.port) != (
+                endpoint.scheme,
+                endpoint.hostname,
+                endpoint.port,
+            ):
+                raise ConfigurationError("SOURCE_D_REFERER must use the same origin as SOURCE_D_URL")
+        if self.source_d_enabled and not self.source_d_cookie:
+            raise ConfigurationError("SOURCE_D_COOKIE is required")
 
         if self.turnstile_test_mode:
             if production:

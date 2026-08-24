@@ -6,6 +6,7 @@ import time
 from collections.abc import Iterable
 
 from app.adapters.base import AdapterFetchError, BaseAdapter
+from app.adapters.ikuuu_source import IkuuuSourceError
 from app.models import CandidateAccount, InternalAccount
 from app.security import public_account_id
 from app.services.store import RedisStore
@@ -18,9 +19,13 @@ def deduplicate_accounts(accounts: Iterable[InternalAccount]) -> list[InternalAc
     for account in accounts:
         key = account.username.strip().lower()
         current = unique.get(key)
-        if current is None or account.last_synced_at > current.last_synced_at:
+        if current is None or _freshness_timestamp(account) > _freshness_timestamp(current):
             unique[key] = account
-    return sorted(unique.values(), key=lambda item: (-item.last_synced_at, item.id))
+    return sorted(unique.values(), key=lambda item: (-_freshness_timestamp(item), item.id))
+
+
+def _freshness_timestamp(account: InternalAccount) -> int:
+    return account.upstream_updated_at or account.last_synced_at
 
 
 class AccountAggregator:
@@ -48,6 +53,8 @@ class AccountAggregator:
                 status="active",
                 last_synced_at=fetched_at,
                 features=list(record.features),
+                upstream_updated_at=record.upstream_updated_at,
+                relay_synced_at=record.relay_synced_at,
             )
             for record in records
         ]
@@ -59,8 +66,21 @@ class AccountAggregator:
                 return False
             fetched_at = int(time.time())
             accounts = self._normalize(records, fetched_at)
-            stored = await self.store.replace_source_slice(adapter.alias, fetched_at, accounts)
+            authoritative_expiries = [
+                record.source_valid_until
+                for record in records
+                if record.source_valid_until is not None
+            ]
+            stored = await self.store.replace_source_slice(
+                adapter.alias,
+                fetched_at,
+                accounts,
+                source_valid_until=min(authoritative_expiries) if authoritative_expiries else None,
+            )
             return stored
+        except IkuuuSourceError as exc:
+            logger.warning("poll_failed alias=%s result=%s", adapter.alias, exc.reason)
+            return False
         except (AdapterFetchError, ConnectionError, TimeoutError):
             logger.warning("poll_failed alias=%s result=failure", adapter.alias)
             return False

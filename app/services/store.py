@@ -41,19 +41,40 @@ class RedisStore:
         alias: str,
         fetched_at: int,
         accounts: list[InternalAccount],
+        *,
+        source_valid_until: int | None = None,
     ) -> bool:
         if not accounts:
+            return False
+        source_limits = {
+            "reserve_c": (
+                self.settings.source_c_freshness_seconds,
+                self.settings.source_c_slice_ttl_seconds,
+            ),
+            "reserve_d": (
+                self.settings.source_d_freshness_seconds,
+                self.settings.source_d_slice_ttl_seconds,
+            ),
+        }
+        freshness, diagnostic_ttl = source_limits.get(
+            alias,
+            (self.settings.source_freshness_seconds, self.settings.source_slice_ttl_seconds),
+        )
+        valid_until = fetched_at + freshness
+        if source_valid_until is not None:
+            valid_until = min(valid_until, source_valid_until)
+        if valid_until <= fetched_at:
             return False
         payload = SourceSlice(
             source_alias=alias,
             fetched_at=fetched_at,
-            valid_until=fetched_at + self.settings.source_freshness_seconds,
+            valid_until=valid_until,
             accounts=accounts,
         ).model_dump_json()
         await self.redis.set(
             self._key("source", alias),
             payload,
-            ex=self.settings.source_slice_ttl_seconds,
+            ex=diagnostic_ttl,
         )
         return True
 
@@ -76,6 +97,17 @@ class RedisStore:
         parsed = await self.get_source_slice(alias)
         if parsed is None or parsed.fetched_at > current or parsed.valid_until <= current:
             return None
+        if alias == "reserve_c":
+            accounts = [
+                account
+                for account in parsed.accounts
+                if account.upstream_updated_at is None
+                or 0 <= current - account.upstream_updated_at
+                <= self.settings.source_c_upstream_max_age_seconds
+            ]
+            if not accounts:
+                return None
+            parsed.accounts = accounts
         return parsed
 
     async def build_fresh_pool(
@@ -98,16 +130,37 @@ class RedisStore:
         for account in all_accounts:
             key = account.username.strip().lower()
             previous = unique.get(key)
-            if previous is None or account.last_synced_at > previous.last_synced_at:
+            account_freshness = account.upstream_updated_at or account.last_synced_at
+            previous_freshness = (
+                previous.upstream_updated_at or previous.last_synced_at
+                if previous is not None
+                else -1
+            )
+            if previous is None or account_freshness > previous_freshness:
                 unique[key] = account
-        accounts = sorted(unique.values(), key=lambda item: (-item.last_synced_at, item.id))
+        accounts = sorted(
+            unique.values(),
+            key=lambda item: (-(item.upstream_updated_at or item.last_synced_at), item.id),
+        )
         return AggregatePool(
             updated_at=max(item.last_synced_at for item in accounts),
             accounts=accounts,
         )
 
     async def get_fresh_pool(self, *, now: int | None = None) -> AggregatePool | None:
-        return await self.build_fresh_pool(("source_a", "source_b"), now=now)
+        aliases_by_mode = {
+            "all": ("source_a", "source_b")
+            + (("reserve_c",) if self.settings.source_c_enabled else ())
+            + (("reserve_d",) if self.settings.source_d_enabled else ()),
+            "primary_only": ("source_a", "source_b"),
+            "source_a_only": ("source_a",),
+            "source_b_only": ("source_b",),
+            "reserve_only": ("reserve_c",),
+            "source_d_only": ("reserve_d",),
+            "ikuuu_only": ("reserve_d",),
+        }
+        aliases = aliases_by_mode[self.settings.delivery_source_mode]
+        return await self.build_fresh_pool(aliases, now=now)
 
     async def create_session(self, raw_session: str, *, now: int | None = None) -> str:
         digest = self._state_digest(raw_session, "session")

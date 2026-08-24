@@ -1,0 +1,5 @@
+{"file":".trellis/spec/backend/index.md","reason":"Backend review entry point."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Verify generic public errors and fail-closed behavior."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Verify no URL/Cookie/account/HTML leakage."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Verify tests, lint, types, and negative coverage."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Verify source_c freshness isolation and failure-no-renew semantics."}

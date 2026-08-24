@@ -27,6 +27,23 @@ def test_environment_runtime_controls_are_not_silently_ignored(monkeypatch) -> N
         "START_POLLERS": "false",
         "SOURCE_A_POLL_SECONDS": "31",
         "SOURCE_B_POLL_SECONDS": "37",
+        "SOURCE_C_ENABLED": "true",
+        "SOURCE_C_URL": "https://reserve.example.invalid/accounts",
+        "SOURCE_C_COOKIE": "opaque-synthetic-cookie",
+        "SOURCE_C_POLL_SECONDS": "301",
+        "SOURCE_C_SAMPLE_COUNT": "4",
+        "SOURCE_C_SAMPLE_JITTER_MIN_MS": "12",
+        "SOURCE_C_SAMPLE_JITTER_MAX_MS": "34",
+        "SOURCE_C_FRESHNESS_SECONDS": "601",
+        "SOURCE_C_UPSTREAM_MAX_AGE_SECONDS": "901",
+        "SOURCE_C_SLICE_TTL_SECONDS": "1201",
+        "SOURCE_D_ENABLED": "true",
+        "SOURCE_D_URL": "https://api.example.invalid/accounts",
+        "SOURCE_D_COOKIE": "opaque-synthetic-cookie-d",
+        "SOURCE_D_REFERER": "https://api.example.invalid/tutorial",
+        "SOURCE_D_POLL_SECONDS": "302",
+        "SOURCE_D_FRESHNESS_SECONDS": "303",
+        "SOURCE_D_SLICE_TTL_SECONDS": "604",
         "UPSTREAM_TIMEOUT_SECONDS": "9",
         "SOURCE_FRESHNESS_SECONDS": "42",
         "SOURCE_SLICE_TTL_SECONDS": "77",
@@ -43,6 +60,13 @@ def test_environment_runtime_controls_are_not_silently_ignored(monkeypatch) -> N
     settings = Settings.from_env()
     assert settings.source_a_interval_seconds == 31
     assert settings.source_b_interval_seconds == 37
+    assert settings.source_c_enabled is True
+    assert settings.source_c_sample_count == 4
+    assert settings.source_c_sample_jitter_ms == (12, 34)
+    assert settings.source_c_freshness_seconds == 601
+    assert settings.source_d_enabled is True
+    assert settings.source_d_interval_seconds == 302
+    assert settings.source_d_freshness_seconds == 303
     assert settings.upstream_timeout_seconds == 9
     assert settings.source_freshness_seconds == 42
     assert settings.source_slice_ttl_seconds == 77

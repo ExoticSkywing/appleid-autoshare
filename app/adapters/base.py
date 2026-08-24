@@ -13,6 +13,10 @@ import httpx
 from app.models import CandidateAccount
 
 logger = logging.getLogger("app.ingestion")
+# httpx logs complete request URLs at INFO. Upstream endpoints are deployment
+# secrets, so keep transport diagnostics at WARNING or above globally.
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
 SUPPLEMENTAL_CA_PATH = Path(__file__).resolve().parents[2] / "certs" / "isrg-root-ye.pem"
 
 

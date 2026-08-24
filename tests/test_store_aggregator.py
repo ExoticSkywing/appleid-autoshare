@@ -30,6 +30,17 @@ def test_deduplicate_is_case_insensitive_and_prefers_freshest() -> None:
     assert [item.password for item in result] == ["synthetic-new", "synthetic-other"]
 
 
+def test_deduplicate_prefers_newer_upstream_timestamp_over_later_relay_fetch() -> None:
+    primary = account("same@example.invalid", "primary-new", 100)
+    primary = primary.model_copy(update={"upstream_updated_at": 100})
+    reserve = account("same@example.invalid", "reserve-old", 200)
+    reserve = reserve.model_copy(update={"upstream_updated_at": 90})
+
+    result = deduplicate_accounts([reserve, primary])
+
+    assert [item.password for item in result] == ["primary-new"]
+
+
 def test_public_id_is_stable_keyed_hmac_not_plain_username_hash() -> None:
     first = public_account_id("Person.One@example.invalid", "key-one")
     same = public_account_id("person.one@example.invalid", "key-one")
@@ -64,3 +75,17 @@ async def test_empty_refresh_does_not_replace_or_extend_source_slice(redis_clien
     source = await store.get_fresh_source_slice("source_a", now=100)
     assert source is not None
     assert source.fetched_at == 100
+
+
+@pytest.mark.asyncio
+async def test_source_d_slice_is_capped_by_authoritative_expiry(redis_client, settings) -> None:
+    configured = settings.with_overrides(source_d_freshness_seconds=300)
+    store = RedisStore(redis_client, configured)
+    item = account("reserve@example.invalid", "synthetic-secret", 100)
+    assert await store.replace_source_slice(
+        "reserve_d", 100, [item], source_valid_until=175
+    ) is True
+    source = await store.get_source_slice("reserve_d")
+    assert source is not None
+    assert source.valid_until == 175
+    assert await store.get_fresh_source_slice("reserve_d", now=175) is None
