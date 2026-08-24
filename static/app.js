@@ -77,7 +77,11 @@ function announce(text) {
 }
 
 function playSound(name) {
-  if (window.RelaySound) window.RelaySound.play(name);
+  try {
+    if (window.RelaySound) window.RelaySound.play(name);
+  } catch (_) {
+    // Audio feedback is optional and must never interrupt the task flow.
+  }
 }
 
 function hideCopyConfirmation() {
@@ -907,7 +911,12 @@ async function copyText(value) {
 
 function returnHome() {
   clearSession();
-  window.location.assign(`${window.location.origin}/`);
+  try {
+    window.history.replaceState(null, "", "/");
+  } catch (_) {
+    // A reload below still resets the current document if history is unavailable.
+  }
+  window.location.reload();
 }
 
 function restartFlow() {

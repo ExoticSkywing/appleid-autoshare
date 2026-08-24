@@ -1,0 +1,169 @@
+:root {
+  --discord-green: #35ed7e;
+  --discord-magenta: #ec48bd;
+  --discord-on-bright: #0a0d18;
+}
+
+::selection {
+  color: var(--discord-on-bright);
+  background: #9da5ff;
+}
+:focus-visible { outline-color: #9da5ff; }
+
+.status-light { background: var(--discord-magenta); }
+body[data-phase="ready"] .status-light,
+body[data-phase="success"] .status-light {
+  background: var(--discord-green);
+  box-shadow: 0 0 0 4px rgba(53,237,126,.16);
+}
+
+.mode-tab.is-selected,
+.intent-option.is-selected {
+  background: var(--neutral-750);
+  box-shadow: 0 0 0 2px var(--discord-blurple), 0 4px 14px rgba(0,0,0,.42);
+}
+.mode-tab[data-mode="novice"] {
+  background: rgba(27,23,21,.82);
+  box-shadow: inset 0 1px rgba(255,240,224,.035), 0 0 0 1px rgba(217,130,36,.24), 0 2px 8px rgba(0,0,0,.34);
+}
+.mode-tab[data-mode="novice"] .mode-tab-text small { color: #b9a185; }
+.mode-tab[data-mode="novice"] .mode-tab-check { color: #241408; background: #f0aa55; }
+.mode-tab[data-mode="novice"].is-selected {
+  background: rgba(36,26,20,.9);
+  box-shadow: inset 0 1px rgba(255,237,214,.05), 0 0 0 2px #d98224, 0 4px 14px rgba(35,18,7,.46);
+}
+.mode-tab[data-mode="expert"] {
+  background: rgba(24,22,29,.82);
+  box-shadow: inset 0 1px rgba(255,235,250,.035), 0 0 0 1px rgba(236,72,189,.24), 0 2px 8px rgba(0,0,0,.34);
+}
+.mode-tab[data-mode="expert"] .mode-tab-text small { color: #c2a1bb; }
+.mode-tab[data-mode="expert"].is-selected {
+  color: var(--neutral-200);
+  background: rgba(38,22,34,.9);
+  box-shadow: inset 0 1px rgba(255,237,252,.055), 0 0 0 2px var(--discord-magenta), 0 4px 14px rgba(64,12,52,.46);
+}
+.mode-tab[data-mode="expert"].is-selected .mode-tab-text strong { color: var(--neutral-100); }
+.mode-tab[data-mode="expert"].is-selected .mode-tab-text small { color: #d8b1cf; }
+.mode-tab-check,
+.intent-check,
+.flow-step.is-current span {
+  color: #fff;
+  background: var(--discord-blurple);
+}
+.mode-tab[data-mode="novice"] .mode-tab-check { color: #241408; background: #f0aa55; }
+.mode-tab[data-mode="expert"] .mode-tab-check { color: #26091f; background: var(--discord-magenta); }
+
+.verify-action-hint { color: #ffb8e9; }
+.signout-confirm input { accent-color: var(--discord-magenta); }
+.sound-toggle[aria-pressed="true"] { color: #9da5ff; }
+.sound-toggle:hover { background: rgba(88,101,242,.14); }
+
+/*
+ * The accepted theme pins enabled action fills with !important.
+ * Important layer precedence is reversed, so reset is the only safe
+ * color-only override layer. Disabled, gated and blocked controls are excluded.
+ */
+@layer reset {
+  .primary-action:not(:disabled):not(.is-blocked),
+  .show-results-primary:not(:disabled),
+  .account-entered-action:not(.is-gated):not(:disabled),
+  .appstore-home-action:not(.is-gated),
+  .appstore-action,
+  .target-app-link.appstore-action,
+  .copy-action.is-primary-copy:not(.is-copied),
+  #returnHomeButton.primary-action {
+    color: #fff !important;
+    background: #5865f2 !important;
+    background-image: none !important;
+    border-color: #5865f2 !important;
+    box-shadow: 0 6px 18px rgba(88,101,242,.3) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  #verifyButton.primary-action:not(:disabled):not(.is-blocked),
+  #finishAfterSignOutButton.primary-action:not(:disabled):not(.is-blocked),
+  #replaceAfterSignOutButton.primary-action:not(:disabled):not(.is-blocked),
+  .empty-store-link.primary-action,
+  body[data-phase="empty"] .store-link {
+    color: #0a0d18 !important;
+    background: #35ed7e !important;
+    background-image: none !important;
+    border-color: #35ed7e !important;
+    box-shadow: 0 6px 18px rgba(53,237,126,.24) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .primary-action:not(:disabled):not(.is-blocked) svg,
+  .show-results-primary:not(:disabled),
+  .account-entered-action:not(.is-gated):not(:disabled) > svg,
+  .account-entered-action:not(.is-gated):not(:disabled) > span,
+  .appstore-home-action:not(.is-gated) strong,
+  .appstore-home-action:not(.is-gated) > svg,
+  .appstore-action strong,
+  .appstore-action > svg,
+  .target-app-link.appstore-action strong,
+  .target-app-link.appstore-action > svg,
+  .copy-action.is-primary-copy:not(.is-copied),
+  #returnHomeButton.primary-action > svg { color: #fff !important; }
+  .appstore-home-action:not(.is-gated) small,
+  .appstore-action small,
+  .target-app-link.appstore-action small { color: #e5e7ff !important; }
+  #verifyButton.primary-action:not(:disabled):not(.is-blocked) svg,
+  #finishAfterSignOutButton.primary-action:not(:disabled):not(.is-blocked) svg,
+  #replaceAfterSignOutButton.primary-action:not(:disabled):not(.is-blocked) svg,
+  .empty-store-link.primary-action svg,
+  body[data-phase="empty"] .store-link strong,
+  body[data-phase="empty"] .store-link small,
+  body[data-phase="empty"] .store-link > svg { color: #0a0d18 !important; }
+  #verifyButton.primary-action:not(:disabled):not(.is-blocked)::before { background: rgba(255,255,255,.22) !important; pointer-events: none !important; }
+  .result-action.result-success:not(:disabled),
+  .result-action[data-login-result="success"]:not(:disabled),
+  .target-result.target-success:not(:disabled) {
+    color: #0a0d18 !important;
+    background: #35ed7e !important;
+    border-color: #35ed7e !important;
+    box-shadow: 0 4px 14px rgba(53,237,126,.2) !important;
+  }
+  .result-action.result-success:not(:disabled) strong,
+  .result-action.result-success:not(:disabled) small,
+  .result-action.result-success:not(:disabled) .result-arrow,
+  .result-action[data-login-result="success"]:not(:disabled) strong,
+  .result-action[data-login-result="success"]:not(:disabled) small,
+  .result-action[data-login-result="success"]:not(:disabled) .result-arrow,
+  .target-result.target-success:not(:disabled) strong,
+  .target-result.target-success:not(:disabled) small { color: #0a0d18 !important; }
+  .result-action.result-success:not(:disabled) .result-icon,
+  .result-action[data-login-result="success"]:not(:disabled) .result-icon,
+  .target-result.target-success:not(:disabled) .target-result-icon {
+    color: #ffffff !important;
+    background: #0a0d18 !important;
+    box-shadow: 0 0 0 4px rgba(10,13,24,.16) !important;
+  }
+  .copy-action.is-copied,
+  .copy-action.is-copied:disabled,
+  .copy-action.is-confirming,
+  .account-entered-action.is-confirming {
+    color: #0a0d18 !important;
+    background: #35ed7e !important;
+    border-color: #35ed7e !important;
+  }
+  .copy-action.is-copied .check-glyph,
+  .copy-action.is-confirming svg,
+  .copy-action.is-confirming span,
+  .account-entered-action.is-confirming svg,
+  .account-entered-action.is-confirming span { color: #0a0d18 !important; }
+  .recovery-panel button {
+    color: #fff !important;
+    background: #4650bf !important;
+    box-shadow: 0 0 0 1px rgba(157,165,255,.42) !important;
+  }
+  .feedback-step,
+  .target-app-question > span,
+  .signout-purpose > span,
+  .download-window-kicker,
+  .update-tradeoff strong { color: #ffb8e9 !important; }
+  .signout-purpose > span {
+    background: #30213d !important;
+    box-shadow: inset 0 1px rgba(255,255,255,.045), 0 0 0 1px rgba(236,72,189,.34) !important;
+  }
+}
