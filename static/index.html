@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/assets/app.css?v=20260823-7">
   <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260823-6">
   <link rel="stylesheet" href="/assets/motion.css?v=20260823-1">
+  <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
 </head>
 <body data-phase="boot">
   <div class="ambient-media" aria-hidden="true">
@@ -22,7 +23,13 @@
   <main id="workspace" class="shell">
     <header class="masthead">
       <span class="brand-word">RELAY</span>
-      <p class="masthead-state"><span id="statusLight" class="status-light"></span><span id="headerState">安全通道准备中</span></p>
+      <div class="masthead-tools">
+        <button id="soundToggle" class="sound-toggle" type="button" aria-pressed="true" aria-label="关闭提示音">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4H4Z"/><path class="sound-wave" d="M16 9.5a4 4 0 0 1 0 5M18.5 7a7.5 7.5 0 0 1 0 10"/></svg>
+          <span>提示音</span>
+        </button>
+        <p class="masthead-state"><span id="statusLight" class="status-light"></span><span id="headerState">安全通道准备中</span></p>
+      </div>
     </header>
 
     <section class="mode-switch-panel" aria-label="操作模式选择">
@@ -411,6 +418,7 @@
     <p id="message" class="sr-status" role="status" aria-live="polite"></p>
   </main>
 
-  <script src="/assets/app.js?v=20260823-1" defer></script>
+  <script src="/assets/sound.js?v=20260823-3" defer></script>
+  <script src="/assets/app.js?v=20260823-2" defer></script>
 </body>
 </html>

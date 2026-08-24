@@ -1,0 +1,42 @@
+@layer sound {
+  .masthead-tools {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    min-width: 0;
+  }
+  .sound-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 30px;
+    padding: 5px 7px;
+    border: 0;
+    border-radius: 8px;
+    color: var(--text-faint);
+    background: transparent;
+    font-size: .66rem;
+    font-weight: 700;
+    line-height: 1;
+    opacity: .76;
+    transition: color 160ms ease, background-color 160ms ease, transform 160ms ease;
+  }
+  .sound-toggle svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.7;
+  }
+  .sound-toggle[aria-pressed="true"] { color: #c7b58e; }
+  .sound-toggle[aria-pressed="false"] { color: var(--text-faint); }
+  .sound-toggle[aria-pressed="false"] .sound-wave { opacity: 0; }
+  .sound-toggle:hover { background: rgba(255,255,255,.06); }
+  .sound-toggle:active { transform: scale(.95); }
+  @media (prefers-reduced-motion: reduce) {
+    .sound-toggle { transition: none; }
+  }
+}

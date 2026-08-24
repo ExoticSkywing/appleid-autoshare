@@ -76,6 +76,10 @@ function announce(text) {
   byId("message").textContent = text;
 }
 
+function playSound(name) {
+  if (window.RelaySound) window.RelaySound.play(name);
+}
+
 function hideCopyConfirmation() {
   window.clearTimeout(state.toastTimer);
   state.toastTimer = null;
@@ -96,6 +100,7 @@ function showCopyConfirmation(text, sourceButton = null) {
     window.setTimeout(() => sourceButton.classList.remove("is-confirming"), 850);
   }
   if (navigator.vibrate) navigator.vibrate(18);
+  playSound("copy");
   window.clearTimeout(state.toastTimer);
   state.toastTimer = window.setTimeout(() => {
     toast.classList.add("hidden");
@@ -355,6 +360,7 @@ function selectMode(mode) {
   updateIntentUI();
   const modeSwitch = document.querySelector(".mode-switch");
   replayMotion(modeSwitch, "motion-mode-switch");
+  playSound("mode");
   replayMotion(byId("intentPanel"), "motion-panel-enter");
   updateVerifyAction();
   if (state.token && state.mode === "expert") {
@@ -368,6 +374,7 @@ function selectIntent(intent) {
   byId("intentPanel").classList.remove("needs-attention");
   updateIntentUI();
   replayMotion(document.querySelector(`[data-intent="${state.intent}"]`), "motion-select");
+  playSound("select");
   if (state.token) {
     updateVerifyAction();
     byId("verifyButton").focus({ preventScroll: true });
@@ -426,6 +433,7 @@ function showResultChoices({ returned = false } = {}) {
   replayMotion(panel, "motion-panel-enter");
   replayTextMotion(panel);
   replayStepMotion(byId("resultStep"));
+  playSound("result");
   document.querySelectorAll("[data-login-result], [data-result]").forEach((button) => {
     button.disabled = state.busy || state.feedbackLocked;
   });
@@ -455,6 +463,7 @@ function showTargetAppCheck() {
   replayMotion(byId("targetAppCheck"), "motion-panel-enter");
   replayTextMotion(byId("feedbackPanel"));
   replayStepMotion(byId("resultStep"));
+  playSound("check");
   updateCopyUI();
   saveSession();
   announce("登录成功。现在检查是否可以下载目标应用。" );
@@ -611,6 +620,7 @@ function showSuccess() {
   byId("resultStep").querySelector("span").textContent = "✓";
   replayStepMotion(byId("resultStep"));
   replayMotion(byId("successView"), "motion-success-enter");
+  playSound("success");
   replayTextMotion(byId("successView"));
   byId("intentPanel").classList.add("hidden");
   byId("credentialState").textContent = "反馈已记录";
@@ -914,6 +924,7 @@ function restartFlow() {
 }
 
 function playVerifyGooey() {
+  playSound("verify");
   const button = byId("verifyButton");
   const host = button.querySelector(".gooey-action-particles");
   if (!host || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -952,12 +963,14 @@ byId("verifyButton").addEventListener("click", () => {
   if (state.busy) return;
   if (!state.intent) {
     byId("intentPanel").classList.add("needs-attention");
+    playSound("error");
     byId("intentPanel").scrollIntoView({ behavior: "smooth", block: "center" });
     announce("请先选择下载目标。" );
     return;
   }
   if (!state.token) {
     byId("turnstileWidget").scrollIntoView({ behavior: "smooth", block: "center" });
+    playSound("error");
     announce("请先完成人机验证。" );
     return;
   }
@@ -965,7 +978,10 @@ byId("verifyButton").addEventListener("click", () => {
   window.setTimeout(() => verifyAndReveal(), 140);
 });
 byId("restartButton").addEventListener("click", restartFlow);
-byId("returnHomeButton").addEventListener("click", returnHome);
+byId("returnHomeButton").addEventListener("click", () => {
+  playSound("open");
+  returnHome();
+});
 document.querySelectorAll(".mode-switch [data-mode]").forEach((btn) => {
   btn.addEventListener("click", () => selectMode(btn.dataset.mode));
 });
@@ -1030,6 +1046,7 @@ function requireSecurityAcknowledgement() {
   guide.classList.add("needs-confirmation");
   byId("securityGuideError").classList.remove("hidden");
   byId("securityGuideCheck").focus({ preventScroll: true });
+  playSound("error");
   byId("securityGuideCheck").scrollIntoView({ behavior: "smooth", block: "center" });
   announce("请先阅读 Apple ID 安全提示，并勾选确认后再复制密码。" );
   return false;
@@ -1037,6 +1054,7 @@ function requireSecurityAcknowledgement() {
 
 byId("securityGuideCheck").addEventListener("change", (event) => {
   state.securityAcknowledged = Boolean(event.currentTarget.checked);
+  if (state.securityAcknowledged) playSound("check");
   byId("securityGuideError").classList.add("hidden");
   byId("securityGuide").classList.remove("needs-confirmation");
   updateCopyUI();
@@ -1088,6 +1106,7 @@ byId("accountEnteredButton").addEventListener("click", () => {
 byId("accountPreflightCheck").addEventListener("change", (event) => {
   state.preflightAcknowledged = Boolean(event.currentTarget.checked);
   if (state.preflightAcknowledged) {
+    playSound("check");
     byId("accountPreflightError").classList.add("hidden");
     byId("accountPreflight").classList.remove("needs-confirmation");
   }
@@ -1108,6 +1127,7 @@ byId("appStoreHomeLink").addEventListener("click", (event) => {
     byId("accountPreflight").classList.add("needs-confirmation");
     byId("accountPreflightError").classList.remove("hidden");
     byId("accountPreflightCheck").focus({ preventScroll: true });
+    playSound("error");
     byId("accountPreflightCheck").scrollIntoView({ behavior: "smooth", block: "center" });
     announce("请先查看第二项示例，并勾选确认。" );
     return;
@@ -1117,6 +1137,7 @@ byId("appStoreHomeLink").addEventListener("click", (event) => {
   announce("正在打开 App Store Today 首页。若未正常打开，请返回并按手动步骤继续。" );
 });
 byId("needAccountButton").addEventListener("click", () => {
+  playSound("open");
   if (!state.purchaseLink) {
     announce("专属账号入口暂不可用。" );
     return;
@@ -1126,6 +1147,7 @@ byId("needAccountButton").addEventListener("click", () => {
 });
 
 byId("signOutGuideLink").addEventListener("click", () => {
+  playSound("open");
   state.signOutGuideOpened = true;
   byId("signOutError").classList.add("hidden");
   announce("退出教程已打开。完成后返回并勾选确认。" );
@@ -1133,6 +1155,7 @@ byId("signOutGuideLink").addEventListener("click", () => {
 
 byId("signOutCheck").addEventListener("change", (event) => {
   const checked = Boolean(event.currentTarget.checked);
+  if (checked) playSound("check");
   byId("signOutError").classList.add("hidden");
   byId("finishAfterSignOutButton").disabled = !checked;
   byId("replaceAfterSignOutButton").disabled = !checked;
@@ -1146,6 +1169,7 @@ async function completeNoviceExit(expectedReplacement) {
     byId("signOutError").classList.remove("hidden");
     byId("signOutGuideLink").classList.add("needs-confirmation");
     byId("signOutCheck").focus({ preventScroll: true });
+    playSound("error");
     byId("signOutCheck").scrollIntoView({ behavior: "smooth", block: "center" });
     announce("请先打开退出教程，并确认已经退出当前 App Store 账号。" );
     return;
@@ -1156,15 +1180,17 @@ async function completeNoviceExit(expectedReplacement) {
   state.signOutGuideOpened = false;
 }
 
-byId("finishAfterSignOutButton").addEventListener("click", () => completeNoviceExit(false));
-byId("replaceAfterSignOutButton").addEventListener("click", () => completeNoviceExit(true));
+byId("finishAfterSignOutButton").addEventListener("click", () => { playSound("press"); completeNoviceExit(false); });
+byId("replaceAfterSignOutButton").addEventListener("click", () => { playSound("press"); completeNoviceExit(true); });
 
 byId("targetAppLink").addEventListener("click", () => {
+  playSound("open");
   state.leftForAttempt = true;
   saveSession();
   announce("正在打开应用页面。检查是否出现云朵下载图标。" );
 });
 byId("retryButton").addEventListener("click", () => {
+  playSound("press");
   if (state.pendingAction && !state.busy) state.pendingAction();
 });
 byId("differentPageButton").addEventListener("click", () => {
@@ -1173,19 +1199,25 @@ byId("differentPageButton").addEventListener("click", () => {
   const expanded = button.getAttribute("aria-expanded") === "true";
   button.setAttribute("aria-expanded", String(!expanded));
   panel.classList.toggle("hidden", expanded);
-  if (!expanded) replayMotion(panel, "motion-disclosure-enter");
+  if (!expanded) {
+    playSound("open");
+    replayMotion(panel, "motion-disclosure-enter");
+  }
 });
 
 document.querySelectorAll("[data-login-result]").forEach((button) => {
   button.addEventListener("click", async () => {
     if (button.dataset.loginResult !== "success" || state.busy || state.feedbackLocked) return;
     if (state.mode === "expert") {
+      playSound("result");
       await submitFeedback("login_success");
       return;
     }
     if (state.intent === "target_app") {
+      playSound("result");
       showTargetAppCheck();
     } else {
+      playSound("open");
       showNoviceExitGate("login_success");
     }
   });
@@ -1193,6 +1225,7 @@ document.querySelectorAll("[data-login-result]").forEach((button) => {
 
 resultButtons().forEach((button) => {
   button.addEventListener("click", () => {
+    playSound("result");
     const result = button.dataset.result;
     if (state.mode === "novice" && (result === "shadowrocket_available" || result === "shadowrocket_missing")) {
       showNoviceExitGate(result);
@@ -1218,6 +1251,7 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
       await copyText(target.textContent || "");
       const wasCopied = Boolean(state.copied[key]);
       state.copied[key] = true;
+      playSound("copy");
       state.leftForAttempt = key === "username";
       hideRecovery();
       if (state.resultsVisible) {

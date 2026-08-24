@@ -164,6 +164,7 @@
     font-variant-numeric: tabular-nums;
   }
   body[data-phase="ready"] .masthead-state { display: none; }
+  body[data-phase="ready"] .masthead-tools { gap: 0; }
   .status-light {
     width: 6px;
     height: 6px;
