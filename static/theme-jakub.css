@@ -1399,6 +1399,50 @@
   .store-link strong { display: block; margin: 0 0 4px; color: var(--neutral-200); font-size: .85rem; }
   .store-link small { display: block; color: var(--neutral-500); font-size: .72rem; }
   .store-link > svg { justify-self: end; width: 19px; height: 19px; color: var(--neutral-500); }
+  .result-actions .result-store-link {
+    width: 100% !important;
+    min-height: 66px !important;
+    margin: 6px 0 0 !important;
+    border: 1px solid rgba(196,181,253,.15) !important;
+    background: linear-gradient(100deg, #1b1427 0%, #18131f 54%, #131116 100%) !important;
+    box-shadow: 0 0 0 1px rgba(139,107,216,.07), inset 0 1px rgba(255,255,255,.035) !important;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .result-actions .result-store-link::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 18%, rgba(216,180,254,.13) 46%, transparent 72%);
+    opacity: 0;
+    transform: translateX(-75%);
+    pointer-events: none;
+  }
+  .result-actions .result-store-link.is-attention-entry {
+    animation: result-store-entry 600ms cubic-bezier(.22,1,.36,1) both;
+  }
+  .result-actions .result-store-link.is-attention-entry::after {
+    animation: result-store-sheen 560ms 70ms cubic-bezier(.22,1,.36,1) both;
+  }
+  .result-actions .result-store-link.is-attention-entry > svg {
+    animation: result-store-arrow 520ms 140ms cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes result-store-entry {
+    0% { opacity: 0; transform: translateY(14px) scale(.985); filter: blur(2px); }
+    58% { opacity: 1; transform: translateY(-2px) scale(1.006); filter: blur(0); box-shadow: 0 0 0 1px rgba(196,181,253,.25), 0 8px 24px rgba(76,29,149,.16); }
+    100% { opacity: 1; transform: none; filter: blur(0); }
+  }
+  @keyframes result-store-sheen {
+    0% { opacity: 0; transform: translateX(-75%); }
+    35% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(75%); }
+  }
+  @keyframes result-store-arrow {
+    0%, 100% { transform: translateX(0); }
+    45% { transform: translateX(4px); color: #e9d5ff; }
+  }
   body[data-phase="empty"] .store-link {
     color: var(--neutral-950) !important;
     background: var(--neutral-100) !important;
@@ -1486,10 +1530,8 @@
       margin: 0;
     }
     body[data-phase="ready"] .store-link {
-      grid-column: 1 / -1;
-      grid-row: 6;
       width: 100% !important;
-      margin: 20px 0 0 !important;
+      margin: 6px 0 0 !important;
     }
     body[data-phase="ready"] .recovery-panel {
       grid-column: 1 / -1;
@@ -1499,7 +1541,10 @@
 
   @media (prefers-reduced-motion: reduce) {
     .gooey-particle,
-    .gooey-point { animation: none !important; }
+    .gooey-point,
+    .result-actions .result-store-link,
+    .result-actions .result-store-link::after,
+    .result-actions .result-store-link > svg { animation: none !important; }
     .copy-toast { transition: none !important; }
   }
 

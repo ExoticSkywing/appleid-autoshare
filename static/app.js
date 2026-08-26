@@ -408,7 +408,8 @@ function setStoreLink(url, exhausted = false) {
   link.href = state.purchaseLink;
   emptyLink.href = state.purchaseLink;
   emptyLink.classList.toggle("hidden", !exhausted);
-  link.classList.toggle("hidden", exhausted);
+  link.classList.add("hidden");
+  link.classList.remove("is-attention-entry");
   const strong = link.querySelector("strong");
   const small = link.querySelector("small");
   strong.textContent = "不想继续尝试？";
@@ -440,6 +441,10 @@ function showResultChoices({ returned = false } = {}) {
   byId("showResultsButton").classList.add("hidden");
   byId("targetAppCheck").classList.add("hidden");
   byId("resultActions").classList.remove("hidden");
+  const storeLink = byId("storeLink");
+  const revealStoreLink = Boolean(state.purchaseLink);
+  storeLink.classList.toggle("hidden", !revealStoreLink);
+  if (revealStoreLink) replayMotion(storeLink, "is-attention-entry");
   replayMotion(panel, "motion-panel-enter");
   replayTextMotion(panel);
   replayStepMotion(byId("resultStep"));
@@ -465,6 +470,8 @@ function showTargetAppCheck() {
   byId("feedbackTitle").textContent = "检查下载按钮";
   byId("copyProgress").textContent = "打开应用页面；看到云朵下载图标表示目标已达成。";
   byId("resultActions").classList.add("hidden");
+  byId("storeLink").classList.add("hidden");
+  byId("storeLink").classList.remove("is-attention-entry");
   byId("appStoreInstruction").classList.add("hidden");
   byId("securityGuide").classList.add("hidden");
   byId("showResultsButton").classList.add("hidden");
@@ -798,6 +805,8 @@ function showNoviceExitGate(result, options = {}) {
   byId("replaceAfterSignOutButton").classList.toggle("hidden", !isReplacement);
   byId("targetAppCheck").classList.add("hidden");
   byId("resultActions").classList.add("hidden");
+  byId("storeLink").classList.add("hidden");
+  byId("storeLink").classList.remove("is-attention-entry");
   byId("showResultsButton").classList.add("hidden");
   byId("noviceExitPanel").classList.remove("hidden");
   replayMotion(byId("noviceExitPanel"), "motion-panel-enter");
