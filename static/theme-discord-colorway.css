@@ -133,6 +133,41 @@ body[data-phase="success"] .status-light {
   .appstore-home-action:not(.is-gated) small,
   .appstore-action small,
   .target-app-link.appstore-action small { color: #e5e7ff !important; }
+  .appstore-home-action.is-gated {
+    color: var(--neutral-500) !important;
+    background: var(--neutral-750) !important;
+    border-color: rgba(255,255,255,.1) !important;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.08) !important;
+    pointer-events: none;
+  }
+  .appstore-home-action.is-gated strong { color: var(--neutral-500) !important; }
+  .appstore-home-action.is-gated small,
+  .appstore-home-action.is-gated > svg { color: var(--neutral-600) !important; }
+  .appstore-home-action.is-attention-ready {
+    color: #0a0d18 !important;
+    background: #ffffff !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 8px 24px rgba(255,255,255,.12) !important;
+    animation: appstore-attention-in 520ms ease both;
+  }
+  .appstore-home-action.is-attention-ready strong,
+  .appstore-home-action.is-attention-ready small,
+  .appstore-home-action.is-attention-ready > svg { color: #0a0d18 !important; }
+  .appstore-home-action.is-unlocked {
+    color: #fff !important;
+    background: linear-gradient(135deg, #5865f2, #7280ff) !important;
+    background-image: linear-gradient(135deg, #5865f2, #7280ff) !important;
+    border-color: #7280ff !important;
+    box-shadow: 0 8px 24px rgba(88,101,242,.34) !important;
+  }
+  .appstore-home-action.is-unlocked strong,
+  .appstore-home-action.is-unlocked small,
+  .appstore-home-action.is-unlocked > svg { color: #fff !important; }
+  @keyframes appstore-attention-in {
+    0% { transform: scale(.985); }
+    55% { transform: scale(1.012); box-shadow: 0 0 0 4px rgba(255,255,255,.1), 0 10px 30px rgba(255,255,255,.16); }
+    100% { transform: scale(1); }
+  }
   #verifyButton.primary-action:not(:disabled):not(.is-blocked) svg,
   #finishAfterSignOutButton.primary-action:not(:disabled):not(.is-blocked) svg,
   #replaceAfterSignOutButton.primary-action:not(:disabled):not(.is-blocked) svg,

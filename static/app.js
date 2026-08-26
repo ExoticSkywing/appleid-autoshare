@@ -21,6 +21,8 @@ const state = {
   pendingAction: null,
   preflightAcknowledged: false,
   securityAcknowledged: false,
+  preflightRevealed: false,
+  securityRevealed: false,
   lightboxTrigger: null,
   pendingNoviceExitResult: "",
   signOutGuideOpened: false,
@@ -126,7 +128,9 @@ function saveSession() {
       copied: state.copied,
       usernameEntered: state.usernameEntered,
       preflightAcknowledged: state.preflightAcknowledged,
+      preflightRevealed: state.preflightRevealed,
       securityAcknowledged: state.securityAcknowledged,
+      securityRevealed: state.securityRevealed,
       pendingNoviceExitResult: state.pendingNoviceExitResult,
       signOutGuideOpened: state.signOutGuideOpened,
       feedbackLocked: state.feedbackLocked,
@@ -158,7 +162,9 @@ function restoreSession() {
     };
     state.usernameEntered = Boolean(payload.usernameEntered) || Boolean(state.copied.password);
     state.preflightAcknowledged = Boolean(payload.preflightAcknowledged);
+    state.preflightRevealed = Boolean(payload.preflightRevealed) && Boolean(state.copied.username) || state.preflightAcknowledged;
     state.securityAcknowledged = Boolean(payload.securityAcknowledged);
+    state.securityRevealed = Boolean(payload.securityRevealed) && Boolean(state.copied.username) && !Boolean(state.copied.password) || state.securityAcknowledged;
     state.pendingNoviceExitResult = ["shadowrocket_available", "shadowrocket_missing", "login_success"].includes(payload.pendingNoviceExitResult) ? payload.pendingNoviceExitResult : "";
     state.signOutGuideOpened = Boolean(payload.signOutGuideOpened);
     state.feedbackLocked = Boolean(payload.feedbackLocked);
@@ -540,10 +546,21 @@ function updateCopyUI() {
 
   byId("appStoreInstruction").classList.toggle("hidden", !usernameCopied || passwordCopied || state.resultsVisible);
   byId("accountEnteredButton").classList.toggle("hidden", usernameEntered);
+  const preflight = byId("accountPreflight");
+  const preflightOpen = state.preflightRevealed && usernameCopied && !passwordCopied && !state.resultsVisible;
+  preflight.classList.toggle("hidden", !preflightOpen);
+  preflight.setAttribute("aria-hidden", String(!preflightOpen));
   const preflightCheck = byId("accountPreflightCheck");
   if (preflightCheck) preflightCheck.checked = state.preflightAcknowledged;
-  byId("appStoreHomeLink").classList.toggle("is-gated", !state.preflightAcknowledged);
-  byId("securityGuide").classList.toggle("hidden", isExpert || passwordCopied || state.resultsVisible || state.loginSucceeded || !usernameCopied);
+  const storeLink = byId("appStoreHomeLink");
+  const storeAvailable = usernameCopied && !passwordCopied && !state.resultsVisible;
+  const storeLocked = !storeAvailable || (state.preflightRevealed && !state.preflightAcknowledged);
+  storeLink.classList.toggle("is-gated", storeLocked);
+  storeLink.classList.toggle("is-attention-ready", storeAvailable && !state.preflightRevealed && !state.preflightAcknowledged);
+  storeLink.classList.toggle("is-unlocked", storeAvailable && state.preflightAcknowledged);
+  storeLink.setAttribute("aria-disabled", String(storeLocked));
+  const securityGuide = byId("securityGuide");
+  securityGuide.classList.toggle("hidden", isExpert || passwordCopied || state.resultsVisible || state.loginSucceeded || !usernameCopied || !state.securityRevealed);
   const securityCheck = byId("securityGuideCheck");
   if (securityCheck) securityCheck.checked = state.securityAcknowledged;
   byId("accountEnteredButton").classList.toggle("is-gated", (!state.preflightAcknowledged || !state.securityAcknowledged) && !passwordCopied);
@@ -635,7 +652,9 @@ function showSuccess() {
   state.copied = { username: false, password: false };
   state.usernameEntered = false;
   state.preflightAcknowledged = false;
+  state.preflightRevealed = false;
   state.securityAcknowledged = false;
+  state.securityRevealed = false;
   state.pendingNoviceExitResult = "";
   state.signOutGuideOpened = false;
   state.loginSucceeded = false;
@@ -653,7 +672,9 @@ function showExhausted(purchaseLink) {
   state.copied = { username: false, password: false };
   state.usernameEntered = false;
   state.preflightAcknowledged = false;
+  state.preflightRevealed = false;
   state.securityAcknowledged = false;
+  state.securityRevealed = false;
   state.pendingNoviceExitResult = "";
   state.signOutGuideOpened = false;
   state.loginSucceeded = false;
@@ -704,7 +725,9 @@ async function revealOne({ replacement = false } = {}) {
       state.copied = { username: false, password: false };
       state.usernameEntered = false;
       state.preflightAcknowledged = false;
+      state.preflightRevealed = false;
       state.securityAcknowledged = false;
+      state.securityRevealed = false;
       state.pendingNoviceExitResult = "";
       state.signOutGuideOpened = false;
       state.loginSucceeded = false;
@@ -928,6 +951,10 @@ function restartFlow() {
   state.feedbackLocked = false;
   state.loginSucceeded = false;
   state.resultsVisible = false;
+  state.preflightAcknowledged = false;
+  state.preflightRevealed = false;
+  state.securityAcknowledged = false;
+  state.securityRevealed = false;
   state.token = "";
   window.location.reload();
 }
@@ -1035,6 +1062,8 @@ byId("showResultsButton").addEventListener("click", () => {
 });
 function requireAccountPreflightAcknowledgement() {
   if (state.mode === "expert" || state.preflightAcknowledged) return true;
+  state.preflightRevealed = true;
+  updateCopyUI();
   const preflight = byId("accountPreflight");
   const example = byId("accountPreflightExample");
   preflight.classList.add("needs-confirmation");
@@ -1049,6 +1078,8 @@ function requireAccountPreflightAcknowledgement() {
 
 function requireSecurityAcknowledgement() {
   if (state.mode === "expert" || state.copied.password || state.securityAcknowledged) return true;
+  state.securityRevealed = true;
+  updateCopyUI();
   const guide = byId("securityGuide");
   guide.classList.remove("hidden");
   guide.open = true;
@@ -1063,6 +1094,7 @@ function requireSecurityAcknowledgement() {
 
 byId("securityGuideCheck").addEventListener("change", (event) => {
   state.securityAcknowledged = Boolean(event.currentTarget.checked);
+  state.securityRevealed = true;
   if (state.securityAcknowledged) playSound("check");
   byId("securityGuideError").classList.add("hidden");
   byId("securityGuide").classList.remove("needs-confirmation");
@@ -1114,12 +1146,14 @@ byId("accountEnteredButton").addEventListener("click", () => {
 });
 byId("accountPreflightCheck").addEventListener("change", (event) => {
   state.preflightAcknowledged = Boolean(event.currentTarget.checked);
+  state.preflightRevealed = true;
   if (state.preflightAcknowledged) {
     playSound("check");
     byId("accountPreflightError").classList.add("hidden");
     byId("accountPreflight").classList.remove("needs-confirmation");
+  } else {
+    byId("accountPreflightError").classList.remove("hidden");
   }
-  byId("appStoreHomeLink").classList.toggle("is-gated", !state.preflightAcknowledged);
   updateCopyUI();
   saveSession();
   announce(state.preflightAcknowledged ? "已确认 App Store 账户提示的正确操作。" : "打开 App Store 前需要查看示例并勾选确认。" );
@@ -1129,16 +1163,26 @@ byId("appStoreHomeLink").addEventListener("click", (event) => {
     event.preventDefault();
     return;
   }
-  if (!state.preflightAcknowledged) {
+  if (!state.preflightRevealed) {
     event.preventDefault();
+    state.preflightRevealed = true;
+    updateCopyUI();
+    const preflight = byId("accountPreflight");
     const example = byId("accountPreflightExample");
     example.open = true;
-    byId("accountPreflight").classList.add("needs-confirmation");
+    syncDetailsMotion(example);
+    preflight.classList.add("needs-confirmation");
     byId("accountPreflightError").classList.remove("hidden");
     byId("accountPreflightCheck").focus({ preventScroll: true });
     playSound("error");
     byId("accountPreflightCheck").scrollIntoView({ behavior: "smooth", block: "center" });
-    announce("请先查看第二项示例，并勾选确认。" );
+    announce("请先查看 App Store 第二项示例，并勾选确认后再继续。" );
+    saveSession();
+    return;
+  }
+  if (!state.preflightAcknowledged) {
+    event.preventDefault();
+    requireAccountPreflightAcknowledgement();
     return;
   }
   state.leftForAttempt = true;
@@ -1261,6 +1305,10 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
       const wasCopied = Boolean(state.copied[key]);
       state.copied[key] = true;
       playSound("copy");
+      if (key === "username" && state.mode === "novice") {
+        state.preflightRevealed = false;
+        state.securityRevealed = false;
+      }
       state.leftForAttempt = key === "username";
       hideRecovery();
       if (state.resultsVisible) {

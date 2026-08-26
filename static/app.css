@@ -724,6 +724,10 @@
   .account-target-line img { width: 30px; height: 30px; padding: 3px; border-radius: 9px; background: #fff; object-fit: contain; }
   .account-target-line strong { color: #f0f4f1; font-size: .8rem; }
   .appstore-home-action-wrap { display: grid; gap: 8px; }
+  .appstore-home-action-wrap > .appstore-home-action { order: 1; }
+  .appstore-home-action-wrap > .account-entered-action { order: 2; }
+  .appstore-home-action-wrap > .store-preflight { order: 3; }
+  .appstore-home-action-wrap > .manual-fallback { order: 4; }
   .account-entered-action {
     display: flex;
     align-items: center;
@@ -766,6 +770,41 @@
   .appstore-home-action strong { font-size: .92rem; }
   .appstore-home-action small { color: #5f6368; font-size: .71rem; line-height: 1.4; }
   .appstore-home-action > svg { width: 20px; height: 20px; stroke-width: 2; }
+  .appstore-home-action {
+    transition: color .28s ease, background-color .28s ease, border-color .28s ease, box-shadow .28s ease, transform .18s ease;
+  }
+  .appstore-home-action.is-gated {
+    color: #777d80;
+    background: #222425;
+    border-color: rgba(255,255,255,.08);
+    box-shadow: 0 2px 10px rgba(0,0,0,.16);
+    pointer-events: none;
+  }
+  .appstore-home-action.is-gated strong { color: #d8dcdd !important; }
+  .appstore-home-action.is-gated small { color: #777d80 !important; }
+  .appstore-home-action.is-gated > svg { color: #777d80 !important; }
+  .appstore-home-action:not(.is-gated) {
+    color: #0a0d18;
+    background: #fff;
+    border-color: #fff;
+    box-shadow: 0 8px 24px rgba(0,0,0,.22);
+    animation: appstore-attention-in 520ms ease both;
+  }
+  .appstore-home-action:not(.is-gated) strong,
+  .appstore-home-action:not(.is-gated) > svg { color: #0a0d18 !important; }
+  .appstore-home-action:not(.is-gated) small { color: #5f6368 !important; }
+  @keyframes appstore-attention-in {
+    0% { transform: scale(.985); box-shadow: 0 2px 10px rgba(255,255,255,.05); }
+    55% { transform: scale(1.012); box-shadow: 0 0 0 4px rgba(255,255,255,.10), 0 10px 30px rgba(255,255,255,.18); }
+    100% { transform: scale(1); box-shadow: 0 8px 24px rgba(0,0,0,.22); }
+  }
+  .store-preflight {
+    animation: preflight-reveal 360ms ease both;
+  }
+  @keyframes preflight-reveal {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
   .manual-fallback {
     padding: 0;
     border-radius: 13px;
