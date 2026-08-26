@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#050606">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>获取可用账号</title>
-  <link rel="stylesheet" href="/assets/app.css?v=20260823-7">
+  <link rel="stylesheet" href="/assets/app.css?v=20260826-1">
   <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260823-6">
-  <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260824-38">
+  <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260826-1">
   <link rel="stylesheet" href="/assets/motion.css?v=20260823-1">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
 </head>
@@ -55,18 +55,20 @@
     </section>
 
     <section id="intentPanel" class="intent-panel hidden" aria-labelledby="intentTitle">
-      <p class="intent-kicker">新手引导 · 选择目标</p>
-      <h2 id="intentTitle">你准备下载什么？</h2>
-      <p class="intent-copy">选择后，系统会优先分配更适合的账号。</p>
+      <p class="intent-kicker">第 1 步 · 现在请做</p>
+      <h2 id="intentTitle">先选择你要下载的应用</h2>
+      <p class="intent-copy">请点击下面一个选项，继续获取对应账号。</p>
       <div class="intent-options">
-        <button type="button" class="intent-option intent-target" data-intent="target_app" aria-pressed="false" aria-label="下载目标应用">
+        <button type="button" class="intent-option intent-target" data-intent="target_app" aria-pressed="false" aria-label="选择 Shadowrocket（小火箭）">
           <img src="/assets/assets/target-app-icon.webp" alt="" draggable="false">
-          <span class="intent-option-copy"><strong>Shadowrocket</strong></span>
+          <span class="intent-option-copy"><strong>Shadowrocket（小火箭）</strong><small>常用下载目标</small></span>
+          <span class="intent-arrow" aria-hidden="true">›</span>
           <span class="intent-check" aria-hidden="true">✓</span>
         </button>
-        <button type="button" class="intent-option intent-other" data-intent="other_app" aria-pressed="false">
+        <button type="button" class="intent-option intent-other" data-intent="other_app" aria-pressed="false" aria-label="选择其他应用">
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 12h8M12 8v8"/></svg>
-          <span class="intent-option-copy"><strong>其他应用</strong></span>
+          <span class="intent-option-copy"><strong>其他应用</strong><small>下载其他 App</small></span>
+          <span class="intent-arrow" aria-hidden="true">›</span>
           <span class="intent-check" aria-hidden="true">✓</span>
         </button>
       </div>
@@ -83,8 +85,8 @@
     <section id="relayStage" class="relay-stage" aria-label="账号获取与使用">
       <div id="archiveEdge" class="archive-edge" aria-hidden="true"></div>
 
-      <div class="flow-progress page-flow-progress is-pending" aria-label="当前流程">
-        <div id="accountStep" class="flow-step is-current">
+      <div class="flow-progress page-flow-progress is-pending" aria-label="选择目标后开始账号流程">
+        <div id="accountStep" class="flow-step">
           <span aria-hidden="true">1</span>
           <strong>输入账号</strong>
         </div>

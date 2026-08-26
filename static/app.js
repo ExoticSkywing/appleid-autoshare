@@ -342,8 +342,10 @@ function updateIntentUI() {
     btn.classList.toggle("is-selected", active);
     btn.setAttribute("aria-selected", String(active));
   });
+  const hasIntent = isExpert || Boolean(state.intent);
   document.querySelectorAll(".page-flow-progress").forEach((el) => {
     el.classList.toggle("hidden", isExpert);
+    el.classList.toggle("is-pending", !hasIntent);
   });
   byId("intentPanel").classList.toggle("hidden", isExpert || Boolean(state.account));
   document.querySelectorAll("[data-intent]").forEach((button) => {
