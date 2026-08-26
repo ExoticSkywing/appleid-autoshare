@@ -27,10 +27,10 @@ body[data-phase="success"] .status-light {
   color: #fff;
   background: #5865f2;
 }
-/* Target module hierarchy: blue is reserved for the current action. */
+/* Target module hierarchy: magenta anchors the task; Blurple marks selection. */
 .intent-panel { background: #11151c; box-shadow: 0 0 0 1px rgba(177,188,214,.13), 0 18px 44px rgba(0,0,0,.24); }
 .intent-panel .intent-kicker { color: #9da5ff; }
-.intent-panel h2 { color: #c7d2fe; }
+.intent-panel h2 { color: var(--discord-magenta); }
 .intent-panel .intent-copy { color: #aeb7c6; }
 .intent-option { grid-template-columns: 32px minmax(0, 1fr) 14px; gap: 8px; min-height: 72px; padding: 10px; background: #171b22; border-color: rgba(177,188,214,.2); box-shadow: inset 0 1px rgba(255,255,255,.025); }
 .intent-option > img { width: 32px; height: 32px; margin: 0; }
