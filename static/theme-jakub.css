@@ -1401,9 +1401,11 @@
   .store-link > svg { justify-self: end; width: 19px; height: 19px; color: var(--neutral-500); }
   .result-store-bar {
     width: 100%;
-    margin-top: 18px;
-    padding-top: 14px;
-    border-top: 1px solid rgba(255,255,255,.07);
+    margin: 30px 0 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
   }
   .result-store-bar .result-store-link {
     width: 100% !important;
@@ -1535,9 +1537,11 @@
       height: auto;
       margin: 0;
     }
-    body[data-phase="ready"] .store-link {
-      width: 100% !important;
-      margin: 0 !important;
+    body[data-phase="ready"] .result-store-bar {
+      grid-column: 1 / -1;
+      grid-row: 6;
+      width: min(100%, 680px);
+      margin: 32px auto 0;
     }
     body[data-phase="ready"] .recovery-panel {
       grid-column: 1 / -1;
