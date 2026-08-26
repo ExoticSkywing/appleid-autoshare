@@ -18,69 +18,51 @@ body[data-phase="success"] .status-light {
   box-shadow: 0 0 0 4px rgba(53,237,126,.16);
 }
 
-.intent-option:hover { background: #252a28; border-color: rgba(157,165,255,.78); }
-.intent-option > svg { color: #b9c0c1; }
-.intent-option-copy small { color: #a6acad; }
-.intent-arrow { color: #aab1b2; }
 .intent-option.is-selected {
-  background: #202744;
+  background: var(--neutral-750);
   border: 2px solid #5865f2 !important;
-  box-shadow: 0 0 0 2px rgba(88,101,242,.22), 0 8px 20px rgba(42,49,130,.22);
+  box-shadow: none;
 }
 .intent-option.is-selected .intent-check {
-  color: #ffffff;
+  color: #fff;
   background: #5865f2;
 }
 
-.mode-tab[data-mode="novice"],
+.mode-tab.is-selected {
+  background: var(--neutral-750);
+  box-shadow: 0 0 0 2px var(--discord-blurple), 0 4px 14px rgba(0,0,0,.42);
+}
+.mode-tab[data-mode="novice"] {
+  background: rgba(27,23,21,.82);
+  box-shadow: inset 0 1px rgba(255,240,224,.035), 0 0 0 1px rgba(217,130,36,.24), 0 2px 8px rgba(0,0,0,.34);
+}
+.mode-tab[data-mode="novice"] .mode-tab-text small { color: #b9a185; }
+.mode-tab[data-mode="novice"] .mode-tab-check { color: #241408; background: #f0aa55; }
+.mode-tab[data-mode="novice"].is-selected {
+  background: rgba(36,26,20,.9);
+  box-shadow: inset 0 1px rgba(255,237,214,.05), 0 0 0 2px #d98224, 0 4px 14px rgba(35,18,7,.46);
+}
 .mode-tab[data-mode="expert"] {
-  background: #17191d;
-  box-shadow: inset 0 1px rgba(255,255,255,.035), 0 0 0 1px rgba(255,255,255,.09), 0 2px 8px rgba(0,0,0,.32);
+  background: rgba(24,22,29,.82);
+  box-shadow: inset 0 1px rgba(255,235,250,.035), 0 0 0 1px rgba(236,72,189,.24), 0 2px 8px rgba(0,0,0,.34);
 }
-.mode-tab[data-mode="novice"] .mode-tab-text small,
-.mode-tab[data-mode="expert"] .mode-tab-text small { color: #a6acad; }
-.mode-tab[data-mode="novice"].is-selected,
+.mode-tab[data-mode="expert"] .mode-tab-text small { color: #c2a1bb; }
 .mode-tab[data-mode="expert"].is-selected {
-  color: var(--neutral-100);
-  background: #202744;
-  box-shadow: inset 0 1px rgba(255,255,255,.055), 0 0 0 2px #5865f2, 0 4px 14px rgba(42,49,130,.28);
+  color: var(--neutral-200);
+  background: rgba(38,22,34,.9);
+  box-shadow: inset 0 1px rgba(255,237,252,.055), 0 0 0 2px var(--discord-magenta), 0 4px 14px rgba(64,12,52,.46);
 }
-.mode-tab[data-mode="novice"].is-selected .mode-tab-text small,
-.mode-tab[data-mode="expert"].is-selected .mode-tab-text small { color: #cbd2ff; }
-.mode-tab[data-mode="novice"] .mode-tab-check,
-.mode-tab[data-mode="expert"] .mode-tab-check { color: #0a0d18; background: #9da5ff; }
+.mode-tab[data-mode="expert"].is-selected .mode-tab-text strong { color: var(--neutral-100); }
+.mode-tab[data-mode="expert"].is-selected .mode-tab-text small { color: #d8b1cf; }
+.mode-tab-check,
+.intent-check,
+.flow-step.is-current span {
+  color: #fff;
+  background: var(--discord-blurple);
+}
+.mode-tab[data-mode="novice"] .mode-tab-check { color: #241408; background: #f0aa55; }
+.mode-tab[data-mode="expert"] .mode-tab-check { color: #26091f; background: var(--discord-magenta); }
 
-.intent-panel { border-top: 2px solid #5865f2; }
-.intent-kicker { color: #9da5ff; }
-.intent-panel h2 { font-size: 1.32rem; }
-.intent-copy { color: #c5cbcc; font-size: .86rem; }
-.intent-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.intent-option {
-  grid-template-columns: 54px minmax(0, 1fr) 20px;
-  gap: 12px;
-  min-height: 76px;
-  padding: 10px 14px;
-  border: 1px solid rgba(88,101,242,.42);
-  border-radius: 14px;
-  background: #1c1f1d;
-  box-shadow: 0 0 0 1px rgba(0,0,0,.12), 0 6px 14px rgba(0,0,0,.16);
-  text-align: start;
-  transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease;
-}
-.intent-option:hover { background: #252a28; border-color: #9da5ff; }
-.intent-option:active { transform: scale(.96); }
-.intent-option:focus-visible { outline: 2px solid #9da5ff; outline-offset: 3px; }
-.intent-option > img { width: 54px; height: 54px; outline: 1px solid rgba(255,255,255,.1); outline-offset: -1px; }
-.intent-option > svg { width: 28px; height: 28px; color: #b9c0c1; }
-.intent-option-copy { display: grid; gap: 3px; min-width: 0; }
-.intent-option-copy strong { color: #f0f2f2; font-size: .94rem; font-weight: 780; line-height: 1.25; }
-.intent-option-copy small { color: #a6acad; font-size: .76rem; line-height: 1.3; }
-.intent-arrow { color: #aab1b2; font-size: 1.2rem; line-height: 1; text-align: end; }
-.intent-check { position: static; display: none; width: 20px; height: 20px; color: #ffffff; background: #5865f2; }
-.intent-option { border: 1px solid rgba(88,101,242,.42); }
-.intent-option.is-selected { background: #202744; border: 2px solid #5865f2 !important; box-shadow: 0 0 0 2px rgba(88,101,242,.22), 0 8px 20px rgba(42,49,130,.22); }
-.intent-panel.needs-attention { border-top-color: #d98224; box-shadow: 0 0 0 2px rgba(217,130,36,.58), 0 18px 44px rgba(0,0,0,.2); }
-.intent-panel.needs-attention .intent-kicker { color: #f0c98e; }
 .verify-action-hint { color: #ffb8e9; }
 .signout-confirm input { accent-color: var(--discord-magenta); }
 .sound-toggle[aria-pressed="true"] { color: #9da5ff; }
