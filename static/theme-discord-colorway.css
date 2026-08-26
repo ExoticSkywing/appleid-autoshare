@@ -19,14 +19,29 @@ body[data-phase="success"] .status-light {
 }
 
 .intent-option.is-selected {
-  background: var(--neutral-750);
-  border: 2px solid #5865f2 !important;
-  box-shadow: none;
+  background: #202744;
+  border-color: #5865f2 !important;
+  box-shadow: 0 0 0 2px rgba(88,101,242,.42);
 }
 .intent-option.is-selected .intent-check {
   color: #fff;
   background: #5865f2;
 }
+/* Target module hierarchy: blue is reserved for the current action. */
+.intent-panel { background: #11151c; box-shadow: 0 0 0 1px rgba(177,188,214,.13), 0 18px 44px rgba(0,0,0,.24); }
+.intent-panel .intent-kicker { color: #9da5ff; }
+.intent-panel h2 { color: #c7d2fe; }
+.intent-panel .intent-copy { color: #aeb7c6; }
+.intent-option { grid-template-columns: 32px minmax(0, 1fr) 14px; gap: 8px; min-height: 72px; padding: 10px; background: #171b22; border-color: rgba(177,188,214,.2); box-shadow: inset 0 1px rgba(255,255,255,.025); }
+.intent-option > img { width: 32px; height: 32px; margin: 0; }
+.intent-option > svg { width: 24px; height: 24px; margin: 0; }
+.intent-option-copy strong,
+.intent-option-copy small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.intent-option:hover { background: #1d2330; border-color: rgba(157,165,255,.62); }
+.intent-option .intent-option-copy strong { color: #f3f4f6; }
+.intent-option .intent-option-copy small { color: #a3aab8; }
+.intent-option .intent-arrow { color: #9da7b7; }
+.intent-option.is-selected { background: #202744; border-color: #5865f2 !important; box-shadow: 0 0 0 2px rgba(88,101,242,.42); }
 
 .mode-tab.is-selected {
   background: var(--neutral-750);
