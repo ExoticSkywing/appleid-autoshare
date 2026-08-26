@@ -1078,6 +1078,9 @@ function requireAccountPreflightAcknowledgement() {
 
 function requireSecurityAcknowledgement() {
   if (state.mode === "expert" || state.copied.password || state.securityAcknowledged) return true;
+  state.preflightRevealed = false;
+  byId("accountPreflight").classList.remove("needs-confirmation");
+  byId("accountPreflightError").classList.add("hidden");
   state.securityRevealed = true;
   updateCopyUI();
   const guide = byId("securityGuide");
