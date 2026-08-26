@@ -1399,10 +1399,16 @@
   .store-link strong { display: block; margin: 0 0 4px; color: var(--neutral-200); font-size: .85rem; }
   .store-link small { display: block; color: var(--neutral-500); font-size: .72rem; }
   .store-link > svg { justify-self: end; width: 19px; height: 19px; color: var(--neutral-500); }
-  .result-actions .result-store-link {
+  .result-store-bar {
+    width: 100%;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,.07);
+  }
+  .result-store-bar .result-store-link {
     width: 100% !important;
     min-height: 66px !important;
-    margin: 6px 0 0 !important;
+    margin: 0 !important;
     border: 1px solid rgba(196,181,253,.15) !important;
     background: linear-gradient(100deg, #1b1427 0%, #18131f 54%, #131116 100%) !important;
     box-shadow: 0 0 0 1px rgba(139,107,216,.07), inset 0 1px rgba(255,255,255,.035) !important;
@@ -1410,7 +1416,7 @@
     overflow: hidden;
     isolation: isolate;
   }
-  .result-actions .result-store-link::after {
+  .result-store-bar .result-store-link::after {
     content: "";
     position: absolute;
     z-index: -1;
@@ -1420,13 +1426,13 @@
     transform: translateX(-75%);
     pointer-events: none;
   }
-  .result-actions .result-store-link.is-attention-entry {
+  .result-store-bar.is-attention-entry {
     animation: result-store-entry 600ms cubic-bezier(.22,1,.36,1) both;
   }
-  .result-actions .result-store-link.is-attention-entry::after {
+  .result-store-bar.is-attention-entry .result-store-link::after {
     animation: result-store-sheen 560ms 70ms cubic-bezier(.22,1,.36,1) both;
   }
-  .result-actions .result-store-link.is-attention-entry > svg {
+  .result-store-bar.is-attention-entry .result-store-link > svg {
     animation: result-store-arrow 520ms 140ms cubic-bezier(.22,1,.36,1) both;
   }
   @keyframes result-store-entry {
@@ -1531,7 +1537,7 @@
     }
     body[data-phase="ready"] .store-link {
       width: 100% !important;
-      margin: 6px 0 0 !important;
+      margin: 0 !important;
     }
     body[data-phase="ready"] .recovery-panel {
       grid-column: 1 / -1;
@@ -1542,9 +1548,9 @@
   @media (prefers-reduced-motion: reduce) {
     .gooey-particle,
     .gooey-point,
-    .result-actions .result-store-link,
-    .result-actions .result-store-link::after,
-    .result-actions .result-store-link > svg { animation: none !important; }
+    .result-store-bar,
+    .result-store-bar .result-store-link::after,
+    .result-store-bar .result-store-link > svg { animation: none !important; }
     .copy-toast { transition: none !important; }
   }
 

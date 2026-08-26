@@ -397,10 +397,11 @@ function selectIntent(intent) {
 function setStoreLink(url, exhausted = false) {
   state.purchaseLink = typeof url === "string" ? url : "";
   const link = byId("storeLink");
+  const resultBar = byId("resultStoreBar");
   const emptyLink = byId("emptyStoreLink");
   if (!state.purchaseLink) {
     link.removeAttribute("href");
-    link.classList.add("hidden");
+    resultBar.classList.add("hidden");
     emptyLink.removeAttribute("href");
     emptyLink.classList.add("hidden");
     return;
@@ -408,8 +409,8 @@ function setStoreLink(url, exhausted = false) {
   link.href = state.purchaseLink;
   emptyLink.href = state.purchaseLink;
   emptyLink.classList.toggle("hidden", !exhausted);
-  link.classList.add("hidden");
-  link.classList.remove("is-attention-entry");
+  resultBar.classList.add("hidden");
+  resultBar.classList.remove("is-attention-entry");
   const strong = link.querySelector("strong");
   const small = link.querySelector("small");
   strong.textContent = "不想继续尝试？";
@@ -441,10 +442,10 @@ function showResultChoices({ returned = false } = {}) {
   byId("showResultsButton").classList.add("hidden");
   byId("targetAppCheck").classList.add("hidden");
   byId("resultActions").classList.remove("hidden");
-  const storeLink = byId("storeLink");
+  const storeBar = byId("resultStoreBar");
   const revealStoreLink = Boolean(state.purchaseLink);
-  storeLink.classList.toggle("hidden", !revealStoreLink);
-  if (revealStoreLink) replayMotion(storeLink, "is-attention-entry");
+  storeBar.classList.toggle("hidden", !revealStoreLink);
+  if (revealStoreLink) replayMotion(storeBar, "is-attention-entry");
   replayMotion(panel, "motion-panel-enter");
   replayTextMotion(panel);
   replayStepMotion(byId("resultStep"));
@@ -470,8 +471,8 @@ function showTargetAppCheck() {
   byId("feedbackTitle").textContent = "检查下载按钮";
   byId("copyProgress").textContent = "打开应用页面；看到云朵下载图标表示目标已达成。";
   byId("resultActions").classList.add("hidden");
-  byId("storeLink").classList.add("hidden");
-  byId("storeLink").classList.remove("is-attention-entry");
+  byId("resultStoreBar").classList.add("hidden");
+  byId("resultStoreBar").classList.remove("is-attention-entry");
   byId("appStoreInstruction").classList.add("hidden");
   byId("securityGuide").classList.add("hidden");
   byId("showResultsButton").classList.add("hidden");
@@ -653,7 +654,7 @@ function showSuccess() {
   byId("intentPanel").classList.add("hidden");
   byId("credentialState").textContent = "反馈已记录";
   byId("feedbackPanel").classList.add("hidden");
-  byId("storeLink").classList.add("hidden");
+  byId("resultStoreBar").classList.add("hidden");
   byId("archiveEdge").classList.add("hidden");
   state.account = null;
   state.copied = { username: false, password: false };
@@ -805,8 +806,8 @@ function showNoviceExitGate(result, options = {}) {
   byId("replaceAfterSignOutButton").classList.toggle("hidden", !isReplacement);
   byId("targetAppCheck").classList.add("hidden");
   byId("resultActions").classList.add("hidden");
-  byId("storeLink").classList.add("hidden");
-  byId("storeLink").classList.remove("is-attention-entry");
+  byId("resultStoreBar").classList.add("hidden");
+  byId("resultStoreBar").classList.remove("is-attention-entry");
   byId("showResultsButton").classList.add("hidden");
   byId("noviceExitPanel").classList.remove("hidden");
   replayMotion(byId("noviceExitPanel"), "motion-panel-enter");
@@ -865,7 +866,7 @@ function showVerify(hint = "完成下方验证，账号只会在本次会话中�
   byId("credentialState").textContent = "等待访问验证";
   byId("attemptCount").textContent = "本次第 1 组";
   byId("feedbackPanel").classList.add("hidden");
-  byId("storeLink").classList.add("hidden");
+  byId("resultStoreBar").classList.add("hidden");
   byId("emptyStoreLink").classList.add("hidden");
   setPhase("verify", "verifyView");
 }
