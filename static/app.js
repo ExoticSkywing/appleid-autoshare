@@ -531,6 +531,11 @@ function updateCopyUI() {
   usernameButton.classList.toggle("is-primary-copy", !usernameCopied);
   passwordButton.classList.toggle("is-primary-copy", (isExpert && !passwordCopied) || (usernameCopied && !passwordCopied));
 
+  const manualFallback = byId("manualFallback");
+  const manualVisible = !isExpert && state.preflightAcknowledged && usernameCopied && !passwordCopied && !state.resultsVisible;
+  manualFallback.classList.toggle("hidden", !manualVisible);
+  manualFallback.setAttribute("aria-hidden", String(!manualVisible));
+
   if (isExpert) {
     byId("appStoreInstruction").classList.add("hidden");
     byId("securityGuide").classList.add("hidden");
