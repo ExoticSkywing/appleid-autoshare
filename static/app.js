@@ -62,8 +62,12 @@ function replayErrorMotion(element) {
   replayMotion(element, "motion-error");
 }
 
-function replayPreflightErrorMotion() {
-  replayMotion(byId("accountPreflightError"), "motion-preflight-error");
+function startPreflightErrorMotion() {
+  const element = byId("accountPreflightError");
+  if (!element) return;
+  element.classList.remove("motion-preflight-error");
+  void element.offsetWidth;
+  if (!motionQuery.matches) element.classList.add("motion-preflight-error");
 }
 
 function syncDetailsMotion(details) {
@@ -1086,7 +1090,7 @@ function requireAccountPreflightAcknowledgement() {
   const preflight = byId("accountPreflight");
   preflight.classList.add("needs-confirmation");
   byId("accountPreflightError").classList.remove("hidden");
-  replayPreflightErrorMotion();
+  startPreflightErrorMotion();
   byId("accountPreflightCheck").focus({ preventScroll: true });
   byId("accountPreflightCheck").scrollIntoView({ behavior: "smooth", block: "center" });
   announce("请先查看 App Store 第二项示例，并勾选确认后再继续。" );
@@ -1175,7 +1179,7 @@ byId("accountPreflightCheck").addEventListener("change", (event) => {
     byId("accountPreflight").classList.remove("needs-confirmation");
   } else {
     byId("accountPreflightError").classList.remove("hidden");
-    replayPreflightErrorMotion();
+    startPreflightErrorMotion();
   }
   updateCopyUI();
   if (state.preflightAcknowledged) {
@@ -1197,7 +1201,7 @@ byId("appStoreHomeLink").addEventListener("click", (event) => {
     const preflight = byId("accountPreflight");
     preflight.classList.add("needs-confirmation");
     byId("accountPreflightError").classList.remove("hidden");
-    replayPreflightErrorMotion();
+    startPreflightErrorMotion();
     byId("accountPreflightCheck").focus({ preventScroll: true });
     playSound("error");
     byId("accountPreflightCheck").scrollIntoView({ behavior: "smooth", block: "center" });
