@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>获取可用账号</title>
   <link rel="stylesheet" href="/assets/app.css?v=20260826-2">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260826-10">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260827-3">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260824-38">
   <link rel="stylesheet" href="/assets/motion.css?v=20260823-1">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
@@ -233,21 +233,18 @@
               <div class="preflight-case preflight-case-prompt"><span>有弹窗</span><p>点击第二个选项</p></div>
               <div class="preflight-case preflight-case-direct"><span>无弹窗</span><p>直接粘贴账号</p></div>
             </div>
-            <details id="accountPreflightExample" class="preflight-example">
-              <summary>查看“点第二项”的示例</summary>
-              <div>
-                <p>不要点“继续”，姓名可能不同。</p>
-                <button type="button" class="guide-image-button guide-image-landscape" data-guide-image="/assets/assets/appstore-account-choice.jpg" data-guide-caption="有弹窗时，点击第二个选项">
-                  <img src="/assets/assets/appstore-account-choice.jpg" alt="系统弹窗中，点击第二个选项">
-                  <span>轻触放大</span>
-                </button>
-                <label class="preflight-confirm" for="accountPreflightCheck">
-                  <input id="accountPreflightCheck" type="checkbox">
-                  <span>我已看过示例，知道有弹窗时点第二个</span>
-                </label>
-                <p id="accountPreflightError" class="preflight-error hidden" role="alert">请勾选后再打开 App Store。</p>
-              </div>
-            </details>
+            <div id="accountPreflightExample" class="preflight-example">
+              <p>不要点“继续”，姓名可能不同。</p>
+              <button type="button" class="guide-image-button guide-image-landscape" data-guide-image="/assets/assets/appstore-account-choice.jpg" data-guide-caption="有弹窗时，点击第二个选项">
+                <img src="/assets/assets/appstore-account-choice.jpg" alt="系统弹窗中，点击第二个选项">
+                <span>轻触放大</span>
+              </button>
+              <label class="preflight-confirm" for="accountPreflightCheck">
+                <input id="accountPreflightCheck" type="checkbox">
+                <span>我已看过示例，知道有弹窗时点第二个</span>
+              </label>
+              <p id="accountPreflightError" class="preflight-error hidden" role="alert">请勾选后再打开 App Store。</p>
+            </div>
           </section>
           <a id="appStoreHomeLink" class="appstore-home-action" href="itms-apps://itunes.apple.com/today" aria-describedby="accountPreflightTitle">
             <img src="/assets/assets/appstore-app-icon.png" alt="" aria-hidden="true">
@@ -424,6 +421,6 @@
   </main>
 
   <script src="/assets/sound.js?v=20260824-17" defer></script>
-  <script src="/assets/app.js?v=20260826-7" defer></script>
+  <script src="/assets/app.js?v=20260827-2" defer></script>
 </body>
 </html>

@@ -1075,10 +1075,7 @@ function requireAccountPreflightAcknowledgement() {
   state.preflightRevealed = true;
   updateCopyUI();
   const preflight = byId("accountPreflight");
-  const example = byId("accountPreflightExample");
   preflight.classList.add("needs-confirmation");
-  example.open = true;
-  syncDetailsMotion(example);
   byId("accountPreflightError").classList.remove("hidden");
   byId("accountPreflightCheck").focus({ preventScroll: true });
   byId("accountPreflightCheck").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1181,9 +1178,6 @@ byId("appStoreHomeLink").addEventListener("click", (event) => {
     state.preflightRevealed = true;
     updateCopyUI();
     const preflight = byId("accountPreflight");
-    const example = byId("accountPreflightExample");
-    example.open = true;
-    syncDetailsMotion(example);
     preflight.classList.add("needs-confirmation");
     byId("accountPreflightError").classList.remove("hidden");
     byId("accountPreflightCheck").focus({ preventScroll: true });

@@ -599,16 +599,20 @@
     box-shadow: 0 0 0 1px rgba(255,255,255,.08);
   }
   .store-preflight-heading {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    display: grid;
+    gap: 7px;
   }
   .store-preflight-heading > .guide-badge {
-    color: #f0c98e;
-    background: rgba(169,135,79,.18);
-    box-shadow: 0 0 0 1px rgba(169,135,79,.26);
+    justify-self: start;
+    white-space: nowrap;
   }
-  .store-preflight-heading > strong { color: var(--neutral-100); font-size: .76rem; }
+  .store-preflight-heading > strong {
+    display: block;
+    color: var(--neutral-100);
+    font-size: .76rem;
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
   .store-preflight-cases { display: grid; gap: 8px; }
   .store-preflight-cases > div {
     display: grid;
@@ -645,26 +649,11 @@
     border-radius: 4px;
     padding: 2px 4px;
   }
-  .preflight-example { padding-top: 2px; }
-  .preflight-example > summary {
-    position: relative;
-    min-height: 36px;
-    display: flex;
-    align-items: center;
-    padding-inline: 2px 24px;
-    color: var(--neutral-500);
-    font-size: .7rem;
-    cursor: pointer;
-    list-style: none;
+  .preflight-example {
+    display: grid;
+    gap: 8px;
+    padding-top: 2px;
   }
-  .preflight-example > summary::-webkit-details-marker { display: none; }
-  .preflight-example > summary::after {
-    position: absolute;
-    inset-inline-end: 3px;
-    content: "⌄";
-  }
-  .preflight-example[open] > summary::after { transform: rotate(180deg); }
-  .preflight-example > div { display: grid; gap: 8px; }
   .preflight-example p { color: var(--neutral-400); font-size: .71rem; line-height: 1.45; }
   .preflight-example img {
     display: block;
@@ -702,10 +691,6 @@
   }
   .store-preflight.needs-confirmation {
     box-shadow: 0 0 0 2px #a9874f, 0 0 0 6px rgba(169,135,79,.12);
-  }
-  .store-preflight.needs-confirmation .preflight-example > summary {
-    color: #f0c98e;
-    font-weight: 700;
   }
   .appstore-home-action.is-gated {
     color: var(--neutral-500) !important;
