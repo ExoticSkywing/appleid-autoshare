@@ -681,23 +681,127 @@
     line-height: 1.4;
     cursor: pointer;
   }
+  .preflight-confirm.needs-attention {
+    position: relative;
+    z-index: 1;
+    color: #fff !important;
+    background: rgba(255,59,48,.24) !important;
+    box-shadow: 0 0 0 2px #ff453a, 0 0 0 5px rgba(255,69,58,.28), 0 0 18px rgba(255,59,48,.28) !important;
+    animation: preflight-confirm-attention 1400ms ease-in-out infinite;
+  }
   .preflight-confirm input {
-    width: 20px;
-    height: 20px;
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    width: 24px;
+    height: 24px;
     margin: 0;
-    accent-color: #a9874f;
+    border: 3px solid #fff;
+    border-radius: 5px;
+    background: #17191d;
+    box-shadow: 0 0 0 2px rgba(255,69,58,.75), 0 0 10px rgba(255,59,48,.4);
+    cursor: pointer;
+  }
+  .preflight-confirm input:checked {
+    border-color: #fff;
+    background: #ff453a;
+  }
+  .preflight-confirm input:checked::after {
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    width: 6px;
+    height: 11px;
+    content: "";
+    border: solid #fff;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+  }
+  .preflight-confirm input:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 3px;
+  }
+  .preflight-confirm.needs-attention input {
+    animation: preflight-checkbox-attention 1400ms ease-in-out infinite;
   }
   .preflight-error {
-    display: inline-flex;
-    width: fit-content;
-    max-width: 100%;
-    padding: 3px 8px;
-    border-radius: 6px;
-    color: #fca5a5 !important;
-    background: rgba(248,113,113,.1);
-    box-shadow: inset 0 0 0 1px rgba(248,113,113,.18);
-    font-size: .72rem !important;
-    font-weight: 700;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 48px;
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 9px;
+    color: #fff !important;
+    background: linear-gradient(105deg, #ff453a 0%, #ff3b30 52%, #d92720 100%);
+    background-size: 200% 100%;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.2), 0 0 22px 5px rgba(255,59,48,.58);
+    font-size: .83rem !important;
+    font-weight: 800;
+    line-height: 1.15;
+    overflow: hidden;
+  }
+  .preflight-error::after {
+    position: absolute;
+    inset: 0 auto 0 -45%;
+    width: 34%;
+    content: "";
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.58), transparent);
+    transform: skewX(-18deg);
+    animation: preflight-error-sweep 1400ms ease-in-out infinite;
+  }
+  .preflight-error::before {
+    position: absolute;
+    inset: 0;
+    content: "";
+    pointer-events: none;
+    border: 2px solid rgba(255,255,255,.78);
+    border-radius: inherit;
+    opacity: 0;
+    transform: scale(.97);
+    animation: preflight-error-outline 1400ms ease-in-out infinite;
+  }
+  .preflight-error-copy strong { display: block; letter-spacing: .01em; }
+  .preflight-error-cue {
+    animation: preflight-error-cue 900ms ease-in-out infinite;
+  }
+  .preflight-error-icon {
+    display: grid;
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
+    place-items: center;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    font-size: .9rem;
+    line-height: 1;
+  }
+  .preflight-error-copy {
+    display: grid;
+    min-width: 0;
+    gap: 2px;
+  }
+  .preflight-error-copy strong,
+  .preflight-error-copy small { color: inherit !important; }
+  .preflight-error-copy strong { font-size: .84rem; }
+  .preflight-error-copy small { font-size: .7rem; font-weight: 700; opacity: .94; }
+  .preflight-error-cue {
+    display: grid;
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
+    margin-left: auto;
+    place-items: center;
+    border: 1px solid rgba(255,255,255,.62);
+    border-radius: 50%;
+    font-size: 1.05rem;
+    font-weight: 900;
+    line-height: 1;
   }
   .store-preflight.needs-confirmation {
     box-shadow: 0 0 0 2px #a9874f, 0 0 0 6px rgba(169,135,79,.12);

@@ -7,9 +7,9 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>获取可用账号</title>
   <link rel="stylesheet" href="/assets/app.css?v=20260826-2">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260827-6">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260827-7">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260824-38">
-  <link rel="stylesheet" href="/assets/motion.css?v=20260827-3">
+  <link rel="stylesheet" href="/assets/motion.css?v=20260827-4">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
 </head>
 <body data-phase="boot">
@@ -243,7 +243,11 @@
                 <input id="accountPreflightCheck" type="checkbox">
                 <span>我已看过示例，知道有弹窗时点第二个</span>
               </label>
-              <p id="accountPreflightError" class="preflight-error hidden" role="alert">请勾选后再打开 App Store。</p>
+              <p id="accountPreflightError" class="preflight-error hidden" role="alert">
+                <span class="preflight-error-icon" aria-hidden="true">!</span>
+                <span class="preflight-error-copy"><strong>必须先勾选上方确认框</strong><small>才能打开 App Store</small></span>
+                <span class="preflight-error-cue" aria-hidden="true">↑</span>
+              </p>
             </div>
           </section>
           <a id="appStoreHomeLink" class="appstore-home-action" href="itms-apps://itunes.apple.com/today" aria-describedby="accountPreflightTitle manualFallbackSteps">
@@ -418,6 +422,6 @@
   </main>
 
   <script src="/assets/sound.js?v=20260824-17" defer></script>
-  <script src="/assets/app.js?v=20260827-7" defer></script>
+  <script src="/assets/app.js?v=20260827-8" defer></script>
 </body>
 </html>

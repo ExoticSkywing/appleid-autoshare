@@ -63,11 +63,14 @@ function replayErrorMotion(element) {
 }
 
 function startPreflightErrorMotion() {
-  const element = byId("accountPreflightError");
-  if (!element) return;
-  element.classList.remove("motion-preflight-error");
-  void element.offsetWidth;
-  if (!motionQuery.matches) element.classList.add("motion-preflight-error");
+  const error = byId("accountPreflightError");
+  const confirm = byId("accountPreflightCheck")?.closest(".preflight-confirm");
+  [error, confirm].forEach((element) => {
+    if (element) element.classList.remove("motion-preflight-error", "needs-attention");
+  });
+  void error?.offsetWidth;
+  if (!motionQuery.matches) error?.classList.add("motion-preflight-error");
+  confirm?.classList.add("needs-attention");
 }
 
 function syncDetailsMotion(details) {
@@ -1103,6 +1106,7 @@ function requireSecurityAcknowledgement() {
   byId("accountPreflight").classList.remove("needs-confirmation");
   byId("accountPreflightError").classList.add("hidden");
   byId("accountPreflightError").classList.remove("motion-preflight-error");
+  byId("accountPreflightCheck").closest(".preflight-confirm")?.classList.remove("needs-attention");
   state.securityRevealed = true;
   updateCopyUI();
   const guide = byId("securityGuide");
@@ -1176,6 +1180,7 @@ byId("accountPreflightCheck").addEventListener("change", (event) => {
     playSound("check");
     byId("accountPreflightError").classList.add("hidden");
     byId("accountPreflightError").classList.remove("motion-preflight-error");
+    byId("accountPreflightCheck").closest(".preflight-confirm")?.classList.remove("needs-attention");
     byId("accountPreflight").classList.remove("needs-confirmation");
   } else {
     byId("accountPreflightError").classList.remove("hidden");
