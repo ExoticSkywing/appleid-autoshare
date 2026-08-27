@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>获取可用账号</title>
   <link rel="stylesheet" href="/assets/app.css?v=20260826-2">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260827-4">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260827-5">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260824-38">
   <link rel="stylesheet" href="/assets/motion.css?v=20260823-1">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
@@ -246,21 +246,13 @@
               <p id="accountPreflightError" class="preflight-error hidden" role="alert">请勾选后再打开 App Store。</p>
             </div>
           </section>
-          <a id="appStoreHomeLink" class="appstore-home-action" href="itms-apps://itunes.apple.com/today" aria-describedby="accountPreflightTitle">
+          <a id="appStoreHomeLink" class="appstore-home-action" href="itms-apps://itunes.apple.com/today" aria-describedby="accountPreflightTitle manualFallbackSteps">
             <img src="/assets/assets/appstore-app-icon.png" alt="" aria-hidden="true">
             <span><strong>打开 App Store</strong><small>进入后点右上角 <img class="inline-account-icon" src="/assets/assets/appstore-account-guide.png" alt="" aria-hidden="true"> 账户头像</small></span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
           </a>
-          <button id="accountEnteredButton" class="account-entered-action" type="button">
-            <svg class="account-copy-glyph" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
-            <span class="account-copy-check hidden" aria-hidden="true">✓</span>
-            <span id="accountEnteredLabel">已填好账号，复制密码</span>
-          </button>
-        </div>
-        <div class="manual-fallback">
-          <details>
-            <summary>无法打开？查看手动操作指引</summary>
-            <div class="manual-fallback-steps">
+          <div class="manual-fallback" aria-label="打开 App Store 后的操作步骤">
+            <div id="manualFallbackSteps" class="manual-fallback-steps">
               <div class="instruction-step">
                 <span>1</span>
                 <p><strong>手动打开 App Store</strong><small>在主屏幕或 App 资源库找到这个图标。</small></p>
@@ -272,7 +264,12 @@
                 <img src="/assets/assets/appstore-account-guide.png" alt="" aria-hidden="true">
               </div>
             </div>
-          </details>
+          </div>
+          <button id="accountEnteredButton" class="account-entered-action" type="button">
+            <svg class="account-copy-glyph" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+            <span class="account-copy-check hidden" aria-hidden="true">✓</span>
+            <span id="accountEnteredLabel">已填好账号，复制密码</span>
+          </button>
         </div>
       </div>
 
@@ -421,6 +418,6 @@
   </main>
 
   <script src="/assets/sound.js?v=20260824-17" defer></script>
-  <script src="/assets/app.js?v=20260827-2" defer></script>
+  <script src="/assets/app.js?v=20260827-3" defer></script>
 </body>
 </html>

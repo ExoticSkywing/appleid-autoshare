@@ -530,10 +530,10 @@
     display: grid;
     gap: 12px;
   }
-  .appstore-home-action-wrap > .store-preflight { order: 3; }
+  .appstore-home-action-wrap > .store-preflight { order: 4; }
   .appstore-home-action-wrap > .appstore-home-action { order: 1; }
-  .appstore-home-action-wrap > .account-entered-action { order: 2; }
-  .appstore-home-action-wrap > .manual-fallback { order: 4; }
+  .appstore-home-action-wrap > .manual-fallback { order: 2; }
+  .appstore-home-action-wrap > .account-entered-action { order: 3; }
   .appstore-home-action small {
     display: flex;
     align-items: center;
@@ -580,15 +580,15 @@
     box-shadow: 0 2px 8px rgba(37,99,235,.16) !important;
   }
   .manual-fallback {
-    margin-top: 12px;
-    background: transparent;
-    box-shadow: none;
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--neutral-800);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.08);
   }
-  .manual-fallback summary {
-    min-height: 40px;
-    padding-inline: 4px 28px;
-    color: var(--neutral-500);
-    font-size: .74rem;
+  .manual-fallback-steps {
+    display: grid;
+    gap: 10px;
+    padding: 0;
   }
   .store-preflight {
     display: grid;
