@@ -605,6 +605,9 @@
   .store-preflight-heading > .guide-badge {
     justify-self: start;
     white-space: nowrap;
+    color: #f0c98e;
+    background: rgba(169,135,79,.18);
+    box-shadow: 0 0 0 1px rgba(169,135,79,.26);
   }
   .store-preflight-heading > strong {
     display: block;
