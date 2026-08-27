@@ -153,16 +153,7 @@ body[data-phase="success"] .status-light {
   .appstore-home-action.is-attention-ready strong,
   .appstore-home-action.is-attention-ready small,
   .appstore-home-action.is-attention-ready > svg { color: #0a0d18 !important; }
-  .appstore-home-action.is-unlocked {
-    color: #fff !important;
-    background: linear-gradient(135deg, #5865f2, #7280ff) !important;
-    background-image: linear-gradient(135deg, #5865f2, #7280ff) !important;
-    border-color: #7280ff !important;
-    box-shadow: 0 8px 24px rgba(88,101,242,.34) !important;
-  }
-  .appstore-home-action.is-unlocked strong,
-  .appstore-home-action.is-unlocked small,
-  .appstore-home-action.is-unlocked > svg { color: #fff !important; }
+  /* App Store preflight is a one-way instructional gate, not a check-state button. */
   @keyframes appstore-attention-in {
     0% { transform: scale(.985); }
     55% { transform: scale(1.012); box-shadow: 0 0 0 4px rgba(255,255,255,.1), 0 10px 30px rgba(255,255,255,.16); }

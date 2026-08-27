@@ -549,14 +549,13 @@ function updateCopyUI() {
   byId("appStoreInstruction").classList.toggle("hidden", !usernameCopied || passwordCopied || state.resultsVisible);
   byId("accountEnteredButton").classList.toggle("hidden", usernameEntered);
   const preflight = byId("accountPreflight");
-  const preflightOpen = usernameCopied && !passwordCopied && !state.resultsVisible;
+  const preflightOpen = usernameCopied && !passwordCopied && !state.resultsVisible && !state.securityRevealed;
   preflight.classList.toggle("hidden", !preflightOpen);
   preflight.setAttribute("aria-hidden", String(!preflightOpen));
   const storeLink = byId("appStoreHomeLink");
   const storeAvailable = usernameCopied && !passwordCopied && !state.resultsVisible;
   storeLink.classList.toggle("is-gated", !storeAvailable);
   storeLink.classList.toggle("is-attention-ready", storeAvailable);
-  storeLink.classList.toggle("is-unlocked", storeAvailable);
   storeLink.setAttribute("aria-disabled", String(!storeAvailable));
   const securityGuide = byId("securityGuide");
   securityGuide.classList.toggle("hidden", isExpert || passwordCopied || state.resultsVisible || state.loginSucceeded || !usernameCopied || !state.securityRevealed);
