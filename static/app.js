@@ -62,6 +62,10 @@ function replayErrorMotion(element) {
   replayMotion(element, "motion-error");
 }
 
+function replayPreflightErrorMotion() {
+  replayMotion(byId("accountPreflightError"), "motion-preflight-error");
+}
+
 function syncDetailsMotion(details) {
   if (!details) return;
   details.dataset.motionOpen = String(details.open);
@@ -1082,6 +1086,7 @@ function requireAccountPreflightAcknowledgement() {
   const preflight = byId("accountPreflight");
   preflight.classList.add("needs-confirmation");
   byId("accountPreflightError").classList.remove("hidden");
+  replayPreflightErrorMotion();
   byId("accountPreflightCheck").focus({ preventScroll: true });
   byId("accountPreflightCheck").scrollIntoView({ behavior: "smooth", block: "center" });
   announce("请先查看 App Store 第二项示例，并勾选确认后再继续。" );
@@ -1093,6 +1098,7 @@ function requireSecurityAcknowledgement() {
   state.preflightRevealed = false;
   byId("accountPreflight").classList.remove("needs-confirmation");
   byId("accountPreflightError").classList.add("hidden");
+  byId("accountPreflightError").classList.remove("motion-preflight-error");
   state.securityRevealed = true;
   updateCopyUI();
   const guide = byId("securityGuide");
@@ -1165,9 +1171,11 @@ byId("accountPreflightCheck").addEventListener("change", (event) => {
   if (state.preflightAcknowledged) {
     playSound("check");
     byId("accountPreflightError").classList.add("hidden");
+    byId("accountPreflightError").classList.remove("motion-preflight-error");
     byId("accountPreflight").classList.remove("needs-confirmation");
   } else {
     byId("accountPreflightError").classList.remove("hidden");
+    replayPreflightErrorMotion();
   }
   updateCopyUI();
   if (state.preflightAcknowledged) {
@@ -1189,6 +1197,7 @@ byId("appStoreHomeLink").addEventListener("click", (event) => {
     const preflight = byId("accountPreflight");
     preflight.classList.add("needs-confirmation");
     byId("accountPreflightError").classList.remove("hidden");
+    replayPreflightErrorMotion();
     byId("accountPreflightCheck").focus({ preventScroll: true });
     playSound("error");
     byId("accountPreflightCheck").scrollIntoView({ behavior: "smooth", block: "center" });
