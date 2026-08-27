@@ -826,14 +826,70 @@
   .manual-fallback summary::-webkit-details-marker { display: none; }
   .manual-fallback summary::after { position: absolute; inset-inline-end: 15px; content: "⌄"; color: var(--text-soft); transition: transform .2s ease; }
   .manual-fallback details[open] summary::after { transform: rotate(180deg); }
-  .manual-fallback-steps { display: grid; gap: 10px; padding: 0 14px 14px; }
-  .instruction-step { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 11px; }
-  .instruction-step > span { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #0b0d11; background: #ffffff; font-size: .76rem; font-weight: 850; }
-  .instruction-step p { display: grid; gap: 3px; }
+  .manual-fallback-steps {
+    position: relative;
+    display: grid;
+    gap: 14px;
+    padding: 0;
+  }
+  .manual-fallback-steps::before {
+    position: absolute;
+    inset-inline-start: 15px;
+    inset-block: 15px;
+    width: 2px;
+    content: "";
+    background: linear-gradient(180deg, rgba(88,101,242,.9), rgba(236,72,189,.9));
+    box-shadow: 0 0 12px rgba(129,105,242,.34);
+  }
+  .instruction-step { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 11px; }
+  .instruction-step > span {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 2px solid #9da5ff;
+    border-radius: 50%;
+    color: #fff;
+    background: #5865f2;
+    box-shadow: 0 0 0 3px rgba(88,101,242,.18), 0 5px 14px rgba(88,101,242,.32);
+    font-size: .74rem;
+    font-weight: 850;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .instruction-step + .instruction-step > span {
+    border-color: #ffb8e9;
+    background: #ec48bd;
+    box-shadow: 0 0 0 3px rgba(236,72,189,.18), 0 5px 14px rgba(236,72,189,.3);
+  }
+  .instruction-step p { display: grid; gap: 3px; min-width: 0; }
   .instruction-step strong { font-size: .86rem; }
   .instruction-step small { color: var(--text-soft); font-size: .72rem; line-height: 1.45; }
-  .instruction-step img { width: 36px; height: 36px; padding: 3px; border-radius: 10px; background: #fff; object-fit: contain; outline: 1px solid rgba(255,255,255,.1); outline-offset: -1px; }
-  .instruction-step .appstore-app-cue { padding: 0; background: transparent; }
+  .instruction-step img {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    object-fit: contain;
+    outline: 0;
+    outline-offset: 0;
+    box-shadow: none;
+    filter: drop-shadow(0 4px 7px rgba(0,0,0,.28));
+  }
+  .instruction-step > span::after {
+    position: absolute;
+    inset: -6px;
+    content: "";
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    opacity: .55;
+    pointer-events: none;
+  }
+  .instruction-step + .instruction-step > span::after { opacity: .7; }
   .appstore-action {
     display: flex;
     align-items: center;

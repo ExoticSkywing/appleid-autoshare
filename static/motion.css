@@ -77,6 +77,13 @@
     animation: motion-preflight-error 1600ms cubic-bezier(.36,.07,.19,.97) infinite;
   }
 
+  .instruction-step > span::after {
+    animation: instruction-step-ring 1800ms ease-out infinite;
+  }
+  .instruction-step + .instruction-step > span::after {
+    animation-delay: 450ms;
+  }
+
   .preflight-confirm.needs-attention {
     animation: preflight-confirm-attention 1400ms ease-in-out infinite;
   }
@@ -282,6 +289,10 @@
     68% { transform: scale(1.015); box-shadow: 0 0 0 2px #ff453a, 0 0 0 7px rgba(255,69,58,.46), 0 0 23px rgba(255,59,48,.4); }
     80% { transform: scale(1); }
   }
+  @keyframes instruction-step-ring {
+    0%, 48%, 100% { opacity: .55; transform: scale(.82); }
+    64% { opacity: 0; transform: scale(1.28); }
+  }
   @keyframes motion-text-enter {
     from { opacity: 0; transform: translateY(8px); filter: blur(2px); }
     to { opacity: 1; transform: translateY(0); filter: blur(0); }
@@ -301,6 +312,7 @@
     .motion-preflight-error,
     .preflight-confirm.needs-attention,
     .preflight-confirm.needs-attention input,
+    .instruction-step > span::after,
     .preflight-error::before,
     .preflight-error::after,
     .preflight-error-cue {

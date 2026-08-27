@@ -1081,8 +1081,19 @@
   }
   .account-entered-action.is-gated > svg,
   .account-entered-action.is-gated > span { color: var(--neutral-500) !important; }
-  .instruction-step > span { color: var(--neutral-950); background: var(--neutral-200); }
-  .instruction-step small { color: var(--neutral-500); }
+  .instruction-step > span {
+    border-color: #9da5ff;
+    color: #fff;
+    background: linear-gradient(145deg, #7180ff, #5865f2);
+    box-shadow: 0 0 0 3px rgba(88,101,242,.18), 0 5px 16px rgba(88,101,242,.38);
+  }
+  .instruction-step + .instruction-step > span {
+    border-color: #ffb8e9;
+    background: linear-gradient(145deg, #f36dcc, #ec48bd);
+    box-shadow: 0 0 0 3px rgba(236,72,189,.18), 0 5px 16px rgba(236,72,189,.34);
+  }
+  .instruction-step strong { color: var(--neutral-100); }
+  .instruction-step small { color: var(--neutral-400); }
 
   .result-actions {
     display: grid;
