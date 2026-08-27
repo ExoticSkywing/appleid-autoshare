@@ -598,24 +598,54 @@
     background: var(--neutral-800);
     box-shadow: 0 0 0 1px rgba(255,255,255,.08);
   }
-  .preflight-decision {
-    margin: 0;
-    color: var(--neutral-100);
-    font-size: .86rem;
-    font-weight: 720;
-    line-height: 1.55;
-    text-wrap: balance;
+  .store-preflight-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .preflight-decision strong {
+  .store-preflight-heading > .guide-badge {
+    color: #f0c98e;
+    background: rgba(169,135,79,.18);
+    box-shadow: 0 0 0 1px rgba(169,135,79,.26);
+  }
+  .store-preflight-heading > strong { color: var(--neutral-100); font-size: .76rem; }
+  .store-preflight-cases { display: grid; gap: 8px; }
+  .store-preflight-cases > div {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    align-items: center;
+    gap: 9px;
+    min-height: 42px;
+    padding: 7px 9px;
+    border-radius: 9px;
+  }
+  .preflight-case-prompt {
+    background: rgba(37,99,235,.14);
+    box-shadow: 0 0 0 1px rgba(96,165,250,.34);
+  }
+  .preflight-case-direct {
+    background: rgba(255,255,255,.035);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.08);
+  }
+  .store-preflight-cases span {
+    display: grid;
+    place-items: center;
+    min-height: 26px;
+    border-radius: 999px;
+    font-size: .65rem;
+    font-weight: 750;
+  }
+  .preflight-case-prompt > span { color: #ffffff; background: #2563eb; }
+  .preflight-case-direct > span { color: var(--neutral-300); background: var(--neutral-700); }
+  .store-preflight-cases p { color: var(--neutral-300); font-size: .74rem; line-height: 1.45; }
+  .store-preflight-cases strong {
     color: #ffffff;
     background: rgba(37,99,235,.42);
     box-shadow: 0 0 0 3px rgba(37,99,235,.14);
     border-radius: 4px;
     padding: 2px 4px;
   }
-  .preflight-example {
-    padding-top: 2px;
-  }
+  .preflight-example { padding-top: 2px; }
   .preflight-example > summary {
     position: relative;
     min-height: 36px;
@@ -644,7 +674,39 @@
     object-fit: cover;
     object-position: center;
   }
-
+  .preflight-confirm {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    align-items: center;
+    gap: 9px;
+    min-height: 44px;
+    padding: 8px 10px;
+    border-radius: 9px;
+    color: var(--neutral-100);
+    background: rgba(169,135,79,.14);
+    box-shadow: 0 0 0 1px rgba(169,135,79,.28);
+    font-size: .74rem;
+    line-height: 1.4;
+    cursor: pointer;
+  }
+  .preflight-confirm input {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: #a9874f;
+  }
+  .preflight-error {
+    color: #fca5a5 !important;
+    font-size: .72rem !important;
+    font-weight: 650;
+  }
+  .store-preflight.needs-confirmation {
+    box-shadow: 0 0 0 2px #a9874f, 0 0 0 6px rgba(169,135,79,.12);
+  }
+  .store-preflight.needs-confirmation .preflight-example > summary {
+    color: #f0c98e;
+    font-weight: 700;
+  }
   .appstore-home-action.is-gated {
     color: var(--neutral-500) !important;
     background: var(--neutral-750) !important;

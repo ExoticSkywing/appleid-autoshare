@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>获取可用账号</title>
   <link rel="stylesheet" href="/assets/app.css?v=20260826-2">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260827-1">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260826-10">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260824-38">
   <link rel="stylesheet" href="/assets/motion.css?v=20260823-1">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
@@ -225,21 +225,33 @@
       <div id="appStoreInstruction" class="app-store-instruction hidden">
         <div class="appstore-home-action-wrap">
           <section id="accountPreflight" class="store-preflight hidden" aria-labelledby="accountPreflightTitle" aria-hidden="true">
-            <p id="accountPreflightTitle" class="preflight-decision">登录时若有弹窗，点击<strong>第二个选项</strong>；若没有，直接粘贴账号。</p>
+            <div class="store-preflight-heading">
+              <span class="guide-badge">打开前确认</span>
+              <strong id="accountPreflightTitle">无论是否弹窗，都按这里继续</strong>
+            </div>
+            <div class="store-preflight-cases">
+              <div class="preflight-case preflight-case-prompt"><span>有提示</span><p>选择 <strong>“不是 [当前姓名]？”</strong></p></div>
+              <div class="preflight-case preflight-case-direct"><span>没提示</span><p>直接粘贴已复制的 Apple ID</p></div>
+            </div>
             <details id="accountPreflightExample" class="preflight-example">
-              <summary>查看第二个选项</summary>
+              <summary>查看“点第二项”的示例</summary>
               <div>
                 <p>不要点“继续”；每台手机显示的姓名可能不同。</p>
-                <button type="button" class="guide-image-button guide-image-landscape" data-guide-image="/assets/assets/appstore-account-choice.jpg" data-guide-caption="有弹窗时，点击第二个选项“不是 [当前姓名]？”">
-                  <img src="/assets/assets/appstore-account-choice.jpg" alt="系统弹窗中，点击第二个选项‘不是当前姓名？’">
+                <button type="button" class="guide-image-button guide-image-landscape" data-guide-image="/assets/assets/appstore-account-choice.jpg" data-guide-caption="有提示时，点击中间的“不是 [当前姓名]？”">
+                  <img src="/assets/assets/appstore-account-choice.jpg" alt="系统提示中，点击第二项‘不是当前姓名？’">
                   <span>轻触放大</span>
                 </button>
+                <label class="preflight-confirm" for="accountPreflightCheck">
+                  <input id="accountPreflightCheck" type="checkbox">
+                  <span>我已看过示例，知道有提示时要点第二项</span>
+                </label>
+                <p id="accountPreflightError" class="preflight-error hidden" role="alert">请勾选确认后再打开 App Store。</p>
               </div>
             </details>
           </section>
           <a id="appStoreHomeLink" class="appstore-home-action" href="itms-apps://itunes.apple.com/today" aria-describedby="accountPreflightTitle">
             <img src="/assets/assets/appstore-app-icon.png" alt="" aria-hidden="true">
-            <span><strong>打开 App Store</strong><small>进入后点右上角 <img class="inline-account-icon" src="/assets/assets/appstore-account-guide.png" alt="" aria-hidden="true"> 账户头像</small></span>
+            <span><strong>我已知晓，打开 App Store</strong><small>进入后点右上角 <img class="inline-account-icon" src="/assets/assets/appstore-account-guide.png" alt="" aria-hidden="true"> 账户头像</small></span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
           </a>
           <button id="accountEnteredButton" class="account-entered-action" type="button">
