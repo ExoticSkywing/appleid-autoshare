@@ -943,31 +943,8 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
   }
-  .security-guide-steps::after {
-    position: absolute;
-    z-index: 0;
-    top: 20px;
-    left: calc(50% - 12px);
-    width: 24px;
-    height: 2px;
-    content: "";
-    background: linear-gradient(90deg, #7180ff, #f0c98e 48%, #f36dcc);
-    box-shadow: 0 0 12px rgba(240,201,142,.48);
-    pointer-events: none;
-  }
-  .security-guide-steps::before {
-    position: absolute;
-    z-index: 1;
-    top: 11px;
-    left: calc(50% - 8px);
-    content: "→";
-    color: #fff1d0;
-    font-size: 1.05rem;
-    font-weight: 900;
-    line-height: 1;
-    text-shadow: 0 0 14px rgba(240,201,142,.66);
-    pointer-events: none;
-  }
+  .security-guide-steps::before,
+  .security-guide-steps::after { display: none; }
   .security-step {
     position: relative;
     display: grid;
@@ -1797,8 +1774,6 @@
 
   @media (max-width: 520px) {
     .security-guide-steps { gap: 12px; }
-    .security-guide-steps::before { left: calc(50% - 7px); }
-    .security-guide-steps::after { left: calc(50% - 10px); width: 20px; }
     .security-step-copy strong { font-size: .7rem; }
     .security-step-copy small { font-size: .6rem; }
     .security-step > .guide-image-button > span { padding: 3px 5px; font-size: .58rem; }
@@ -1807,8 +1782,6 @@
   @media (max-width: 350px) {
     .security-guide-body { padding-inline: 10px; }
     .security-guide-steps { gap: 8px; }
-    .security-guide-steps::before { left: calc(50% - 6px); }
-    .security-guide-steps::after { left: calc(50% - 8px); width: 16px; }
     .security-step figcaption { grid-template-columns: 26px minmax(0, 1fr); gap: 5px; }
     .security-step figcaption > span:first-child { width: 26px; height: 26px; }
     .security-step-copy strong { font-size: .66rem; }
