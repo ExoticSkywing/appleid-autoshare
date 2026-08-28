@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>获取可用账号</title>
   <link rel="stylesheet" href="/assets/app.css?v=20260826-3">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260827-14">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260827-15">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260824-38">
   <link rel="stylesheet" href="/assets/motion.css?v=20260827-8">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
@@ -387,8 +387,13 @@
         <p id="signOutError" class="signout-error hidden" role="alert">请先查看退出教程并确认已退出。</p>
         <div class="update-tradeoff">
           <strong>更新提醒</strong>
-          <p>当前方式应用不会及时得到更新，长期使用建议底部的专属账号</p>
+          <p>当前方式应用不会及时得到更新，长期稳定使用建议购买专属账号。</p>
         </div>
+        <button id="updateTradeoffStoreButton" class="update-tradeoff-store" type="button" aria-label="获取专属账号" aria-disabled="true" disabled>
+          <img src="/assets/assets/store-logo.png" alt="" aria-hidden="true">
+          <span><small>长期使用</small><strong>获取专属账号</strong></span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-9 9"/></svg>
+        </button>
         <button id="finishAfterSignOutButton" class="primary-action" type="button">已退出，完成本次使用</button>
         <button id="replaceAfterSignOutButton" class="primary-action hidden" type="button">已退出，尝试下一个账号</button>
       </section>
@@ -428,6 +433,6 @@
   </main>
 
   <script src="/assets/sound.js?v=20260824-17" defer></script>
-  <script src="/assets/app.js?v=20260827-10" defer></script>
+  <script src="/assets/app.js?v=20260828-1" defer></script>
 </body>
 </html>

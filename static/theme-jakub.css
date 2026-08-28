@@ -1532,6 +1532,39 @@
   }
   .update-tradeoff strong { color: #c69a58; font-size: .7rem; }
   .update-tradeoff p { color: var(--neutral-500); font-size: .68rem; line-height: 1.45; }
+  .update-tradeoff-store {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 18px;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    min-height: 56px;
+    padding: 8px 10px;
+    border: 1px solid rgba(196,181,253,.22);
+    border-radius: 11px;
+    color: #f5f3ff;
+    background: linear-gradient(100deg, #241641 0%, #1b1130 52%, #130c22 100%);
+    box-shadow: inset 0 1px rgba(255,255,255,.04);
+    text-align: start;
+    transition: transform 140ms cubic-bezier(.2,0,0,1), border-color 140ms ease, background-color 140ms ease;
+  }
+  .update-tradeoff-store:active { transform: scale(.985); }
+  .update-tradeoff-store:disabled {
+    color: var(--neutral-500);
+    border-color: rgba(255,255,255,.08);
+    background: var(--neutral-800);
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: .72;
+  }
+  .update-tradeoff-store:disabled > img { opacity: .55; }
+  .update-tradeoff-store:disabled > svg { color: var(--neutral-500); }
+  .update-tradeoff-store:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+  .update-tradeoff-store > img { width: 34px; height: 34px; border-radius: 9px; object-fit: contain; }
+  .update-tradeoff-store > span { display: grid; gap: 3px; min-width: 0; }
+  .update-tradeoff-store small { color: #c4b5d8; font-size: .63rem; line-height: 1.1; }
+  .update-tradeoff-store strong { color: #ffffff; font-size: .78rem; line-height: 1.2; }
+  .update-tradeoff-store > svg { justify-self: end; width: 18px; height: 18px; color: #e9d5ff; stroke-width: 1.8; }
   .signout-purpose {
     display: grid;
     gap: 7px;

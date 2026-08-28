@@ -405,8 +405,16 @@ function selectIntent(intent) {
   }
 }
 
+function updateTradeoffStoreLink(url) {
+  const button = byId("updateTradeoffStoreButton");
+  const available = typeof url === "string" && url.length > 0;
+  button.disabled = !available;
+  button.setAttribute("aria-disabled", String(!available));
+}
+
 function setStoreLink(url, exhausted = false) {
   state.purchaseLink = typeof url === "string" ? url : "";
+  updateTradeoffStoreLink(state.purchaseLink);
   const link = byId("storeLink");
   const resultBar = byId("resultStoreBar");
   const emptyLink = byId("emptyStoreLink");
@@ -1226,6 +1234,15 @@ byId("appStoreHomeLink").addEventListener("click", (event) => {
   announce("正在打开 App Store Today 首页。若未正常打开，请返回并按手动步骤继续。" );
 });
 byId("needAccountButton").addEventListener("click", () => {
+  playSound("open");
+  if (!state.purchaseLink) {
+    announce("专属账号入口暂不可用。" );
+    return;
+  }
+  window.open(state.purchaseLink, "_blank", "noopener,noreferrer");
+  announce("正在打开专属账号店铺。" );
+});
+byId("updateTradeoffStoreButton").addEventListener("click", () => {
   playSound("open");
   if (!state.purchaseLink) {
     announce("专属账号入口暂不可用。" );
