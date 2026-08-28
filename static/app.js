@@ -588,6 +588,8 @@ function updateCopyUI() {
   const securityCheck = byId("securityGuideCheck");
   if (securityCheck) securityCheck.checked = state.securityAcknowledged;
   byId("accountEnteredButton").classList.toggle("is-gated", (!state.preflightAcknowledged || !state.securityAcknowledged) && !passwordCopied);
+  const accountEnteredReady = !isExpert && !usernameEntered && !passwordCopied && state.preflightAcknowledged && state.securityAcknowledged;
+  byId("accountEnteredButton").classList.toggle("is-guided-next", accountEnteredReady);
   const passwordGateButton = document.querySelector('[data-copy="password"]');
   if (passwordGateButton) passwordGateButton.classList.toggle("is-security-gated", !isExpert && !passwordCopied && (!state.preflightAcknowledged || !state.securityAcknowledged));
   byId("showResultsButton").classList.toggle("hidden", !passwordCopied || state.resultsVisible);

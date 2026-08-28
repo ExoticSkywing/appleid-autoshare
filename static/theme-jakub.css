@@ -579,6 +579,40 @@
     font-size: .8rem;
     box-shadow: 0 2px 8px rgba(37,99,235,.16) !important;
   }
+  .account-entered-action.is-guided-next {
+    position: relative;
+    isolation: isolate;
+    box-shadow: 0 6px 18px rgba(37,99,235,.24) !important;
+  }
+  .account-entered-action.is-guided-next::after {
+    position: absolute;
+    z-index: 0;
+    inset: -5px;
+    border: 1px solid rgba(96,165,250,.72);
+    border-radius: 14px;
+    content: "";
+    pointer-events: none;
+    animation: account-entered-guide-ring 4200ms ease-out infinite;
+  }
+  .account-entered-action.is-guided-next > svg,
+  .account-entered-action.is-guided-next > span {
+    position: relative;
+    z-index: 1;
+  }
+  .account-entered-action.is-guided-next .account-copy-glyph {
+    animation: account-entered-guide-icon 4200ms ease-out infinite;
+  }
+  @keyframes account-entered-guide-ring {
+    0%, 70%, 100% { opacity: 0; transform: scale(.98); box-shadow: 0 0 0 0 rgba(96,165,250,0); }
+    78% { opacity: .72; transform: scale(1.01); box-shadow: 0 0 0 4px rgba(96,165,250,.09); }
+    88% { opacity: 0; transform: scale(1.035); box-shadow: 0 0 0 8px rgba(96,165,250,0); }
+  }
+  @keyframes account-entered-guide-icon {
+    0%, 72%, 100% { transform: translateX(0); }
+    76% { transform: translateX(1px); }
+    80% { transform: translateX(0); }
+  }
+
   .manual-fallback {
     padding: 12px;
     border-radius: 10px;

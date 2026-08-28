@@ -333,11 +333,14 @@
     .instruction-step > span::after,
     .security-step figcaption > span:first-child::after,
     .security-guide.needs-confirmation .security-confirm,
+    .account-entered-action.is-guided-next::after,
+    .account-entered-action.is-guided-next .account-copy-glyph,
     .preflight-error::before,
     .preflight-error::after,
     .preflight-error-cue {
       animation: none !important;
     }
+    .account-entered-action.is-guided-next::after { opacity: .65; }
     .preflight-error::before { opacity: 0 !important; }
 
     .motion-text-enter,
