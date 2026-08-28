@@ -7,9 +7,9 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>获取可用账号</title>
   <link rel="stylesheet" href="/assets/app.css?v=20260826-3">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260827-8">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260827-9">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260824-38">
-  <link rel="stylesheet" href="/assets/motion.css?v=20260827-5">
+  <link rel="stylesheet" href="/assets/motion.css?v=20260827-6">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
 </head>
 <body data-phase="boot">
@@ -278,30 +278,36 @@
       </div>
 
       <details id="securityGuide" class="conditional-guide security-guide hidden">
-        <summary><span>复制密码前先确认安全提示</span><strong>查看两步</strong></summary>
+        <summary><span>复制密码前先确认安全提示</span><strong>先看两步</strong></summary>
         <div class="security-guide-body">
-          <p class="security-guide-lead"><span class="guide-badge">登录后可能出现</span> 没有出现时可直接继续登录。</p>
-          <div class="security-guide-steps">
-            <figure>
+          <p class="security-guide-lead"><span class="guide-badge">登录后可能出现</span><strong>没出现就直接继续</strong></p>
+          <div class="security-guide-steps" aria-label="安全提示的正确操作顺序">
+            <figure class="security-step security-step-first">
+              <figcaption>
+                <span>先</span>
+                <span class="security-step-copy"><strong>点“其他选项”</strong><small>避开蓝色“继续”</small></span>
+              </figcaption>
               <button type="button" class="guide-image-button guide-image-portrait" data-guide-image="/assets/assets/appleid-security-options.jpg" data-guide-caption="第 1 步：点击页面底部的“其他选项”，不要点蓝色“继续”">
                 <img src="/assets/assets/appleid-security-options.jpg" alt="Apple ID 安全页面，点击底部的‘其他选项’">
                 <span>轻触放大</span>
               </button>
-              <figcaption><span>1</span><strong>点“其他选项”</strong><small>不要点蓝色“继续”</small></figcaption>
             </figure>
-            <figure>
-              <button type="button" class="guide-image-button guide-image-portrait" data-guide-image="/assets/assets/appleid-security-skip.jpg" data-guide-caption="第 2 步：在“保护你的账户”弹窗中点击右侧“不升级”">
+            <figure class="security-step security-step-second">
+              <figcaption>
+                <span>再</span>
+                <span class="security-step-copy"><strong>点“不升级”</strong><small>不要点“升级账户安全”</small></span>
+              </figcaption>
+              <button type="button" class="guide-image-button guide-image-portrait" data-guide-image="/assets/assets/appleid-security-skip.jpg" data-guide-caption="第 2 步：在“保护你的账户”弹窗中点击“不升级”，不要点“升级账户安全”">
                 <img src="/assets/assets/appleid-security-skip.jpg" alt="保护你的账户弹窗，点击右侧的‘不升级’">
                 <span>轻触放大</span>
               </button>
-              <figcaption><span>2</span><strong>点“不升级”</strong><small>避免升级账户安全</small></figcaption>
             </figure>
           </div>
           <label class="security-confirm" for="securityGuideCheck">
             <input id="securityGuideCheck" type="checkbox">
-            <span>我已看过两步，知道出现时要点“其他选项”再点“不升级”</span>
+            <span class="security-confirm-copy"><strong>我知道：先点“其他选项”，再点“不升级”</strong><small>确认后才能复制密码</small></span>
           </label>
-          <p id="securityGuideError" class="security-guide-error hidden" role="alert">请阅读并勾选确认后再复制密码。</p>
+          <p id="securityGuideError" class="security-guide-error hidden" role="alert">请先看完上方两步，再勾选确认。</p>
         </div>
       </details>
 

@@ -84,6 +84,16 @@
     animation-delay: 450ms;
   }
 
+  .security-step figcaption > span:first-child::after {
+    animation: security-guide-pulse 1800ms ease-out infinite;
+  }
+  .security-guide.needs-confirmation .security-confirm {
+    animation: security-confirm-pulse 1500ms ease-in-out infinite;
+  }
+  .security-step-second figcaption > span:first-child::after {
+    animation-delay: 420ms;
+  }
+
   .preflight-confirm.needs-attention {
     animation: preflight-confirm-attention 1400ms ease-in-out infinite;
   }
@@ -289,6 +299,14 @@
     68% { transform: scale(1.015); box-shadow: 0 0 0 2px #ff453a, 0 0 0 7px rgba(255,69,58,.46), 0 0 23px rgba(255,59,48,.4); }
     80% { transform: scale(1); }
   }
+  @keyframes security-guide-pulse {
+    0%, 46%, 100% { opacity: .5; transform: scale(.84); box-shadow: 0 0 0 0 rgba(240,201,142,0); }
+    64% { opacity: 0; transform: scale(1.3); box-shadow: 0 0 0 7px rgba(240,201,142,.12); }
+  }
+  @keyframes security-confirm-pulse {
+    0%, 54%, 100% { box-shadow: 0 0 0 3px rgba(169,135,79,.08), inset 0 1px rgba(255,240,200,.05); }
+    66% { box-shadow: 0 0 0 4px rgba(240,201,142,.26), 0 0 22px rgba(169,135,79,.25), inset 0 1px rgba(255,240,200,.1); }
+  }
   @keyframes instruction-step-ring {
     0%, 48%, 100% { opacity: .55; transform: scale(.82); }
     64% { opacity: 0; transform: scale(1.28); }
@@ -313,6 +331,8 @@
     .preflight-confirm.needs-attention,
     .preflight-confirm.needs-attention input,
     .instruction-step > span::after,
+    .security-step figcaption > span:first-child::after,
+    .security-guide.needs-confirmation .security-confirm,
     .preflight-error::before,
     .preflight-error::after,
     .preflight-error-cue {
