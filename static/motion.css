@@ -333,6 +333,8 @@
     .instruction-step > span::after,
     .security-step figcaption > span:first-child::after,
     .security-guide.needs-confirmation .security-confirm,
+    .account-entered-action.is-guided-next,
+    .account-entered-action.is-guided-next::before,
     .account-entered-action.is-guided-next::after,
     .account-entered-action.is-guided-next .account-copy-glyph,
     .preflight-error::before,
@@ -340,7 +342,9 @@
     .preflight-error-cue {
       animation: none !important;
     }
-    .account-entered-action.is-guided-next::after { opacity: .65; }
+    .account-entered-action.is-guided-next::before,
+    .account-entered-action.is-guided-next::after { opacity: .82; }
+    .security-guide.needs-confirmation .security-confirm { box-shadow: 0 0 0 3px rgba(169,135,79,.08), inset 0 1px rgba(255,240,200,.05); }
     .preflight-error::before { opacity: 0 !important; }
 
     .motion-text-enter,
