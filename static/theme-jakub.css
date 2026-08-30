@@ -181,8 +181,11 @@
     height: 38px;
     border-radius: 9px;
     object-fit: contain;
-    outline: 1px solid rgba(255,255,255,.1);
-    outline-offset: -1px;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    box-shadow: none;
+    background: transparent;
   }
   .safety-rule h1 { color: var(--neutral-100); }
   .safety-rule p { color: var(--neutral-400); }
