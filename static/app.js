@@ -562,8 +562,8 @@ function showResultChoices({ returned = false } = {}) {
   panel.classList.add("is-ready", "is-results");
   panel.classList.toggle("is-returned", returned);
   byId("feedbackStep").textContent = returned ? "欢迎回来" : "请选择结果";
-  byId("feedbackTitle").textContent = "能否登录 App Store？";
-  byId("copyProgress").textContent = "登录成功可继续；登录不上会自动换号。";
+  byId("feedbackTitle").textContent = "核对登录结果";
+  byId("copyProgress").textContent = "App Store 是否出现了下面这个「帐户」页面？";
   byId("accountStep").classList.add("is-complete");
   byId("accountStep").classList.remove("is-current");
   byId("accountStep").querySelector("span").textContent = "✓";
@@ -649,7 +649,7 @@ function updateCopyUI() {
   const progress = byId("copyProgress");
   const step = byId("feedbackStep");
   panel.classList.toggle("is-ready", isExpert || usernameCopied);
-  byId("loginSuccessHint").textContent = isExpert ? "完成并结束" : (state.intent === "target_app" ? "继续确认下载结果" : "完成并结束");
+  byId("loginSuccessHint").textContent = isExpert ? "完成并结束" : (state.intent === "target_app" ? "继续检查下载" : "完成并结束");
   byId("targetAppCheck").classList.toggle("hidden", !state.loginSucceeded);
 
   byId("accountStep").classList.toggle("is-current", !isExpert && !usernameEntered);
@@ -682,8 +682,8 @@ function updateCopyUI() {
       progress.textContent = "复制完成后去 App Store 登录，登录后再回来确认结果。";
     } else {
       step.textContent = "极速通道";
-      title.textContent = "登录结果确认";
-      progress.textContent = "登录成功直接结束；登录不上立即换号。";
+      title.textContent = "核对登录结果";
+      progress.textContent = "只有出现下方的「帐户」页面才算成功。";
     }
     document.querySelectorAll("[data-login-result], [data-result]").forEach((button) => {
       button.disabled = state.busy || state.feedbackLocked || !passwordCopied;

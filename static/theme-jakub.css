@@ -1273,8 +1273,59 @@
     margin-top: 14px;
     border-top: 0;
   }
+  .login-result-evidence {
+    display: grid;
+    gap: 10px;
+    margin-block-end: 4px;
+  }
+  .login-result-evidence > p {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+  }
+  .login-result-evidence > p strong {
+    color: var(--neutral-100);
+    font-size: .9rem;
+    line-height: 1.35;
+  }
+  .login-result-evidence > p span {
+    color: var(--neutral-400);
+    font-size: .76rem;
+    line-height: 1.5;
+  }
+  .login-success-reference {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 12px;
+    background: #f2f2f7;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.14);
+    cursor: zoom-in;
+  }
+  .login-success-reference > img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .login-success-reference > span {
+    position: absolute;
+    inset-block-start: 8px;
+    inset-inline-end: 8px;
+    padding: 5px 8px;
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(16,18,22,.78);
+    backdrop-filter: blur(10px);
+    font-size: .66rem;
+    font-weight: 700;
+    pointer-events: none;
+  }
+  .login-success-reference:focus-visible { outline: 2px solid #60a5fa; outline-offset: 3px; }
   .result-action {
-    grid-template-columns: 36px minmax(0, 1fr) 18px;
+    grid-template-columns: 36px minmax(0, 1fr);
     gap: 12px;
     min-height: 70px;
     padding: 11px 14px;

@@ -154,3 +154,17 @@ def test_novice_turnstile_is_gated_by_app_selection() -> None:
     start_turnstile = script.index("startTurnstile();", select_intent)
     next_function = script.index("function changeIntent()", select_intent)
     assert select_intent < start_turnstile < next_function
+
+
+def test_login_result_uses_observable_account_page_evidence() -> None:
+    root = Path(__file__).parents[1]
+    script = (root / "static" / "app.js").read_text(encoding="utf-8")
+    markup = (root / "static" / "index.html").read_text(encoding="utf-8")
+
+    assert "App Store 是否出现了下面这个「帐户」页面？" in script
+    assert "只有看到这个「帐户」页面才算成功" in markup
+    assert "appstore-login-success-reference.jpg" in markup
+    assert "看到了这个页面" in markup
+    assert "没看到 / 不确定" in markup
+    assert 'data-login-result="success"' in markup
+    assert 'data-result="login_failed"' in markup
