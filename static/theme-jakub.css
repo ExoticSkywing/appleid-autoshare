@@ -1275,12 +1275,12 @@
   }
   .login-result-evidence {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(142px, 46%);
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-      "rule image"
-      "failure image";
-    align-items: center;
-    gap: 8px 14px;
+      "rule"
+      "image"
+      "failure";
+    gap: 12px;
     padding: 14px;
     border-radius: 16px;
     background: linear-gradient(145deg, rgba(32,35,44,.72), rgba(15,17,22,.54));
@@ -1359,7 +1359,7 @@
   .login-success-reference:focus-visible { outline: 2px solid #60a5fa; outline-offset: 3px; }
   .result-choice-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 10px;
   }
   .result-action {
@@ -1414,13 +1414,7 @@
     background: #475569;
     box-shadow: 0 0 0 4px rgba(148,163,184,.06);
   }
-  @media (max-width: 350px) {
-    .login-result-evidence {
-      grid-template-columns: 1fr;
-      grid-template-areas: "rule" "image" "failure";
-    }
-    .result-choice-grid { grid-template-columns: 1fr; }
-  }
+
   .result-arrow { color: var(--neutral-500); }
 
   .recovery-panel {
