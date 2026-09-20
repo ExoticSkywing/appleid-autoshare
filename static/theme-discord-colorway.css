@@ -186,16 +186,16 @@ body[data-phase="success"] .status-light {
   }
   #resultActions .result-action[data-login-result="success"]:not(:disabled) {
     color: #f6f7fb !important;
-    background: #35405a !important;
-    border-color: #53627e !important;
-    box-shadow: 0 0 0 1px rgba(129,140,248,.14) !important;
+    background: #35ed7e !important;
+    border-color: #35ed7e !important;
+    box-shadow: 0 4px 14px rgba(53,237,126,.2) !important;
   }
-  #resultActions .result-action[data-login-result="success"]:not(:disabled) strong { color: #f6f7fb !important; }
-  #resultActions .result-action[data-login-result="success"]:not(:disabled) small { color: #bcc5d8 !important; }
+  #resultActions .result-action[data-login-result="success"]:not(:disabled) strong { color: #0a0d18 !important; }
+  #resultActions .result-action[data-login-result="success"]:not(:disabled) small { color: rgba(10,13,24,.72) !important; }
   #resultActions .result-action[data-login-result="success"]:not(:disabled) .result-icon {
     color: #ffffff !important;
-    background: #5865f2 !important;
-    box-shadow: 0 0 0 4px rgba(88,101,242,.14) !important;
+    background: #0a0d18 !important;
+    box-shadow: 0 0 0 4px rgba(10,13,24,.16) !important;
   }
   .result-action.result-success:not(:disabled) strong,
   .result-action.result-success:not(:disabled) small,

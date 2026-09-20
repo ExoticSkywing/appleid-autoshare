@@ -161,10 +161,11 @@ def test_login_result_uses_observable_account_page_evidence() -> None:
     script = (root / "static" / "app.js").read_text(encoding="utf-8")
     markup = (root / "static" / "index.html").read_text(encoding="utf-8")
 
-    assert "App Store 是否出现了下面这个「帐户」页面？" in script
-    assert "只有看到这个「帐户」页面才算成功" in markup
+    assert "App Store 是否同时显示账号昵称和 Apple ID？" in script
+    assert "出现账号昵称和 Apple ID" in markup
+    assert "两项同时出现，才表示登录成功" in markup
     assert "appstore-login-success-reference.jpg" in markup
-    assert "看到了这个页面" in markup
+    assert "已看到两项信息" in markup
     assert "没看到 / 不确定" in markup
     assert 'data-login-result="success"' in markup
     assert 'data-result="login_failed"' in markup

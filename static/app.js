@@ -561,9 +561,9 @@ function showResultChoices({ returned = false } = {}) {
   const panel = byId("feedbackPanel");
   panel.classList.add("is-ready", "is-results");
   panel.classList.toggle("is-returned", returned);
-  byId("feedbackStep").textContent = returned ? "欢迎回来" : "请选择结果";
-  byId("feedbackTitle").textContent = "核对登录结果";
-  byId("copyProgress").textContent = "App Store 是否出现了下面这个「帐户」页面？";
+  byId("feedbackStep").textContent = returned ? "欢迎回来" : "最后确认";
+  byId("feedbackTitle").textContent = "对照账号信息";
+  byId("copyProgress").textContent = "App Store 是否同时显示账号昵称和 Apple ID？";
   byId("accountStep").classList.add("is-complete");
   byId("accountStep").classList.remove("is-current");
   byId("accountStep").querySelector("span").textContent = "✓";
@@ -682,8 +682,8 @@ function updateCopyUI() {
       progress.textContent = "复制完成后去 App Store 登录，登录后再回来确认结果。";
     } else {
       step.textContent = "极速通道";
-      title.textContent = "核对登录结果";
-      progress.textContent = "只有出现下方的「帐户」页面才算成功。";
+      title.textContent = "对照账号信息";
+      progress.textContent = "同时看到账号昵称和 Apple ID，才表示登录成功。";
     }
     document.querySelectorAll("[data-login-result], [data-result]").forEach((button) => {
       button.disabled = state.busy || state.feedbackLocked || !passwordCopied;

@@ -7,8 +7,8 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>获取可用账号</title>
   <link rel="stylesheet" href="/assets/app.css?v=20260920-3">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-4">
-  <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260920-39">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-5">
+  <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260920-40">
   <link rel="stylesheet" href="/assets/motion.css?v=20260827-8">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
 </head>
@@ -329,20 +329,26 @@
 
       <div id="resultActions" class="result-actions hidden">
         <div class="login-result-evidence">
-          <p><strong>只有看到这个「帐户」页面才算成功</strong><span>核对顶部账号信息和「已购项目」；其他画面或不确定都不算成功。</span></p>
-          <button type="button" class="guide-image-button login-success-reference" data-guide-image="/assets/assets/appstore-login-success-reference.jpg" data-guide-caption="登录成功时会进入 App Store 的「帐户」页面，并显示账号信息和「已购项目」">
-            <img src="/assets/assets/appstore-login-success-reference.jpg" alt="App Store 登录成功参照：帐户页面显示账号信息和已购项目">
-            <span>轻触放大</span>
+          <div class="login-evidence-rule" aria-label="登录成功判定标准">
+            <span class="login-evidence-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span>
+            <p><strong>出现账号昵称和 Apple ID</strong><small>两项同时出现，才表示登录成功</small></p>
+          </div>
+          <button type="button" class="guide-image-button login-success-reference" data-guide-image="/assets/assets/appstore-login-success-reference.jpg" data-guide-caption="登录成功时，App Store 的帐户页面会同时显示账号昵称和 Apple ID">
+            <img src="/assets/assets/appstore-login-success-reference.jpg" alt="App Store 登录成功参照：帐户页面同时显示账号昵称和 Apple ID">
+            <span>点击查看原图</span>
+          </button>
+          <p class="login-failure-rule">没看到这两项、出现其他画面或不确定，都算未登录成功。</p>
+        </div>
+        <div class="result-choice-grid">
+          <button type="button" data-login-result="success" class="result-action result-success">
+            <span class="result-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span>
+            <span><strong>已看到两项信息</strong><small id="loginSuccessHint">继续检查下载</small></span>
+          </button>
+          <button type="button" data-result="login_failed" class="result-action">
+            <span class="result-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17"/></svg></span>
+            <span><strong>没看到 / 不确定</strong><small>自动更换账号</small></span>
           </button>
         </div>
-        <button type="button" data-login-result="success" class="result-action result-success">
-          <span class="result-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span>
-          <span><strong>看到了这个页面</strong><small id="loginSuccessHint">继续检查下载</small></span>
-        </button>
-        <button type="button" data-result="login_failed" class="result-action">
-          <span class="result-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17"/></svg></span>
-          <span><strong>没看到 / 不确定</strong><small>自动更换账号</small></span>
-        </button>
       </div>
 
       <div id="targetAppCheck" class="target-app-check hidden">
@@ -450,6 +456,6 @@
   </main>
 
   <script src="/assets/sound.js?v=20260824-17" defer></script>
-  <script src="/assets/app.js?v=20260920-5" defer></script>
+  <script src="/assets/app.js?v=20260920-6" defer></script>
 </body>
 </html>
