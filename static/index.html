@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#050606">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>获取可用账号</title>
-  <link rel="stylesheet" href="/assets/app.css?v=20260920-1">
+  <link rel="stylesheet" href="/assets/app.css?v=20260920-2">
   <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260830-3">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260824-38">
   <link rel="stylesheet" href="/assets/motion.css?v=20260827-8">
@@ -55,10 +55,12 @@
     </section>
 
     <section id="intentPanel" class="intent-panel hidden" aria-labelledby="intentTitle">
-      <p class="intent-kicker">第 1 步 · 现在请做</p>
-      <h2 id="intentTitle">先选择你要下载的应用</h2>
-      <p class="intent-copy">请点击下面一个选项，继续获取对应账号。</p>
-      <div class="intent-options">
+      <div id="intentPrompt">
+        <p class="intent-kicker">第 1 步 · 现在请做</p>
+        <h2 id="intentTitle">先选择你要下载的应用</h2>
+        <p class="intent-copy">请点击下面一个选项，继续获取对应账号。</p>
+      </div>
+      <div id="intentOptions" class="intent-options">
         <button type="button" class="intent-option intent-target" data-intent="target_app" aria-pressed="false" aria-label="下载 Shadowrocket（小火箭）">
           <img src="/assets/assets/target-app-icon.webp" alt="" draggable="false">
           <span class="intent-option-copy"><strong>小火箭</strong><small>Shadowrocket</small></span>
@@ -72,9 +74,14 @@
           <span class="intent-check" aria-hidden="true">✓</span>
         </button>
       </div>
+      <button id="intentSummary" class="intent-summary hidden" type="button" aria-label="更改下载应用">
+        <span class="intent-summary-check" aria-hidden="true">✓</span>
+        <span><small>已选择</small><strong id="intentSummaryLabel">小火箭（Shadowrocket）</strong></span>
+        <span class="intent-summary-change">更改</span>
+      </button>
     </section>
 
-    <section class="safety-rule" aria-labelledby="safetyTitle">
+    <section id="safetyRule" class="safety-rule hidden" aria-labelledby="safetyTitle">
       <img class="safety-appstore-icon" src="/assets/assets/appstore-app-icon.png" alt="" aria-hidden="true">
       <div>
         <h1 id="safetyTitle">仅在 App Store 登录</h1>
@@ -85,7 +92,7 @@
     <section id="relayStage" class="relay-stage" aria-label="账号获取与使用">
       <div id="archiveEdge" class="archive-edge" aria-hidden="true"></div>
 
-      <div class="flow-progress page-flow-progress is-pending" aria-label="当前流程">
+      <div class="flow-progress page-flow-progress is-pending hidden" aria-label="当前流程">
         <div id="accountStep" class="flow-step is-current">
           <span aria-hidden="true">1</span>
           <strong>输入账号</strong>
@@ -102,7 +109,7 @@
         </div>
       </div>
 
-      <article id="credential" class="credential" aria-live="polite" aria-busy="true">
+      <article id="credential" class="credential hidden" aria-live="polite" aria-busy="true">
         <div class="scanner" aria-hidden="true"></div>
         <div class="credential-topline">
           <p id="credentialState" class="credential-state">正在连接账号池</p>
@@ -119,8 +126,8 @@
 
         <section id="verifyView" class="phase-view verify-view hidden" aria-labelledby="verifyTitle">
           <div class="verify-copy">
-            <h2 id="verifyTitle">先选择下载目标</h2>
-            <p id="verifyHint">选择目标后，再完成访问验证。</p>
+            <h2 id="verifyTitle">完成人机验证</h2>
+            <p id="verifyHint">验证完成后即可获取账号。</p>
           </div>
           <div id="turnstileWidget" class="turnstile-host" aria-label="人机验证">
             <div id="turnstileLoading" class="turnstile-loading" role="status">
@@ -133,7 +140,7 @@
             <span id="verifyButtonLabel">获取账号</span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
           </button>
-          <p id="verifyActionHint" class="verify-action-hint">请先选择上方的下载目标。</p>
+          <p id="verifyActionHint" class="verify-action-hint">请完成上方的人机验证。</p>
         </section>
 
         <section id="accountView" class="phase-view account-view hidden" aria-labelledby="accountTitle">
@@ -438,6 +445,6 @@
   </main>
 
   <script src="/assets/sound.js?v=20260824-17" defer></script>
-  <script src="/assets/app.js?v=20260920-1" defer></script>
+  <script src="/assets/app.js?v=20260920-2" defer></script>
 </body>
 </html>

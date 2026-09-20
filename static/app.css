@@ -305,6 +305,36 @@
   .intent-panel.is-locked .intent-copy { display: none; }
   .intent-panel.is-locked h2 { font-size: .82rem; color: var(--text-soft); }
   .intent-panel.is-locked .intent-options { display: none; }
+  .intent-summary {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 54px;
+    padding: 9px 11px;
+    border: 1px solid rgba(88,101,242,.7);
+    border-radius: 12px;
+    color: var(--text);
+    background: #171b22;
+    text-align: start;
+  }
+  .intent-summary-check {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    color: #fff;
+    background: #5865f2;
+    font-size: .72rem;
+    font-weight: 900;
+  }
+  .intent-summary > span:nth-child(2) { display: grid; gap: 2px; min-width: 0; }
+  .intent-summary small { color: var(--text-faint); font-size: .65rem; }
+  .intent-summary strong { overflow: hidden; font-size: .82rem; text-overflow: ellipsis; white-space: nowrap; }
+  .intent-summary-change { color: #9da5ff; font-size: .74rem; font-weight: 750; }
+  .intent-summary:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 3px; }
 
   .safety-rule {
     display: flex;

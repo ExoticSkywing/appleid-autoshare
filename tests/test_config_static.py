@@ -114,10 +114,27 @@ def test_turnstile_has_bounded_loading_and_recovery_contract() -> None:
     markup = (root / "static" / "index.html").read_text(encoding="utf-8")
 
     assert "TURNSTILE_LOAD_TIMEOUT_MS = 12_000" in script
-    assert "TURNSTILE_TOKEN_TIMEOUT_MS = 45_000" in script
     assert "TURNSTILE_RETRY_LIMIT = 1" in script
     assert 'host.querySelector("iframe")' in script
     assert '"timeout-callback"' in script
     assert '"unsupported-callback"' in script
-    assert "人机验证加载超时" in script
+    assert "人机验证没有加载出来" in script
+    assert "点击重新加载验证" in script
     assert 'id="turnstileLoading"' in markup
+
+
+def test_novice_turnstile_is_gated_by_app_selection() -> None:
+    root = Path(__file__).parents[1]
+    script = (root / "static" / "app.js").read_text(encoding="utf-8")
+    markup = (root / "static" / "index.html").read_text(encoding="utf-8")
+
+    assert 'id="credential" class="credential hidden"' in markup
+    assert 'id="safetyRule" class="safety-rule hidden"' in markup
+    assert 'id="intentSummary" class="intent-summary hidden"' in markup
+    assert "function startTurnstile()" in script
+    assert "function stopTurnstile()" in script
+    assert "function changeIntent()" in script
+    select_intent = script.index("function selectIntent(intent)")
+    start_turnstile = script.index("startTurnstile();", select_intent)
+    next_function = script.index("function changeIntent()", select_intent)
+    assert select_intent < start_turnstile < next_function

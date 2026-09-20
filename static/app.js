@@ -31,6 +31,8 @@ const state = {
   intent: "",
   verified: false,
   resultsVisible: false,
+  turnstileLoading: false,
+  turnstileReady: false,
 };
 
 const byId = (id) => document.getElementById(id);
@@ -223,6 +225,10 @@ function loadScript(url) {
   return new Promise((resolve, reject) => {
     const existing = document.querySelector(`script[src="${CSS.escape(url)}"]`);
     if (existing) {
+      if (window.turnstile || existing.dataset.loaded === "true") {
+        resolve();
+        return;
+      }
       existing.addEventListener("load", resolve, { once: true });
       existing.addEventListener("error", reject, { once: true });
       return;
@@ -231,14 +237,19 @@ function loadScript(url) {
     script.src = url;
     script.async = true;
     script.defer = true;
-    script.addEventListener("load", resolve, { once: true });
-    script.addEventListener("error", reject, { once: true });
+    script.addEventListener("load", () => {
+      script.dataset.loaded = "true";
+      resolve();
+    }, { once: true });
+    script.addEventListener("error", () => {
+      script.remove();
+      reject(new Error("script_load_failed"));
+    }, { once: true });
     document.head.appendChild(script);
   });
 }
 
 const TURNSTILE_LOAD_TIMEOUT_MS = 12_000;
-const TURNSTILE_TOKEN_TIMEOUT_MS = 45_000;
 const TURNSTILE_RETRY_LIMIT = 1;
 let turnstileLoadTimer = null;
 let turnstileRetryCount = 0;
@@ -256,7 +267,6 @@ function removeTurnstileLoading() {
 
 function resetTurnstileHost() {
   clearTurnstileLoadTimer();
-  turnstileRetryCount = 0;
   const host = byId("turnstileWidget");
   host.replaceChildren();
   const loading = document.createElement("div");
@@ -274,10 +284,12 @@ function resetTurnstileHost() {
 function showTurnstileFailure(title, detail) {
   clearTurnstileLoadTimer();
   state.token = "";
+  state.turnstileLoading = false;
+  state.turnstileReady = false;
   removeTurnstileLoading();
   updateVerifyAction();
   byId("credentialState").textContent = "验证组件未连接";
-  showRecovery(title, detail, () => window.location.reload());
+  showRecovery(title, detail, () => startTurnstile(), "重新加载验证");
 }
 
 function watchTurnstileProgress() {
@@ -285,26 +297,20 @@ function watchTurnstileProgress() {
   turnstileLoadTimer = window.setTimeout(() => {
     const host = byId("turnstileWidget");
     if (state.token) return;
-    if (host.querySelector("iframe")) {
-      turnstileLoadTimer = window.setTimeout(() => {
-        if (!state.token) {
-          showTurnstileFailure(
-            "人机验证等待超时",
-            "Cloudflare 验证一直没有完成。请关闭内容拦截或私人中继后刷新重试。",
-          );
-        }
-      }, TURNSTILE_TOKEN_TIMEOUT_MS);
-      return;
-    }
+    if (host.querySelector("iframe")) return;
     if (turnstileRetryCount < TURNSTILE_RETRY_LIMIT && window.turnstile && state.widgetId !== null) {
       turnstileRetryCount += 1;
       window.turnstile.reset(state.widgetId);
       watchTurnstileProgress();
       return;
     }
+    if (state.widgetId !== null && window.turnstile) {
+      try { window.turnstile.remove(state.widgetId); } catch (_) {}
+      state.widgetId = null;
+    }
     showTurnstileFailure(
-      "人机验证加载超时",
-      "Cloudflare 验证没有连上。请关闭内容拦截或私人中继后刷新重试。",
+      "人机验证没有加载出来",
+      "点击重新加载验证；仍未出现时，再刷新页面。",
     );
   }, TURNSTILE_LOAD_TIMEOUT_MS);
 }
@@ -353,10 +359,7 @@ function updateVerifyAction() {
   let reason = "";
   let buttonLabel = "获取账号";
 
-  if (!isExpert && !state.intent) {
-    reason = "请先选择上方的下载目标；选择后才会显示人机验证。";
-    buttonLabel = "先选择下载目标";
-  } else if (!state.token) {
+  if (!state.token) {
     reason = isExpert ? "请完成上方的人机验证。" : "目标已选择，请完成上方的人机验证。";
     buttonLabel = "完成验证后获取";
   }
@@ -367,7 +370,7 @@ function updateVerifyAction() {
   label.textContent = state.busy ? "正在获取账号" : (isExpert && !blocked ? "获取账号（极速）" : buttonLabel);
   hint.textContent = state.busy ? "正在为你分配账号，请稍候。" : reason;
   hint.classList.toggle("hidden", !state.busy && !reason);
-  byId("turnstileWidget").classList.toggle("hidden", (!isExpert && !state.intent) || Boolean(state.account));
+  byId("turnstileWidget").classList.toggle("hidden", Boolean(state.account));
 
   if (!onVerifyView) return;
   if (state.busy) {
@@ -388,12 +391,6 @@ function updateVerifyAction() {
     byId("verifyHint").textContent = "验证完成后即可直接获取账号。";
     byId("headerState").textContent = "等待访问验证";
     byId("statusLight").classList.remove("is-ready");
-  } else {
-    byId("credentialState").textContent = "等待选择目标";
-    byId("verifyTitle").textContent = "先选择下载目标";
-    byId("verifyHint").textContent = "选择目标后，再完成访问验证。";
-    byId("headerState").textContent = "等待选择目标";
-    byId("statusLight").classList.remove("is-ready");
   }
 }
 
@@ -411,9 +408,10 @@ function hideRecovery() {
   state.pendingAction = null;
 }
 
-function showRecovery(title, text, action) {
+function showRecovery(title, text, action, actionLabel = "重试") {
   byId("recoveryTitle").textContent = title;
   byId("recoveryText").textContent = text;
+  byId("retryButton").textContent = actionLabel;
   byId("recoveryPanel").classList.remove("hidden");
   replayErrorMotion(byId("recoveryPanel"));
   state.pendingAction = action;
@@ -425,6 +423,8 @@ function showRecovery(title, text, action) {
 
 function updateIntentUI() {
   const isExpert = state.mode === "expert";
+  const selectionComplete = isExpert || Boolean(state.intent);
+  const hasAccount = Boolean(state.account);
   document.body.dataset.mode = state.mode;
   document.querySelectorAll(".mode-switch [data-mode]").forEach((btn) => {
     const active = btn.dataset.mode === state.mode;
@@ -432,9 +432,16 @@ function updateIntentUI() {
     btn.setAttribute("aria-selected", String(active));
   });
   document.querySelectorAll(".page-flow-progress").forEach((el) => {
-    el.classList.toggle("hidden", isExpert);
+    el.classList.toggle("hidden", isExpert || !hasAccount);
   });
+  byId("safetyRule").classList.toggle("hidden", !hasAccount);
+  byId("credential").classList.toggle("hidden", !selectionComplete && !hasAccount);
   byId("intentPanel").classList.toggle("hidden", isExpert || Boolean(state.account));
+  const showIntentSummary = !isExpert && Boolean(state.intent) && !hasAccount;
+  byId("intentPrompt").classList.toggle("hidden", showIntentSummary);
+  byId("intentOptions").classList.toggle("hidden", showIntentSummary);
+  byId("intentSummary").classList.toggle("hidden", !showIntentSummary);
+  byId("intentSummaryLabel").textContent = state.intent === "other_app" ? "其他应用" : "小火箭（Shadowrocket）";
   document.querySelectorAll("[data-intent]").forEach((button) => {
     const selected = !isExpert && button.dataset.intent === state.intent;
     button.setAttribute("aria-pressed", String(selected));
@@ -456,6 +463,11 @@ function selectMode(mode) {
   playSound("mode");
   replayMotion(byId("intentPanel"), "motion-panel-enter");
   updateVerifyAction();
+  if (state.mode === "expert") {
+    startTurnstile();
+  } else {
+    stopTurnstile();
+  }
   if (state.token && state.mode === "expert") {
     byId("verifyButton").focus({ preventScroll: true });
   }
@@ -475,6 +487,20 @@ function selectIntent(intent) {
   } else {
     announce("目标已选择，可以继续完成访问验证。" );
   }
+  startTurnstile();
+  window.setTimeout(() => byId("credential").scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+}
+
+function changeIntent() {
+  if (state.account || state.busy) return;
+  stopTurnstile();
+  state.intent = "";
+  hideRecovery();
+  updateIntentUI();
+  byId("headerState").textContent = "等待选择应用";
+  byId("intentPanel").scrollIntoView({ behavior: "smooth", block: "center" });
+  window.setTimeout(() => document.querySelector("[data-intent]")?.focus({ preventScroll: true }), 180);
+  announce("请重新选择要下载的应用。" );
 }
 
 function updateTradeoffStoreLink(url) {
@@ -969,7 +995,91 @@ function showVerify(hint = "完成下方验证，账号只会在本次会话中�
   setPhase("verify", "verifyView");
 }
 
-async function initializeTurnstile() {
+async function startTurnstile() {
+  if (state.turnstileLoading || state.turnstileReady || state.token) return;
+  state.turnstileLoading = true;
+  turnstileRetryCount = 0;
+  hideRecovery();
+  setPhase("verify", "verifyView");
+  byId("credentialState").textContent = "正在加载人机验证";
+  resetTurnstileHost();
+  try {
+    if (!state.config?.turnstile_script_url || !state.config?.turnstile_site_key) throw new Error("configuration_missing");
+    await loadScript(state.config.turnstile_script_url);
+    if (!window.turnstile) throw new Error("turnstile_unavailable");
+    if (state.widgetId !== null) {
+      try { window.turnstile.remove(state.widgetId); } catch (_) {}
+      state.widgetId = null;
+      resetTurnstileHost();
+    }
+    state.widgetId = window.turnstile.render("#turnstileWidget", {
+      sitekey: state.config.turnstile_site_key,
+      action: state.config.turnstile_action,
+      theme: "dark",
+      size: "flexible",
+      callback: (token) => {
+        clearTurnstileLoadTimer();
+        removeTurnstileLoading();
+        state.turnstileLoading = false;
+        state.turnstileReady = true;
+        state.token = token;
+        updateVerifyAction();
+        announce("验证已完成，可以获取账号。" );
+      },
+      "expired-callback": () => {
+        state.token = "";
+        updateVerifyAction();
+        byId("headerState").textContent = "验证已过期";
+        byId("statusLight").classList.remove("is-ready");
+        announce("验证已过期，请重新完成验证。" );
+      },
+      "timeout-callback": () => {
+        showTurnstileFailure("人机验证没有完成", "点击重新加载验证；仍未出现时，再刷新页面。" );
+      },
+      "unsupported-callback": () => {
+        showTurnstileFailure("当前浏览器无法完成验证", "请升级 Safari 或改用系统浏览器后重试。" );
+      },
+      "error-callback": () => {
+        showTurnstileFailure("人机验证暂不可用", "点击重新加载验证；仍未出现时，再刷新页面。" );
+      },
+    });
+    state.turnstileLoading = false;
+    state.turnstileReady = true;
+    watchTurnstileProgress();
+  } catch (_) {
+    clearTurnstileLoadTimer();
+    removeTurnstileLoading();
+    state.turnstileLoading = false;
+    state.turnstileReady = false;
+    byId("credentialState").textContent = "验证组件未连接";
+    showRecovery("人机验证没有加载出来", "点击重新加载验证；仍未出现时，再刷新页面。", () => startTurnstile(), "重新加载验证");
+  }
+}
+
+function stopTurnstile() {
+  clearTurnstileLoadTimer();
+  if (window.turnstile && state.widgetId !== null) {
+    try { window.turnstile.remove(state.widgetId); } catch (_) {}
+  }
+  state.widgetId = null;
+  state.token = "";
+  state.turnstileLoading = false;
+  state.turnstileReady = false;
+  const host = byId("turnstileWidget");
+  host.replaceChildren();
+  const loading = document.createElement("div");
+  loading.id = "turnstileLoading";
+  loading.className = "turnstile-loading";
+  loading.setAttribute("role", "status");
+  const spinner = document.createElement("span");
+  spinner.setAttribute("aria-hidden", "true");
+  const copy = document.createElement("p");
+  copy.textContent = "正在加载人机验证…";
+  loading.append(spinner, copy);
+  host.appendChild(loading);
+}
+
+async function initializeApp() {
   try {
     const savedMode = localStorage.getItem("autoshare_mode");
     if (savedMode === "expert" || savedMode === "novice") {
@@ -983,55 +1093,12 @@ async function initializeTurnstile() {
     state.config = await jsonRequest("/api/v2/config", { method: "GET", headers: {} });
     if (!state.config.turnstile_script_url || !state.config.turnstile_site_key) throw new Error("configuration_missing");
     showVerify();
-    await loadScript(state.config.turnstile_script_url);
-    if (!window.turnstile) throw new Error("turnstile_unavailable");
-    resetTurnstileHost();
-    state.widgetId = window.turnstile.render("#turnstileWidget", {
-      sitekey: state.config.turnstile_site_key,
-      action: state.config.turnstile_action,
-      theme: "dark",
-      size: "flexible",
-      callback: (token) => {
-        clearTurnstileLoadTimer();
-        removeTurnstileLoading();
-        state.token = token;
-        updateVerifyAction();
-        if (state.intent) {
-          updateVerifyAction();
-          announce("验证已完成，可以获取账号。" );
-        } else {
-          byId("headerState").textContent = "验证已通过 · 请选择目标";
-          byId("statusLight").classList.remove("is-ready");
-          byId("intentPanel").classList.add("needs-attention");
-          announce("验证已完成。请先选择上方的下载目标。" );
-          window.setTimeout(() => byId("intentPanel").scrollIntoView({ behavior: "smooth", block: "center" }), 80);
-        }
-      },
-      "expired-callback": () => {
-        state.token = "";
-        updateVerifyAction();
-        byId("headerState").textContent = "验证已过期";
-        byId("statusLight").classList.remove("is-ready");
-        announce("验证已过期，请重新完成验证。" );
-      },
-      "timeout-callback": () => {
-        showTurnstileFailure("人机验证已超时", "请刷新页面后重新完成验证。" );
-      },
-      "unsupported-callback": () => {
-        showTurnstileFailure("当前浏览器无法完成验证", "请升级 Safari 或改用系统浏览器后刷新重试。" );
-      },
-      "error-callback": (code) => {
-        const suffix = typeof code === "string" && code ? `（${code}）` : "";
-        showTurnstileFailure("验证组件暂不可用", `请检查网络或内容拦截设置后刷新重试${suffix}。`);
-      },
-    });
-    watchTurnstileProgress();
+    updateIntentUI();
+    if (state.mode === "expert") startTurnstile();
   } catch (_) {
-    clearTurnstileLoadTimer();
-    removeTurnstileLoading();
     setPhase("error", "bootView");
-    byId("credentialState").textContent = "验证组件未连接";
-    showRecovery("验证组件加载失败", "请检查网络或内容拦截设置，然后重试。", () => window.location.reload());
+    byId("credentialState").textContent = "服务暂未连接";
+    showRecovery("页面没有准备好", "请检查网络后重试。", () => window.location.reload());
   }
 }
 
@@ -1143,6 +1210,7 @@ document.querySelectorAll(".mode-switch [data-mode]").forEach((btn) => {
 document.querySelectorAll("[data-intent]").forEach((button) => {
   button.addEventListener("click", () => selectIntent(button.dataset.intent));
 });
+byId("intentSummary").addEventListener("click", changeIntent);
 function closeGuideLightbox() {
   const lightbox = byId("guideLightbox");
   if (lightbox.classList.contains("hidden")) return;
@@ -1492,4 +1560,4 @@ document.addEventListener("visibilitychange", () => {
 });
 
 setupDetailsMotion();
-initializeTurnstile();
+initializeApp();
