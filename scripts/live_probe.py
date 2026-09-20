@@ -19,6 +19,7 @@ from app.adapters.authenticated_dom_source import (  # noqa: E402
     ReserveSourceError,
 )
 from app.adapters.ikuuu_source import IkuuuSourceAdapter, IkuuuSourceError  # noqa: E402
+from app.adapters.qingfeng_aes import QingfengAesAdapter, QingfengSourceError  # noqa: E402
 
 
 def _required(name: str) -> str:
@@ -29,7 +30,21 @@ def _required(name: str) -> str:
 
 
 async def probe() -> dict[str, object]:
-    if os.getenv("SOURCE_PROBE", "C").upper() == "D":
+    source_probe = os.getenv("SOURCE_PROBE", "C").upper()
+    if source_probe == "Q":
+        adapter_q = QingfengAesAdapter(
+            alias="qingfeng",
+            url=_required("SOURCE_QINGFENG_URL"),
+            referer=_required("SOURCE_QINGFENG_REFERER"),
+            timeout_seconds=float(os.getenv("UPSTREAM_TIMEOUT_SECONDS", "8")),
+            max_response_bytes=int(os.getenv("UPSTREAM_MAX_RESPONSE_BYTES", "1000000")),
+        )
+        try:
+            accounts_q = await adapter_q.fetch_accounts()
+        except QingfengSourceError as exc:
+            return {"classification": exc.reason, "account_count": 0}
+        return {"classification": "ok", "account_count": len(accounts_q)}
+    if source_probe == "D":
         adapter_d = IkuuuSourceAdapter(
             alias="reserve_d",
             url=_required("SOURCE_D_URL"),

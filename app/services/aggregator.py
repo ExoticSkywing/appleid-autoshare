@@ -7,6 +7,7 @@ from collections.abc import Iterable
 
 from app.adapters.base import AdapterFetchError, BaseAdapter
 from app.adapters.ikuuu_source import IkuuuSourceError
+from app.adapters.qingfeng_aes import QingfengSourceError
 from app.models import CandidateAccount, InternalAccount
 from app.security import public_account_id
 from app.services.store import RedisStore
@@ -79,6 +80,9 @@ class AccountAggregator:
             )
             return stored
         except IkuuuSourceError as exc:
+            logger.warning("poll_failed alias=%s result=%s", adapter.alias, exc.reason)
+            return False
+        except QingfengSourceError as exc:
             logger.warning("poll_failed alias=%s result=%s", adapter.alias, exc.reason)
             return False
         except (AdapterFetchError, ConnectionError, TimeoutError):

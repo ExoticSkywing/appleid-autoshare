@@ -55,6 +55,10 @@ class RedisStore:
                 self.settings.source_d_freshness_seconds,
                 self.settings.source_d_slice_ttl_seconds,
             ),
+            "qingfeng": (
+                self.settings.source_qingfeng_freshness_seconds,
+                self.settings.source_qingfeng_slice_ttl_seconds,
+            ),
         }
         freshness, diagnostic_ttl = source_limits.get(
             alias,
@@ -151,13 +155,16 @@ class RedisStore:
         aliases_by_mode = {
             "all": ("source_a", "source_b")
             + (("reserve_c",) if self.settings.source_c_enabled else ())
-            + (("reserve_d",) if self.settings.source_d_enabled else ()),
+            + (("reserve_d",) if self.settings.source_d_enabled else ())
+            + (("qingfeng",) if self.settings.source_qingfeng_enabled else ()),
             "primary_only": ("source_a", "source_b"),
             "source_a_only": ("source_a",),
             "source_b_only": ("source_b",),
             "reserve_only": ("reserve_c",),
             "source_d_only": ("reserve_d",),
             "ikuuu_only": ("reserve_d",),
+            "qingfeng_only": ("qingfeng",),
+            "source_qingfeng_only": ("qingfeng",),
         }
         aliases = aliases_by_mode[self.settings.delivery_source_mode]
         return await self.build_fresh_pool(aliases, now=now)

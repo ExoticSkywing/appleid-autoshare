@@ -84,3 +84,32 @@ async def test_source_d_probe_is_redacted_and_has_no_stable_account_hash(monkeyp
     assert result == {"classification": "ok", "account_count": 1}
     assert secret not in rendered
     assert "probe@example.invalid" not in rendered
+
+
+@pytest.mark.asyncio
+async def test_qingfeng_probe_is_redacted_and_has_only_classification_and_count(monkeypatch) -> None:
+    spec = importlib.util.spec_from_file_location("live_probe_q", SCRIPT)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    monkeypatch.setenv("SOURCE_PROBE", "Q")
+    monkeypatch.setenv("SOURCE_QINGFENG_URL", "https://feed.example.invalid/share/synthetic")
+    monkeypatch.setenv("SOURCE_QINGFENG_REFERER", "https://portal.example.invalid/")
+
+    class FakeAdapter:
+        def __init__(self, **kwargs):
+            assert kwargs["alias"] == "qingfeng"
+
+        async def fetch_accounts(self):
+            class Record:
+                username = "probe@example.invalid"
+                password = "synthetic-probe-password"
+
+            return [Record()]
+
+    monkeypatch.setattr(module, "QingfengAesAdapter", FakeAdapter)
+    result = await module.probe()
+    rendered = str(result)
+    assert result == {"classification": "ok", "account_count": 1}
+    assert "probe@example.invalid" not in rendered
+    assert "synthetic-probe-password" not in rendered

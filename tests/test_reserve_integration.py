@@ -118,7 +118,19 @@ def test_builder_registers_reserve_only_when_enabled(settings: Settings) -> None
         "reserve_d",
     ]
 
-
+    all_settings = both_settings.with_overrides(
+        source_qingfeng_enabled=True,
+        source_qingfeng_url="https://feed.example.invalid/share/synthetic",
+        source_qingfeng_referer="https://portal.example.invalid/",
+    )
+    all_sources = _build_aggregator(all_settings, store=None)  # type: ignore[arg-type]
+    assert [adapter.alias for adapter, _ in all_sources.adapters] == [
+        "source_a",
+        "source_b",
+        "reserve_c",
+        "reserve_d",
+        "qingfeng",
+    ]
 @pytest.mark.asyncio
 async def test_reserve_slice_has_independent_freshness_ttl_and_upstream_age(redis_client, settings) -> None:
     configured = settings.with_overrides(
@@ -158,3 +170,52 @@ async def test_reserve_slice_has_independent_freshness_ttl_and_upstream_age(redi
     pool = await stale_upstream_store.get_fresh_pool(now=fetched + 700)
     assert pool is not None
     assert "old-upstream@example.invalid" not in {item.username for item in pool.accounts}
+
+
+def test_qingfeng_disabled_by_default_and_fail_fast_when_enabled(settings: Settings) -> None:
+    assert settings.source_qingfeng_enabled is False
+    settings.with_overrides(
+        source_qingfeng_enabled=False,
+        source_qingfeng_url="",
+        source_qingfeng_referer="",
+    )
+    with pytest.raises(ConfigurationError, match="SOURCE_QINGFENG_URL"):
+        settings.with_overrides(
+            source_qingfeng_enabled=True,
+            source_qingfeng_referer="https://portal.example.invalid/",
+        )
+    with pytest.raises(ConfigurationError, match="SOURCE_QINGFENG_REFERER"):
+        settings.with_overrides(
+            source_qingfeng_enabled=True,
+            source_qingfeng_url="https://feed.example.invalid/share/synthetic",
+        )
+
+
+def test_qingfeng_settings_repr_redacts_url_and_referer(settings: Settings) -> None:
+    url = "https://feed.example.invalid/share/synthetic"
+    referer = "https://portal.example.invalid/"
+    configured = settings.with_overrides(
+        source_qingfeng_enabled=True,
+        source_qingfeng_url=url,
+        source_qingfeng_referer=referer,
+    )
+    rendered = repr(configured)
+    assert url not in rendered
+    assert referer not in rendered
+
+
+@pytest.mark.asyncio
+async def test_qingfeng_slice_has_independent_freshness_and_ttl(redis_client, settings) -> None:
+    configured = settings.with_overrides(
+        source_qingfeng_enabled=True,
+        source_qingfeng_url="https://feed.example.invalid/share/synthetic",
+        source_qingfeng_referer="https://portal.example.invalid/",
+        source_qingfeng_freshness_seconds=90,
+        source_qingfeng_slice_ttl_seconds=180,
+    )
+    store = RedisStore(redis_client, configured)
+    await store.replace_source_slice("qingfeng", 100, [account("q@example.invalid", 100)])
+    raw_ttl = await redis_client.ttl(f"{configured.redis_prefix}:source:qingfeng")
+    assert 0 < raw_ttl <= 180
+    assert await store.get_fresh_source_slice("qingfeng", now=189) is not None
+    assert await store.get_fresh_source_slice("qingfeng", now=190) is None

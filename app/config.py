@@ -90,6 +90,12 @@ class Settings:
     source_d_interval_seconds: int = 300
     source_d_freshness_seconds: int = 300
     source_d_slice_ttl_seconds: int = 600
+    source_qingfeng_enabled: bool = False
+    source_qingfeng_url: str = field(default="", repr=False)
+    source_qingfeng_referer: str = field(default="", repr=False)
+    source_qingfeng_interval_seconds: int = 60
+    source_qingfeng_freshness_seconds: int = 90
+    source_qingfeng_slice_ttl_seconds: int = 180
     delivery_source_mode: str = "all"
     upstream_timeout_seconds: float = 8.0
     upstream_max_response_bytes: int = 1_000_000
@@ -170,6 +176,12 @@ class Settings:
             source_d_interval_seconds=_int("SOURCE_D_POLL_SECONDS", 300),
             source_d_freshness_seconds=_int("SOURCE_D_FRESHNESS_SECONDS", 300),
             source_d_slice_ttl_seconds=_int("SOURCE_D_SLICE_TTL_SECONDS", 600),
+            source_qingfeng_enabled=_bool("SOURCE_QINGFENG_ENABLED", False),
+            source_qingfeng_url=os.getenv("SOURCE_QINGFENG_URL", ""),
+            source_qingfeng_referer=os.getenv("SOURCE_QINGFENG_REFERER", ""),
+            source_qingfeng_interval_seconds=_int("SOURCE_QINGFENG_POLL_SECONDS", 60),
+            source_qingfeng_freshness_seconds=_int("SOURCE_QINGFENG_FRESHNESS_SECONDS", 90),
+            source_qingfeng_slice_ttl_seconds=_int("SOURCE_QINGFENG_SLICE_TTL_SECONDS", 180),
             delivery_source_mode=os.getenv("DELIVERY_SOURCE_MODE", "all").strip().lower(),
             upstream_timeout_seconds=_float("UPSTREAM_TIMEOUT_SECONDS", 8.0),
             upstream_max_response_bytes=_int("UPSTREAM_MAX_RESPONSE_BYTES", 1_000_000),
@@ -243,6 +255,13 @@ class Settings:
                 raise ConfigurationError("SOURCE_D_FRESHNESS_SECONDS must be positive")
             if self.source_d_slice_ttl_seconds <= self.source_d_freshness_seconds:
                 raise ConfigurationError("SOURCE_D_SLICE_TTL_SECONDS must exceed freshness")
+        if self.source_qingfeng_enabled:
+            if self.source_qingfeng_interval_seconds <= self.upstream_timeout_seconds:
+                raise ConfigurationError("SOURCE_QINGFENG_POLL_SECONDS must exceed UPSTREAM_TIMEOUT_SECONDS")
+            if self.source_qingfeng_freshness_seconds <= 0:
+                raise ConfigurationError("SOURCE_QINGFENG_FRESHNESS_SECONDS must be positive")
+            if self.source_qingfeng_slice_ttl_seconds <= self.source_qingfeng_freshness_seconds:
+                raise ConfigurationError("SOURCE_QINGFENG_SLICE_TTL_SECONDS must exceed freshness")
         if not 1 <= self.source_freshness_seconds <= 60:
             raise ConfigurationError("source freshness must be between 1 and 60 seconds")
         if not 1 <= self.pool_ttl_seconds <= 60 or not 1 <= self.pool_freshness_seconds <= 60:
@@ -288,12 +307,19 @@ class Settings:
             "reserve_only",
             "source_d_only",
             "ikuuu_only",
+            "qingfeng_only",
+            "source_qingfeng_only",
         }:
             raise ConfigurationError("DELIVERY_SOURCE_MODE is invalid")
         if self.delivery_source_mode == "reserve_only" and not self.source_c_enabled:
             raise ConfigurationError("reserve_only requires SOURCE_C_ENABLED=true")
         if self.delivery_source_mode in {"source_d_only", "ikuuu_only"} and not self.source_d_enabled:
             raise ConfigurationError("source_d_only requires SOURCE_D_ENABLED=true")
+        if (
+            self.delivery_source_mode in {"qingfeng_only", "source_qingfeng_only"}
+            and not self.source_qingfeng_enabled
+        ):
+            raise ConfigurationError("qingfeng_only requires SOURCE_QINGFENG_ENABLED=true")
         require_upstreams = self.start_pollers
         _https_url("SOURCE_A_URL", self.source_a_url, require_upstreams)
         _https_url("SOURCE_B_URL", self.source_b_url, require_upstreams)
@@ -314,6 +340,8 @@ class Settings:
                 raise ConfigurationError("SOURCE_D_REFERER must use the same origin as SOURCE_D_URL")
         if self.source_d_enabled and not self.source_d_cookie:
             raise ConfigurationError("SOURCE_D_COOKIE is required")
+        _https_url("SOURCE_QINGFENG_URL", self.source_qingfeng_url, self.source_qingfeng_enabled)
+        _https_url("SOURCE_QINGFENG_REFERER", self.source_qingfeng_referer, self.source_qingfeng_enabled)
 
         if self.turnstile_test_mode:
             if production:

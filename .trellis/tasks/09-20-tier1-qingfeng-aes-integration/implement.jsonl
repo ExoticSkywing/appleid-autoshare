@@ -1,0 +1,4 @@
+{"file":".trellis/spec/backend/index.md","reason":"Backend guidelines entry point."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Upstream and crypto failures must fail closed behind generic reasons."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Source URL, upstream branding, account data and decrypted passwords must never enter logs."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Testing and review baseline for the adapter and aggregation integration."}

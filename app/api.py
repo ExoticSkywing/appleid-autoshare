@@ -20,6 +20,7 @@ from app.adapters.base import BaseAdapter
 from app.adapters.dom_source import DomSourceAdapter
 from app.adapters.json_source import JsonSourceAdapter
 from app.adapters.ikuuu_source import IkuuuSourceAdapter
+from app.adapters.qingfeng_aes import QingfengAesAdapter
 from app.config import Settings
 from app.models import (
     PublicAccount,
@@ -185,6 +186,19 @@ def _build_aggregator(settings: Settings, store: RedisStore) -> AccountAggregato
                     unhealthy_markers=settings.unhealthy_markers,
                 ),
                 settings.source_d_interval_seconds,
+            )
+        )
+    if settings.source_qingfeng_enabled:
+        adapters.append(
+            (
+                QingfengAesAdapter(
+                    alias="qingfeng",
+                    url=settings.source_qingfeng_url,
+                    referer=settings.source_qingfeng_referer,
+                    timeout_seconds=settings.upstream_timeout_seconds,
+                    max_response_bytes=settings.upstream_max_response_bytes,
+                ),
+                settings.source_qingfeng_interval_seconds,
             )
         )
     return AccountAggregator(

@@ -62,6 +62,44 @@ Run the redacted probe with `SOURCE_PROBE=D`; output is restricted to a fixed
 classification and account count. Rotate the Cookie on `auth_expired`; rollback
 by setting `SOURCE_D_ENABLED=false` and rolling workers.
 
+## Encrypted HTML source (Q)
+
+Source Q is a separate Tier-1 slice with internal alias `qingfeng`. It is
+disabled by default. Inject `SOURCE_QINGFENG_URL` and the exact
+`SOURCE_QINGFENG_REFERER` through the deployment secret manager; the two HTTPS
+origins may intentionally differ. Both values reject URL credentials. Do not
+paste either value into tickets, logs, CLI arguments, or fixtures.
+
+The adapter sends a fixed generic browser header set, disables redirects and
+environment proxy inheritance, verifies TLS, and enforces the common timeout
+and response-size limits. It never executes upstream JavaScript. It accepts a
+direct `CryptoJS.SHA256` 32-hex seed or safely decodes a bounded Dean Edwards
+packer payload, then performs strict Base64, AES-256-CBC, PKCS7, and UTF-8
+decoding. Only healthy cards that also claim the purchased target application
+are admitted; account and ciphertext pairing never crosses card boundaries.
+
+Enable with `SOURCE_QINGFENG_ENABLED=true`. The independent poll, freshness,
+and diagnostic TTL are controlled by `SOURCE_QINGFENG_POLL_SECONDS`,
+`SOURCE_QINGFENG_FRESHNESS_SECONDS`, and `SOURCE_QINGFENG_SLICE_TTL_SECONDS`.
+An HTTP 403 or anti-hotlink denial is `referer_rejected`; challenge or
+non-HTML responses are `challenge_returned` or `markup_drift`; missing,
+ambiguous, or unsafe packed seeds are `seed_missing`, `seed_ambiguous`, or
+`unsafe_packer`; a page where every otherwise-valid card fails cryptographic
+validation is `decrypt_failed`. A failed or empty poll does not replace or renew
+the previous slice and does not affect A/B/C/D.
+
+For an authorized live check, run:
+
+```bash
+SOURCE_PROBE=Q .venv/bin/python scripts/live_probe.py
+```
+
+Output is limited to `classification` and `account_count`; it never includes an
+account hash or any credential. The server-side modes `qingfeng_only` and
+`source_qingfeng_only` select only this slice and never fall back. `all` includes
+it only when enabled. Roll back by setting `SOURCE_QINGFENG_ENABLED=false` and
+rolling workers; the old diagnostic slice expires naturally.
+
 ## Safe diagnostics
 
 Allowed: internal alias, fixed reason code, duration, candidate counts, conflict count, consecutive failures, last success timestamp, and source-time age.

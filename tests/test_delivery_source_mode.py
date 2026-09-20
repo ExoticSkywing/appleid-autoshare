@@ -29,6 +29,7 @@ def account(account_id: str, username: str) -> InternalAccount:
                 "b@example.invalid",
                 "c@example.invalid",
                 "d@example.invalid",
+                "q@example.invalid",
             },
         ),
         ("primary_only", {"a@example.invalid", "b@example.invalid"}),
@@ -37,6 +38,8 @@ def account(account_id: str, username: str) -> InternalAccount:
         ("reserve_only", {"c@example.invalid"}),
         ("source_d_only", {"d@example.invalid"}),
         ("ikuuu_only", {"d@example.invalid"}),
+        ("qingfeng_only", {"q@example.invalid"}),
+        ("source_qingfeng_only", {"q@example.invalid"}),
     ],
 )
 async def test_delivery_source_mode_selects_only_configured_slices(redis_client, settings, mode, expected) -> None:
@@ -48,6 +51,9 @@ async def test_delivery_source_mode_selects_only_configured_slices(redis_client,
         source_d_url="https://api.example.invalid/private",
         source_d_cookie="opaque-synthetic-session-d",
         source_d_referer="https://api.example.invalid/tutorial",
+        source_qingfeng_enabled=True,
+        source_qingfeng_url="https://feed.example.invalid/share/synthetic",
+        source_qingfeng_referer="https://portal.example.invalid/",
         delivery_source_mode=mode,
     )
     store = RedisStore(redis_client, configured)
@@ -55,6 +61,7 @@ async def test_delivery_source_mode_selects_only_configured_slices(redis_client,
     await store.replace_source_slice("source_b", 100, [account("acc_b", "b@example.invalid")])
     await store.replace_source_slice("reserve_c", 100, [account("acc_c", "c@example.invalid")])
     await store.replace_source_slice("reserve_d", 100, [account("acc_d", "d@example.invalid")])
+    await store.replace_source_slice("qingfeng", 100, [account("acc_q", "q@example.invalid")])
 
     pool = await store.get_fresh_pool(now=100)
 
@@ -93,6 +100,21 @@ async def test_source_d_only_never_falls_back_to_any_other_source(redis_client, 
     assert await store.get_fresh_pool(now=100) is None
 
 
+@pytest.mark.asyncio
+async def test_qingfeng_only_never_falls_back_to_any_other_source(redis_client, settings) -> None:
+    configured = settings.with_overrides(
+        source_qingfeng_enabled=True,
+        source_qingfeng_url="https://feed.example.invalid/share/synthetic",
+        source_qingfeng_referer="https://portal.example.invalid/",
+        delivery_source_mode="qingfeng_only",
+    )
+    store = RedisStore(redis_client, configured)
+    await store.replace_source_slice("source_a", 100, [account("acc_a", "a@example.invalid")])
+    await store.replace_source_slice("reserve_d", 100, [account("acc_d", "d@example.invalid")])
+
+    assert await store.get_fresh_pool(now=100) is None
+
+
 def test_source_d_referer_must_share_endpoint_origin(settings) -> None:
     with pytest.raises(ConfigurationError, match="same origin"):
         settings.with_overrides(
@@ -110,3 +132,5 @@ def test_delivery_mode_validation(settings) -> None:
         settings.with_overrides(delivery_source_mode="reserve_only", source_c_enabled=False)
     with pytest.raises(ConfigurationError, match="SOURCE_D_ENABLED"):
         settings.with_overrides(delivery_source_mode="source_d_only", source_d_enabled=False)
+    with pytest.raises(ConfigurationError, match="SOURCE_QINGFENG_ENABLED"):
+        settings.with_overrides(delivery_source_mode="qingfeng_only", source_qingfeng_enabled=False)
