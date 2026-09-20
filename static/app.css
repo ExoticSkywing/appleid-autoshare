@@ -317,6 +317,32 @@
   .safety-rule h1 { margin-bottom: 4px; font-size: clamp(1.12rem, 4.8vw, 1.34rem); line-height: 1.2; letter-spacing: -.02em; text-wrap: balance; }
   .safety-rule p { max-width: 32ch; color: #cbd5e1; font-size: .86rem; line-height: 1.5; text-wrap: pretty; }
 
+  .turnstile-host { position: relative; }
+  .turnstile-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 65px;
+    color: var(--text-soft);
+    font-size: .82rem;
+  }
+  .turnstile-loading span {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+    border: 2px solid rgba(255,255,255,.18);
+    border-top-color: var(--accent-soft);
+    border-radius: 50%;
+    animation: turnstile-loading-spin .8s linear infinite;
+  }
+  .turnstile-loading p { margin: 0; }
+  @keyframes turnstile-loading-spin { to { transform: rotate(1turn); } }
+  @media (prefers-reduced-motion: reduce) {
+    .turnstile-loading span { animation: none; }
+  }
+
   .relay-stage { position: relative; isolation: isolate; }
   .archive-edge {
     position: absolute;

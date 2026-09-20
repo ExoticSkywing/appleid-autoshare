@@ -106,3 +106,18 @@ def test_spa_uses_safe_dom_apis_and_has_no_ingestion_identifiers() -> None:
     assert "source_a" not in script
     assert "source_b" not in script
     assert "data-clipboard-text" not in script
+
+
+def test_turnstile_has_bounded_loading_and_recovery_contract() -> None:
+    root = Path(__file__).parents[1]
+    script = (root / "static" / "app.js").read_text(encoding="utf-8")
+    markup = (root / "static" / "index.html").read_text(encoding="utf-8")
+
+    assert "TURNSTILE_LOAD_TIMEOUT_MS = 12_000" in script
+    assert "TURNSTILE_TOKEN_TIMEOUT_MS = 45_000" in script
+    assert "TURNSTILE_RETRY_LIMIT = 1" in script
+    assert 'host.querySelector("iframe")' in script
+    assert '"timeout-callback"' in script
+    assert '"unsupported-callback"' in script
+    assert "人机验证加载超时" in script
+    assert 'id="turnstileLoading"' in markup

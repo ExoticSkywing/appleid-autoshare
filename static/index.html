@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#050606">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>获取可用账号</title>
-  <link rel="stylesheet" href="/assets/app.css?v=20260826-3">
+  <link rel="stylesheet" href="/assets/app.css?v=20260920-1">
   <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260830-3">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260824-38">
   <link rel="stylesheet" href="/assets/motion.css?v=20260827-8">
@@ -122,7 +122,12 @@
             <h2 id="verifyTitle">先选择下载目标</h2>
             <p id="verifyHint">选择目标后，再完成访问验证。</p>
           </div>
-          <div id="turnstileWidget" class="turnstile-host" aria-label="人机验证"></div>
+          <div id="turnstileWidget" class="turnstile-host" aria-label="人机验证">
+            <div id="turnstileLoading" class="turnstile-loading" role="status">
+              <span aria-hidden="true"></span>
+              <p>正在加载人机验证…</p>
+            </div>
+          </div>
           <button id="verifyButton" class="primary-action gooey-action" type="button" aria-describedby="verifyActionHint">
             <span class="gooey-action-particles" aria-hidden="true"></span>
             <span id="verifyButtonLabel">获取账号</span>
@@ -433,6 +438,6 @@
   </main>
 
   <script src="/assets/sound.js?v=20260824-17" defer></script>
-  <script src="/assets/app.js?v=20260828-1" defer></script>
+  <script src="/assets/app.js?v=20260920-1" defer></script>
 </body>
 </html>

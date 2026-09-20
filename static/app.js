@@ -237,6 +237,78 @@ function loadScript(url) {
   });
 }
 
+const TURNSTILE_LOAD_TIMEOUT_MS = 12_000;
+const TURNSTILE_TOKEN_TIMEOUT_MS = 45_000;
+const TURNSTILE_RETRY_LIMIT = 1;
+let turnstileLoadTimer = null;
+let turnstileRetryCount = 0;
+
+function clearTurnstileLoadTimer() {
+  if (turnstileLoadTimer !== null) {
+    window.clearTimeout(turnstileLoadTimer);
+    turnstileLoadTimer = null;
+  }
+}
+
+function removeTurnstileLoading() {
+  byId("turnstileLoading")?.remove();
+}
+
+function resetTurnstileHost() {
+  clearTurnstileLoadTimer();
+  turnstileRetryCount = 0;
+  const host = byId("turnstileWidget");
+  host.replaceChildren();
+  const loading = document.createElement("div");
+  loading.id = "turnstileLoading";
+  loading.className = "turnstile-loading";
+  loading.setAttribute("role", "status");
+  const spinner = document.createElement("span");
+  spinner.setAttribute("aria-hidden", "true");
+  const copy = document.createElement("p");
+  copy.textContent = "正在加载人机验证…";
+  loading.append(spinner, copy);
+  host.appendChild(loading);
+}
+
+function showTurnstileFailure(title, detail) {
+  clearTurnstileLoadTimer();
+  state.token = "";
+  removeTurnstileLoading();
+  updateVerifyAction();
+  byId("credentialState").textContent = "验证组件未连接";
+  showRecovery(title, detail, () => window.location.reload());
+}
+
+function watchTurnstileProgress() {
+  clearTurnstileLoadTimer();
+  turnstileLoadTimer = window.setTimeout(() => {
+    const host = byId("turnstileWidget");
+    if (state.token) return;
+    if (host.querySelector("iframe")) {
+      turnstileLoadTimer = window.setTimeout(() => {
+        if (!state.token) {
+          showTurnstileFailure(
+            "人机验证等待超时",
+            "Cloudflare 验证一直没有完成。请关闭内容拦截或私人中继后刷新重试。",
+          );
+        }
+      }, TURNSTILE_TOKEN_TIMEOUT_MS);
+      return;
+    }
+    if (turnstileRetryCount < TURNSTILE_RETRY_LIMIT && window.turnstile && state.widgetId !== null) {
+      turnstileRetryCount += 1;
+      window.turnstile.reset(state.widgetId);
+      watchTurnstileProgress();
+      return;
+    }
+    showTurnstileFailure(
+      "人机验证加载超时",
+      "Cloudflare 验证没有连上。请关闭内容拦截或私人中继后刷新重试。",
+    );
+  }, TURNSTILE_LOAD_TIMEOUT_MS);
+}
+
 function setPhase(phase, viewId) {
   const previousView = views.find((id) => !byId(id).classList.contains("hidden"));
   document.documentElement.dataset.phase = phase;
@@ -913,12 +985,15 @@ async function initializeTurnstile() {
     showVerify();
     await loadScript(state.config.turnstile_script_url);
     if (!window.turnstile) throw new Error("turnstile_unavailable");
+    resetTurnstileHost();
     state.widgetId = window.turnstile.render("#turnstileWidget", {
       sitekey: state.config.turnstile_site_key,
       action: state.config.turnstile_action,
       theme: "dark",
       size: "flexible",
       callback: (token) => {
+        clearTurnstileLoadTimer();
+        removeTurnstileLoading();
         state.token = token;
         updateVerifyAction();
         if (state.intent) {
@@ -939,13 +1014,21 @@ async function initializeTurnstile() {
         byId("statusLight").classList.remove("is-ready");
         announce("验证已过期，请重新完成验证。" );
       },
-      "error-callback": () => {
-        state.token = "";
-        updateVerifyAction();
-        showRecovery("验证组件暂不可用", "请检查网络后刷新页面重试。", () => window.location.reload());
+      "timeout-callback": () => {
+        showTurnstileFailure("人机验证已超时", "请刷新页面后重新完成验证。" );
+      },
+      "unsupported-callback": () => {
+        showTurnstileFailure("当前浏览器无法完成验证", "请升级 Safari 或改用系统浏览器后刷新重试。" );
+      },
+      "error-callback": (code) => {
+        const suffix = typeof code === "string" && code ? `（${code}）` : "";
+        showTurnstileFailure("验证组件暂不可用", `请检查网络或内容拦截设置后刷新重试${suffix}。`);
       },
     });
+    watchTurnstileProgress();
   } catch (_) {
+    clearTurnstileLoadTimer();
+    removeTurnstileLoading();
     setPhase("error", "bootView");
     byId("credentialState").textContent = "验证组件未连接";
     showRecovery("验证组件加载失败", "请检查网络或内容拦截设置，然后重试。", () => window.location.reload());
