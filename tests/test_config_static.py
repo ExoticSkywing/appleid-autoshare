@@ -44,6 +44,12 @@ def test_environment_runtime_controls_are_not_silently_ignored(monkeypatch) -> N
         "SOURCE_D_POLL_SECONDS": "302",
         "SOURCE_D_FRESHNESS_SECONDS": "303",
         "SOURCE_D_SLICE_TTL_SECONDS": "604",
+        "SOURCE_QINGFENG_ENABLED": "true",
+        "SOURCE_QINGFENG_URL": "https://feed.example.invalid/share/synthetic",
+        "SOURCE_QINGFENG_REFERER": "https://portal.example.invalid/",
+        "SOURCE_QINGFENG_POLL_SECONDS": "61",
+        "SOURCE_QINGFENG_FRESHNESS_SECONDS": "91",
+        "SOURCE_QINGFENG_SLICE_TTL_SECONDS": "181",
         "UPSTREAM_TIMEOUT_SECONDS": "9",
         "SOURCE_FRESHNESS_SECONDS": "42",
         "SOURCE_SLICE_TTL_SECONDS": "77",
@@ -67,6 +73,10 @@ def test_environment_runtime_controls_are_not_silently_ignored(monkeypatch) -> N
     assert settings.source_d_enabled is True
     assert settings.source_d_interval_seconds == 302
     assert settings.source_d_freshness_seconds == 303
+    assert settings.source_qingfeng_enabled is True
+    assert settings.source_qingfeng_interval_seconds == 61
+    assert settings.source_qingfeng_freshness_seconds == 91
+    assert settings.source_qingfeng_slice_ttl_seconds == 181
     assert settings.upstream_timeout_seconds == 9
     assert settings.source_freshness_seconds == 42
     assert settings.source_slice_ttl_seconds == 77
@@ -116,11 +126,15 @@ def test_turnstile_has_bounded_loading_and_recovery_contract() -> None:
     assert "TURNSTILE_LOAD_TIMEOUT_MS = 12_000" in script
     assert "TURNSTILE_RETRY_LIMIT = 1" in script
     assert 'host.querySelector("iframe")' in script
+    assert "MutationObserver" in script
+    assert 'byId("credentialState").textContent = "等待你完成验证"' in script
     assert '"timeout-callback"' in script
     assert '"unsupported-callback"' in script
     assert "人机验证没有加载出来" in script
     assert "点击重新加载验证" in script
     assert 'id="turnstileLoading"' in markup
+    assert 'id="verifyButton" class="primary-action gooey-action hidden"' in markup
+    assert 'id="verifyActionHint"' not in markup
 
 
 def test_novice_turnstile_is_gated_by_app_selection() -> None:

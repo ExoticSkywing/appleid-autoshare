@@ -253,11 +253,19 @@ const TURNSTILE_LOAD_TIMEOUT_MS = 12_000;
 const TURNSTILE_RETRY_LIMIT = 1;
 let turnstileLoadTimer = null;
 let turnstileRetryCount = 0;
+let turnstileFrameObserver = null;
 
 function clearTurnstileLoadTimer() {
   if (turnstileLoadTimer !== null) {
     window.clearTimeout(turnstileLoadTimer);
     turnstileLoadTimer = null;
+  }
+}
+
+function clearTurnstileFrameObserver() {
+  if (turnstileFrameObserver) {
+    turnstileFrameObserver.disconnect();
+    turnstileFrameObserver = null;
   }
 }
 
@@ -283,6 +291,7 @@ function resetTurnstileHost() {
 
 function showTurnstileFailure(title, detail) {
   clearTurnstileLoadTimer();
+  clearTurnstileFrameObserver();
   state.token = "";
   state.turnstileLoading = false;
   state.turnstileReady = false;
@@ -294,10 +303,25 @@ function showTurnstileFailure(title, detail) {
 
 function watchTurnstileProgress() {
   clearTurnstileLoadTimer();
+  clearTurnstileFrameObserver();
+  const host = byId("turnstileWidget");
+  const markTurnstileReady = () => {
+    if (!host.querySelector("iframe")) return false;
+    clearTurnstileLoadTimer();
+    clearTurnstileFrameObserver();
+    removeTurnstileLoading();
+    state.turnstileLoading = false;
+    state.turnstileReady = true;
+    byId("credentialState").textContent = "等待你完成验证";
+    updateVerifyAction();
+    return true;
+  };
+  if (markTurnstileReady()) return;
+  turnstileFrameObserver = new MutationObserver(() => markTurnstileReady());
+  turnstileFrameObserver.observe(host, { childList: true, subtree: true });
   turnstileLoadTimer = window.setTimeout(() => {
-    const host = byId("turnstileWidget");
     if (state.token) return;
-    if (host.querySelector("iframe")) return;
+    if (markTurnstileReady()) return;
     if (turnstileRetryCount < TURNSTILE_RETRY_LIMIT && window.turnstile && state.widgetId !== null) {
       turnstileRetryCount += 1;
       window.turnstile.reset(state.widgetId);
@@ -353,23 +377,14 @@ function runScanner() {
 function updateVerifyAction() {
   const button = byId("verifyButton");
   const label = byId("verifyButtonLabel");
-  const hint = byId("verifyActionHint");
   const onVerifyView = !state.account && document.body.dataset.phase === "verify";
   const isExpert = state.mode === "expert";
-  let reason = "";
-  let buttonLabel = "获取账号";
-
-  if (!state.token) {
-    reason = isExpert ? "请完成上方的人机验证。" : "目标已选择，请完成上方的人机验证。";
-    buttonLabel = "完成验证后获取";
-  }
-
-  const blocked = Boolean(reason) || state.busy;
+  const showButton = state.busy || Boolean(state.token);
+  const blocked = state.busy;
+  button.classList.toggle("hidden", !showButton);
   button.classList.toggle("is-blocked", blocked);
   button.setAttribute("aria-disabled", String(blocked));
-  label.textContent = state.busy ? "正在获取账号" : (isExpert && !blocked ? "获取账号（极速）" : buttonLabel);
-  hint.textContent = state.busy ? "正在为你分配账号，请稍候。" : reason;
-  hint.classList.toggle("hidden", !state.busy && !reason);
+  label.textContent = state.busy ? "正在获取账号" : (isExpert ? "获取账号（极速）" : "获取账号");
   byId("turnstileWidget").classList.toggle("hidden", Boolean(state.account));
 
   if (!onVerifyView) return;
@@ -386,7 +401,7 @@ function updateVerifyAction() {
     byId("headerState").textContent = "验证已通过";
     byId("statusLight").classList.add("is-ready");
   } else if (isExpert || state.intent) {
-    byId("credentialState").textContent = "等待访问验证";
+    byId("credentialState").textContent = state.turnstileReady ? "等待你完成验证" : "正在加载人机验证";
     byId("verifyTitle").textContent = isExpert ? "老玩家极速通道" : "完成访问验证";
     byId("verifyHint").textContent = "验证完成后即可直接获取账号。";
     byId("headerState").textContent = "等待访问验证";
@@ -1019,6 +1034,7 @@ async function startTurnstile() {
       size: "flexible",
       callback: (token) => {
         clearTurnstileLoadTimer();
+        clearTurnstileFrameObserver();
         removeTurnstileLoading();
         state.turnstileLoading = false;
         state.turnstileReady = true;
@@ -1043,11 +1059,10 @@ async function startTurnstile() {
         showTurnstileFailure("人机验证暂不可用", "点击重新加载验证；仍未出现时，再刷新页面。" );
       },
     });
-    state.turnstileLoading = false;
-    state.turnstileReady = true;
     watchTurnstileProgress();
   } catch (_) {
     clearTurnstileLoadTimer();
+    clearTurnstileFrameObserver();
     removeTurnstileLoading();
     state.turnstileLoading = false;
     state.turnstileReady = false;
@@ -1058,6 +1073,7 @@ async function startTurnstile() {
 
 function stopTurnstile() {
   clearTurnstileLoadTimer();
+  clearTurnstileFrameObserver();
   if (window.turnstile && state.widgetId !== null) {
     try { window.turnstile.remove(state.widgetId); } catch (_) {}
   }
