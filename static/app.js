@@ -306,7 +306,9 @@ function watchTurnstileProgress() {
   clearTurnstileFrameObserver();
   const host = byId("turnstileWidget");
   const markTurnstileReady = () => {
-    if (!host.querySelector("iframe")) return false;
+    const responseField = host.querySelector('input[name="cf-turnstile-response"]');
+    const providerRoot = responseField?.closest("#turnstileWidget > div");
+    if (!host.querySelector("iframe") && !providerRoot) return false;
     clearTurnstileLoadTimer();
     clearTurnstileFrameObserver();
     removeTurnstileLoading();
@@ -1032,6 +1034,13 @@ async function startTurnstile() {
       action: state.config.turnstile_action,
       theme: "dark",
       size: "flexible",
+      "before-interactive-callback": () => {
+        removeTurnstileLoading();
+        state.turnstileLoading = false;
+        state.turnstileReady = true;
+        byId("credentialState").textContent = "等待你完成验证";
+        updateVerifyAction();
+      },
       callback: (token) => {
         clearTurnstileLoadTimer();
         clearTurnstileFrameObserver();

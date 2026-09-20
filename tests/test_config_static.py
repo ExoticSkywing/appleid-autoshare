@@ -126,6 +126,8 @@ def test_turnstile_has_bounded_loading_and_recovery_contract() -> None:
     assert "TURNSTILE_LOAD_TIMEOUT_MS = 12_000" in script
     assert "TURNSTILE_RETRY_LIMIT = 1" in script
     assert 'host.querySelector("iframe")' in script
+    assert 'input[name="cf-turnstile-response"]' in script
+    assert '"before-interactive-callback"' in script
     assert "MutationObserver" in script
     assert 'byId("credentialState").textContent = "等待你完成验证"' in script
     assert '"timeout-callback"' in script
