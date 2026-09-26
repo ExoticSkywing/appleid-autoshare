@@ -5,7 +5,11 @@ from datetime import datetime, timezone
 import httpx
 import pytest
 
-from app.adapters.ikuuu_source import IkuuuSourceAdapter, IkuuuSourceError
+from app.adapters.ikuuu_source import (
+    _CLOCK_SKEW_TOLERANCE_SECONDS,
+    IkuuuSourceAdapter,
+    IkuuuSourceError,
+)
 from app.services.aggregator import AccountAggregator
 
 NOW = int(datetime(2026, 8, 24, 12, 0, tzinfo=timezone.utc).timestamp())
@@ -85,7 +89,7 @@ async def test_ret_failure_is_auth_expired() -> None:
         httpx.Response(200, headers={"content-type": "image/png"}, content=b"not-json"),
         httpx.Response(200, headers={"content-type": "application/json"}, content=b"not-json"),
         httpx.Response(200, headers={"content-type": "application/json"}, json={"ret": 1, "msg": "ok", "data": {}}),
-        httpx.Response(200, headers={"content-type": "application/json"}, json=payload(expire_time=NOW)),
+        httpx.Response(200, headers={"content-type": "application/json"}, json=payload(expire_time=NOW - _CLOCK_SKEW_TOLERANCE_SECONDS)),
         httpx.Response(200, headers={"content-type": "application/json"}, json=payload(expire_time=NOW + 367 * 86400)),
     ],
 )
@@ -157,6 +161,23 @@ def test_password_is_treated_as_opaque_credential() -> None:
         }).content
     )
     assert records[0].password == raw
+
+
+def test_clock_skew_tolerance_allows_slight_past_expiry() -> None:
+    instance = adapter(lambda _request: httpx.Response(500))
+    # Exactly within skew tolerance (NOW - 30s)
+    records = instance.parse_response(
+        httpx.Response(200, json=payload(expire_time=NOW - 30)).content
+    )
+    assert len(records) == 1
+    assert records[0].source_valid_until == NOW - 30
+
+    # Outside skew tolerance (NOW - 60s) fails closed
+    with pytest.raises(IkuuuSourceError) as caught:
+        instance.parse_response(
+            httpx.Response(200, json=payload(expire_time=NOW - _CLOCK_SKEW_TOLERANCE_SECONDS)).content
+        )
+    assert caught.value.reason == "schema_drift"
 
 
 @pytest.mark.asyncio

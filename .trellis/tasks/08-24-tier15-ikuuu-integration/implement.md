@@ -5,19 +5,16 @@
 ## 1. 实施清单
 
 ### 阶段一：配置与环境对接
-- [ ] 在 `app/config.py` 中添加 `SOURCE_D_ENABLED`、`SOURCE_D_URL`、`SOURCE_D_COOKIE`、`SOURCE_D_POLL_SECONDS` 配置项与校验逻辑。
-- [ ] 在 `.env.example` 中补充示例模板（凭据处留空）。
+- [ ] 在 `app/config.py` 与运行环境中确认配置项生效（当前主站漂移为 `https://ikuuu.top/user/get-appleid`，Referer 设为 `https://ikuuu.top/user/tutorial?os=ios&client=openvxs`）。
+- [ ] 注入最新有效的会员 Cookie 凭据。
 
-### 阶段二：Adapter 开发
-- [ ] 创建 `app/adapters/ikuuu_source.py`，继承 `BaseAdapter`。
-- [ ] 实现针对 `/user/get-appleid` 的请求组装与 JSON 安全解析。
-- [ ] 增加对 `expire_time` 的时间戳校验与有效截断。
+### 阶段二：Adapter 代码时钟容错微调
+- [x] 检查 `app/adapters/ikuuu_source.py` 第 138 行，对 `expire_time <= current` 加入 60~120 秒的时钟容差，避免因上游服务器与本地服务器的时钟微小差异误判为 `schema_drift` 异常。
 
 ### 阶段三：Aggregator 编排与合流
-- [ ] 在 `app/api.py` 的生命周期中，当 `SOURCE_D_ENABLED=True` 时将该 Adapter 注册进 Aggregator 轮询队列。
-- [ ] 确保与 Redis Source Slice（`alias=ikuuu`）的存取契约对齐。
+- [x] 确认在 `app/api.py` 的生命周期中，当 `SOURCE_D_ENABLED=True` 时将该 Adapter 注册进 Aggregator 轮询队列。
+- [x] 确保与 Redis Source Slice（`alias=reserve_d`）的存取契约对齐。
 
 ### 阶段四：单元测试与门禁验证
-- [ ] 编写 `tests/test_ikuuu_source_adapter.py`，覆盖正常解析、鉴权失败、字段缺失及超时等异常用例。
-- [ ] 运行 `pytest`、`ruff check`、`mypy` 确保全量通过。
-- [ ] 运行敏感信息泄漏检测脚本，确保源码中无明文 Cookie 和源站域名。
+- [x] 运行 `pytest`、`ruff check`、`mypy` 确保全量通过。
+- [x] 启动服务验证分发模式 `DELIVERY_SOURCE_MODE=all` 或 `DELIVERY_SOURCE_MODE=ikuuu_only`，确认带有 `features=["shadowrocket_purchased"]` 的专属账号正常进入 Redis 活跃池。

@@ -14,6 +14,7 @@ from app.models import CandidateAccount
 
 _EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 _MAX_FUTURE_SECONDS = 366 * 24 * 60 * 60
+_CLOCK_SKEW_TOLERANCE_SECONDS = 60
 
 
 class IkuuuSourceError(AdapterFetchError):
@@ -135,7 +136,7 @@ class IkuuuSourceAdapter(BaseAdapter):
         ):
             raise IkuuuSourceError("schema_drift")
         current = self._now()
-        if expire_time <= current or expire_time > current + _MAX_FUTURE_SECONDS:
+        if expire_time + _CLOCK_SKEW_TOLERANCE_SECONDS <= current or expire_time > current + _MAX_FUTURE_SECONDS:
             raise IkuuuSourceError("schema_drift")
         return [
             CandidateAccount(

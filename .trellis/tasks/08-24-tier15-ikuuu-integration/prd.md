@@ -2,12 +2,17 @@
 
 ## 1. 业务目标与来源定位
 
-### 1.1 来源定位
-为 `Apple ID AutoShare` 系统新增一个受控的 **Tier-1.5 鉴权自营储备源 (`SRC-04-IKUUU-API`)**。
-该源属于站点自营维护的专有 Apple ID（自建域名格式），通过原生 REST JSON 接口下发，并带有权威的 `expire_time` 有效期字段。
+### 1.1 来源定位与业务价值
+为 `Apple ID AutoShare` 系统新增受控的 **Tier-1.5 鉴权自营储备源 (`SRC-04-IKUUU-API`)**。
+该源具有付费会员强隔离保护，专为 Shadowrocket（小火箭）维护，账号纯净度与抗改密能力极高，属于**小火箭专用号池的绝对主力保底源**。
 
-### 1.2 核心业务原则
-1. **主次分明**：系统依然以现有无需认证的 **Tier-1 直连源**（`SRC-APPSTORE-AUTOS`、`SRC-FNBAIDU`）为主力；`SRC-IKUUU-API` 定位为 **高纯净度保底储备源**，绝不构成系统可用性的单点瓶颈。
+### 1.2 号池分类与定位架构
+系统当前确立两大核心分发阵营：
+1. **🚀 小火箭专用核心池 (Shadowrocket Pool)**：
+   - 主力核心：`SRC-IKUUU` (`reserve_d`)（自营号，已购 Shadowrocket，带精确有效期）
+   - 备用核心：`SRC-QINGFENG` (`qingfeng`)（清风自营池，待源站补号后无缝合流）
+2. **🌐 通用美区池 (General iOS Pool)**：
+   - `SRC-APPSTORE-AUTOS` (`source_a`) 与 `SRC-FNBAIDU` (`source_b`)（适合非小火箭/Nextin/跨区通用应用下载）
 2. **零泄漏原则**：对外 API 及前端 SPA 严禁暴露该站点的任何域名、Cookie、品牌标识（如屏蔽 `ikuuu` 专有字样）或源站错误信息。
 3. **安全降级**：若该源 Cookie 失效（如返回 `ret != 1` 或 HTTP 401/403/500），系统必须平滑降级并触发内部告警，不影响整体主流程。
 
