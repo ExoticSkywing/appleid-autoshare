@@ -6,7 +6,7 @@ from app.models import InternalAccount
 from app.services.store import RedisStore
 
 
-def account(account_id: str, username: str, synced: int = 100) -> InternalAccount:
+def account(account_id: str, username: str, synced: int = 100, features: list[str] | None = None) -> InternalAccount:
     return InternalAccount(
         id=account_id,
         username=username,
@@ -14,7 +14,7 @@ def account(account_id: str, username: str, synced: int = 100) -> InternalAccoun
         region="US",
         status="active",
         last_synced_at=synced,
-        features=[],
+        features=features if features is not None else [],
     )
 
 
@@ -35,6 +35,19 @@ async def test_confirmed_shadowrocket_is_selected_before_unknown(redis_client, s
     )
 
     assert selected == known
+
+
+@pytest.mark.asyncio
+async def test_target_app_intent_prefers_feature_declared_accounts_over_general(redis_client, settings) -> None:
+    store = RedisStore(redis_client, settings)
+    general_account = account("acc_general", "general@example.invalid", synced=200, features=[])
+    special_account = account("acc_special", "special@example.invalid", synced=100, features=["shadowrocket_purchased"])
+
+    session = await store.create_session("feature-priority-session", now=100)
+    selected = await store.select_account_for_session(
+        session, [general_account, special_account], intent="target_app", now=101
+    )
+    assert selected == special_account
 
 
 @pytest.mark.asyncio

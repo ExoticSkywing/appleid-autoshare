@@ -12,7 +12,7 @@ class CandidateAccount(BaseModel):
     password: str
     region: str = "Unknown"
     status: Literal["active"] = "active"
-    features: tuple[str, ...] = ("shadowrocket_purchased",)
+    features: tuple[str, ...] = ()
     upstream_updated_at: int | None = None
     relay_synced_at: int | None = None
     # Internal authoritative upstream expiry used only to cap a source slice.
@@ -28,7 +28,7 @@ class InternalAccount(BaseModel):
     region: str
     status: Literal["active"] = "active"
     last_synced_at: int
-    features: list[str] = Field(default_factory=lambda: ["shadowrocket_purchased"])
+    features: list[str] = Field(default_factory=list)
     upstream_updated_at: int | None = None
     relay_synced_at: int | None = None
 

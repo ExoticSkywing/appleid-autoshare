@@ -260,8 +260,18 @@ class RedisStore:
                 "shadowrocket_missing": 3,
                 "login_failed": 4,
             }.get(quality, 1)
+            has_feature = "shadowrocket_purchased" in account.features
             if intent == "target_app":
-                intent_rank = 0 if quality == "shadowrocket_available" else 1
+                if quality == "shadowrocket_available":
+                    intent_rank = 0
+                elif quality in {"login_success", None} and has_feature:
+                    intent_rank = 1
+                elif quality in {"login_success", None}:
+                    intent_rank = 2
+                elif quality == "shadowrocket_missing":
+                    intent_rank = 3
+                else:
+                    intent_rank = 4
             else:
                 intent_rank = 0 if quality in {"shadowrocket_available", "shadowrocket_missing", "login_success"} else 1
             ranked.append((intent_rank, rank, -account.last_synced_at, account.id, account))
