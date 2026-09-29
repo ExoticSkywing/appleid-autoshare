@@ -1255,6 +1255,27 @@ document.querySelectorAll("[data-intent]").forEach((button) => {
   button.addEventListener("click", () => selectIntent(button.dataset.intent));
 });
 byId("intentSummary").addEventListener("click", changeIntent);
+function openBenefitModal() {
+  const modal = byId("benefitModal");
+  if (!modal) return;
+  const link = byId("benefitModalShopLink");
+  if (link) {
+    const url = state.purchaseLink || byId("storeLink")?.getAttribute("href") || "#";
+    link.setAttribute("href", url);
+    link.classList.toggle("hidden", !url || url === "#");
+  }
+  modal.classList.remove("hidden");
+  document.body.classList.add("is-benefit-modal-open");
+  byId("benefitModalClose")?.focus({ preventScroll: true });
+}
+
+function closeBenefitModal() {
+  const modal = byId("benefitModal");
+  if (!modal || modal.classList.contains("hidden")) return;
+  modal.classList.add("hidden");
+  document.body.classList.remove("is-benefit-modal-open");
+}
+
 function closeGuideLightbox() {
   const lightbox = byId("guideLightbox");
   if (lightbox.classList.contains("hidden")) return;
@@ -1282,10 +1303,21 @@ document.querySelectorAll("[data-guide-image]").forEach((button) => {
 });
 byId("guideLightboxClose").addEventListener("click", closeGuideLightbox);
 byId("guideLightbox").addEventListener("click", (event) => {
-  if (event.target === event.currentTarget) closeGuideLightbox();
+  if (event.target === byId("guideLightbox")) closeGuideLightbox();
+});
+byId("benefitModalClose")?.addEventListener("click", closeBenefitModal);
+byId("benefitModal")?.querySelector(".benefit-dialog-backdrop")?.addEventListener("click", closeBenefitModal);
+document.querySelectorAll(".store-benefit-trigger").forEach((button) => {
+  button.addEventListener("click", openBenefitModal);
 });
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !byId("guideLightbox").classList.contains("hidden")) closeGuideLightbox();
+  if (event.key === "Escape") {
+    if (!byId("benefitModal")?.classList.contains("hidden")) {
+      closeBenefitModal();
+      return;
+    }
+    if (!byId("guideLightbox").classList.contains("hidden")) closeGuideLightbox();
+  }
 });
 
 byId("showResultsButton").addEventListener("click", () => {

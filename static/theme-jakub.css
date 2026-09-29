@@ -1188,6 +1188,294 @@
     border-color: #f0c98e;
     background: linear-gradient(100deg, rgba(169,135,79,.28), rgba(169,135,79,.12));
   }
+  /* Benefit Comparison Triggers & Modal (Concentric, Precise, Obsidian-Gold) */
+  .result-store-card-wrap {
+    position: relative;
+    width: 100%;
+  }
+  .store-benefit-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    border: 1px solid rgba(251,191,36,.28);
+    border-radius: 8px;
+    color: #fbbf24;
+    background: rgba(245,158,11,.08);
+    font-size: .68rem;
+    font-weight: 650;
+    cursor: pointer;
+    transition: all 180ms cubic-bezier(.22,1,.36,1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .store-benefit-trigger svg {
+    width: 13px;
+    height: 13px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  @media (hover: hover) {
+    .store-benefit-trigger:hover {
+      background: rgba(245,158,11,.16);
+      border-color: rgba(251,191,36,.45);
+      color: #fef08a;
+      transform: translateY(-1px);
+    }
+  }
+  .store-benefit-trigger:active {
+    transform: scale(.96);
+  }
+  .result-store-bar .store-benefit-trigger {
+    position: absolute;
+    right: 12px;
+    bottom: 8px;
+    z-index: 2;
+  }
+  @media (max-width: 440px) {
+    .result-store-bar .result-store-link {
+      padding-bottom: 34px !important;
+    }
+    .result-store-bar .store-benefit-trigger {
+      right: 10px;
+      bottom: 8px;
+    }
+  }
+  .update-tradeoff-wrap,
+  .empty-store-card-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+  }
+
+  /* Modal Dialog */
+  .benefit-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    isolation: isolate;
+  }
+  .benefit-modal.hidden { display: none; }
+  .benefit-dialog-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(8,10,14,.76);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .benefit-dialog-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 540px);
+    max-height: calc(100dvh - 36px);
+    padding: 18px 14px 16px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, #171922 0%, #0f1117 100%);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 24px 48px -12px rgba(0,0,0,.7);
+    overflow: hidden;
+    animation: benefit-dialog-in 260ms cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes benefit-dialog-in {
+    0% { opacity: 0; transform: scale(.95) translateY(12px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .benefit-dialog-header {
+    position: relative;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .benefit-dialog-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 6px;
+    color: #fbbf24;
+    background: rgba(245,158,11,.15);
+    box-shadow: 0 0 0 1px rgba(245,158,11,.3);
+    font-size: .62rem;
+    font-weight: 750;
+    letter-spacing: .02em;
+    margin-bottom: 6px;
+  }
+  .benefit-modal-title {
+    margin: 0 0 4px;
+    color: var(--neutral-100);
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+  .benefit-modal-subtitle {
+    margin: 0;
+    color: var(--neutral-400);
+    font-size: .72rem;
+    line-height: 1.45;
+  }
+  .benefit-modal-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    color: var(--neutral-400);
+    background: rgba(255,255,255,.06);
+    cursor: pointer;
+  }
+  .benefit-modal-close:hover {
+    color: var(--neutral-100);
+    background: rgba(255,255,255,.12);
+  }
+  .benefit-modal-close svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  .benefit-table-container {
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 12px 0;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(0,0,0,.25);
+  }
+  .benefit-comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .72rem;
+    table-layout: fixed;
+  }
+  .benefit-comparison-table th,
+  .benefit-comparison-table td {
+    padding: 10px 8px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    word-break: break-word;
+  }
+  .benefit-comparison-table tr:last-child th,
+  .benefit-comparison-table tr:last-child td {
+    border-bottom: 0;
+  }
+  .th-feature {
+    width: 21%;
+    color: var(--neutral-400);
+    background: rgba(255,255,255,.03);
+    font-weight: 700;
+  }
+  .th-exclusive {
+    width: 41%;
+    background: rgba(245,158,11,.08);
+    color: #fef08a;
+  }
+  .th-exclusive-head {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .benefit-crown {
+    color: #fbbf24;
+    font-size: .75rem;
+  }
+  .th-exclusive-head strong {
+    font-size: .72rem;
+    font-weight: 800;
+  }
+  .th-shared {
+    width: 38%;
+    color: var(--neutral-400);
+    background: rgba(255,255,255,.02);
+  }
+  .th-shared-head strong {
+    font-size: .72rem;
+    font-weight: 600;
+  }
+  .td-feature {
+    color: var(--neutral-300);
+    font-weight: 650;
+    background: rgba(255,255,255,.015);
+  }
+  .td-exclusive {
+    background: rgba(245,158,11,.03);
+  }
+  .td-exclusive p {
+    margin: 4px 0 0;
+    color: var(--neutral-200);
+    font-size: .67rem;
+    line-height: 1.4;
+  }
+  .td-shared p {
+    margin: 4px 0 0;
+    color: var(--neutral-400);
+    font-size: .67rem;
+    line-height: 1.4;
+  }
+  .benefit-state-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: .64rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+  .benefit-state-badge.is-exclusive {
+    color: #fef08a;
+    background: rgba(245,158,11,.18);
+    border: 1px solid rgba(245,158,11,.32);
+  }
+  .benefit-state-badge.is-shared {
+    color: var(--neutral-400);
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  .benefit-state-badge.is-shared-alert {
+    color: #fca5a5;
+    background: rgba(239,68,68,.14);
+    border: 1px solid rgba(239,68,68,.24);
+  }
+  .benefit-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 4px;
+  }
+  .benefit-modal-shop-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    color: #000;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    box-shadow: 0 4px 12px rgba(245,158,11,.3);
+    font-size: .78rem;
+    font-weight: 750;
+    text-decoration: none;
+    transition: transform 150ms ease;
+  }
+  .benefit-modal-shop-btn:active {
+    transform: scale(.97);
+  }
+  .benefit-modal-shop-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+  }
+
   .guide-lightbox {
     position: fixed;
     z-index: 100;
