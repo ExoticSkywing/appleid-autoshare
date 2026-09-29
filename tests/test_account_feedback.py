@@ -51,6 +51,20 @@ async def test_target_app_intent_prefers_feature_declared_accounts_over_general(
 
 
 @pytest.mark.asyncio
+async def test_all_intents_prefer_feature_declared_accounts_over_general(redis_client, settings) -> None:
+    store = RedisStore(redis_client, settings)
+    general_account = account("acc_general", "general@example.invalid", synced=200, features=[])
+    special_account = account("acc_special", "special@example.invalid", synced=100, features=["shadowrocket_purchased"])
+
+    for intent in ("target_app", "other_app", "expert"):
+        session = await store.create_session(f"feature-{intent}-session", now=100)
+        selected = await store.select_account_for_session(
+            session, [general_account, special_account], intent=intent, now=101
+        )
+        assert selected == special_account
+
+
+@pytest.mark.asyncio
 async def test_no_shadowrocket_is_after_unknown_but_before_login_failed(redis_client, settings) -> None:
     store = RedisStore(redis_client, settings)
     session_a = await store.create_session("session-a", now=100)
