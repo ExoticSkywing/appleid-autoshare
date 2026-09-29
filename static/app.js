@@ -565,6 +565,10 @@ function renderResultCopyProgress() {
   );
 }
 
+function showResultChoices({ returned = false } = {}) {
+  showResultActions(returned);
+}
+
 function showResultActions(returned = false) {
   hideCopyConfirmation();
   state.resultsVisible = true;
