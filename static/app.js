@@ -1308,7 +1308,11 @@ byId("guideLightbox").addEventListener("click", (event) => {
 byId("benefitModalClose")?.addEventListener("click", closeBenefitModal);
 byId("benefitModal")?.querySelector(".benefit-dialog-backdrop")?.addEventListener("click", closeBenefitModal);
 document.querySelectorAll(".store-benefit-pill").forEach((button) => {
-  button.addEventListener("click", openBenefitModal);
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openBenefitModal();
+  });
 });
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
