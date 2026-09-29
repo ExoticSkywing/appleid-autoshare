@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>获取可用账号</title>
   <link rel="stylesheet" href="/assets/app.css?v=20260920-3">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-12">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-14">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260920-40">
   <link rel="stylesheet" href="/assets/motion.css?v=20260827-8">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
@@ -217,14 +217,13 @@
           <h2 id="emptyTitle">共享账号已经试完</h2>
           <p>这一轮没有找到能达成目标的账号。你可以重新开始，或直接购买专属账号。</p>
           <div class="empty-actions">
-            <div class="empty-store-card-wrap">
+            <div class="empty-store-container">
               <a id="emptyStoreLink" class="primary-action empty-store-link hidden" rel="noopener noreferrer nofollow" target="_blank">
                 <span>购买专属账号</span>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-9 9M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+                <svg class="store-arrow-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-9 9M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
               </a>
-              <button class="store-benefit-trigger empty-benefit-trigger" type="button" aria-haspopup="dialog" aria-expanded="false">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8l-5-5Z"/><path d="M15 3v5h5M9 13h6M9 17h4"/></svg>
-                <span>查看账号权益对比</span>
+              <button class="store-benefit-pill empty-benefit-pill" type="button" aria-haspopup="dialog" aria-expanded="false" title="查看账号权益对比">
+                <span>权益对比</span>
               </button>
             </div>
             <button id="restartButton" type="button" class="secondary-action">重新开始</button>
@@ -413,15 +412,14 @@
           <strong>更新提醒</strong>
           <p>当前方式应用不会及时得到更新，长期稳定使用建议购买专属账号。</p>
         </div>
-        <div class="update-tradeoff-wrap">
+        <div class="update-tradeoff-container">
           <button id="updateTradeoffStoreButton" class="update-tradeoff-store" type="button" aria-label="获取专属账号" aria-disabled="true" disabled>
             <img src="/assets/assets/store-logo.png" alt="" aria-hidden="true">
             <span><small>长期使用</small><strong>获取专属账号</strong></span>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-9 9"/></svg>
+            <svg class="store-arrow-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-9 9"/></svg>
           </button>
-          <button class="store-benefit-trigger update-tradeoff-benefit-trigger" type="button" aria-haspopup="dialog" aria-expanded="false">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8l-5-5Z"/><path d="M15 3v5h5M9 13h6M9 17h4"/></svg>
-            <span>查看账号权益对比</span>
+          <button class="store-benefit-pill update-tradeoff-benefit-pill" type="button" aria-haspopup="dialog" aria-expanded="false" title="查看账号权益对比">
+            <span>权益对比</span>
           </button>
         </div>
         <button id="finishAfterSignOutButton" class="primary-action" type="button">已退出，完成本次使用</button>
@@ -430,15 +428,14 @@
     </section>
 
     <aside id="resultStoreBar" class="result-store-bar hidden" aria-label="专属账号选项">
-      <div class="result-store-card-wrap">
+      <div class="result-store-link-container">
         <a id="storeLink" class="store-link result-store-link" rel="noopener noreferrer nofollow" target="_blank">
           <img class="store-brand-icon" src="/assets/assets/store-logo.png" alt="星小芽">
-          <span><strong>不想继续尝试？</strong><small>购买专属账号，一次解决</small></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-9 9M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+          <span class="store-text-group"><strong>不想继续尝试？</strong><small>购买专属账号，一次解决</small></span>
+          <svg class="store-arrow-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-9 9M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
         </a>
-        <button id="storeBenefitTrigger" class="store-benefit-trigger" type="button" aria-haspopup="dialog" aria-expanded="false">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8l-5-5Z"/><path d="M15 3v5h5M9 13h6M9 17h4"/></svg>
-          <span>查看账号权益对比</span>
+        <button id="storeBenefitTrigger" class="store-benefit-pill" type="button" aria-haspopup="dialog" aria-expanded="false" title="查看账号权益对比">
+          <span>权益对比</span>
         </button>
       </div>
     </aside>
@@ -546,7 +543,7 @@
   </main>
 
   <script src="/assets/sound.js?v=20260824-17" defer></script>
-  <script src="/assets/app.js?v=20260920-12" defer></script>
+  <script src="/assets/app.js?v=20260920-13" defer></script>
   <script>
     window.chatwootSettings = {"position":"right","type":"expanded_bubble","launcherTitle":""};
     (function(d,t) {

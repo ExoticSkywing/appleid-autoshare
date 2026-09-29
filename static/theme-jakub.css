@@ -1189,67 +1189,65 @@
     background: linear-gradient(100deg, rgba(169,135,79,.28), rgba(169,135,79,.12));
   }
   /* Benefit Comparison Triggers & Modal (Concentric, Precise, Obsidian-Gold) */
-  .result-store-card-wrap {
+  .result-store-link-container,
+  .update-tradeoff-container,
+  .empty-store-container {
     position: relative;
     width: 100%;
+    isolation: isolate;
   }
-  .store-benefit-trigger {
+  .result-store-link-container .result-store-link,
+  .update-tradeoff-container .update-tradeoff-store,
+  .empty-store-container .empty-store-link {
+    width: 100% !important;
+    padding-right: 106px !important;
+  }
+  .store-benefit-pill {
+    position: absolute;
+    top: 50%;
+    right: 34px;
+    transform: translateY(-50%);
+    z-index: 3;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 6px 10px;
-    border: 1px solid rgba(251,191,36,.28);
-    border-radius: 8px;
+    justify-content: center;
+    height: 24px;
+    padding: 0 8px;
+    border: 1px solid rgba(251,191,36,.36);
+    border-radius: 999px;
     color: #fbbf24;
-    background: rgba(245,158,11,.08);
-    font-size: .68rem;
-    font-weight: 650;
+    background: rgba(245,158,11,.14);
+    font-size: .62rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
     cursor: pointer;
-    transition: all 180ms cubic-bezier(.22,1,.36,1);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+    transition: all 160ms cubic-bezier(.22,1,.36,1);
   }
-  .store-benefit-trigger svg {
-    width: 13px;
-    height: 13px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
+  .result-store-link .store-arrow-icon,
+  .update-tradeoff-store .store-arrow-icon,
+  .empty-store-link .store-arrow-icon {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
+    color: var(--neutral-400);
+    pointer-events: none;
   }
   @media (hover: hover) {
-    .store-benefit-trigger:hover {
-      background: rgba(245,158,11,.16);
-      border-color: rgba(251,191,36,.45);
+    .store-benefit-pill:hover {
+      background: rgba(245,158,11,.22);
+      border-color: rgba(251,191,36,.55);
       color: #fef08a;
-      transform: translateY(-1px);
+      transform: translateY(-50%) scale(1.04);
     }
   }
-  .store-benefit-trigger:active {
-    transform: scale(.96);
-  }
-  .result-store-bar .store-benefit-trigger {
-    position: absolute;
-    right: 12px;
-    bottom: 8px;
-    z-index: 2;
-  }
-  @media (max-width: 440px) {
-    .result-store-bar .result-store-link {
-      padding-bottom: 34px !important;
-    }
-    .result-store-bar .store-benefit-trigger {
-      right: 10px;
-      bottom: 8px;
-    }
-  }
-  .update-tradeoff-wrap,
-  .empty-store-card-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    width: 100%;
+  .store-benefit-pill:active {
+    transform: translateY(-50%) scale(.95);
   }
 
   /* Modal Dialog */
