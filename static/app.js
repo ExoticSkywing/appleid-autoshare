@@ -772,7 +772,7 @@ function showAccount(account, options = {}) {
   byId("accountView").classList.toggle("is-summary", state.resultsVisible);
   byId("attemptCount").classList.toggle("hidden", state.resultsVisible);
   byId("resultCredentialHeading").classList.toggle("hidden", !state.resultsVisible);
-  byId("feedbackPanel").classList.remove("is-returned", "is-results");
+  byId("feedbackPanel").classList.remove("is-returned", "is-results", "is-exit-alert");
   byId("username").textContent = account.username;
   byId("password").textContent = account.password;
   byId("region").textContent = account.region || "";
@@ -969,13 +969,14 @@ function showNoviceExitGate(result, options = {}) {
   byId("resultStoreBar").classList.remove("is-attention-entry");
   byId("showResultsButton").classList.add("hidden");
   byId("noviceExitPanel").classList.remove("hidden");
+  byId("feedbackPanel").classList.toggle("is-exit-alert", !isReplacement);
   replayMotion(byId("noviceExitPanel"), "motion-panel-enter");
   replayTextMotion(byId("noviceExitPanel"));
-  byId("feedbackStep").textContent = isReplacement ? "换号前" : "退出账号前";
-  byId("feedbackTitle").textContent = isReplacement ? "先退出当前 App Store 账号" : "你还有些必要且值得做的事情";
+  byId("feedbackStep").textContent = isReplacement ? "换号前" : "重要提醒";
+  byId("feedbackTitle").textContent = isReplacement ? "先退出当前 App Store 账号" : "退出前，必须先下载海外应用";
   byId("copyProgress").textContent = isReplacement
     ? "不会换？点击下方自助更换"
-    : "点击下方应用直接下载吧";
+    : "当前账号已具备下载权限，一旦退出将无法再次免费获取：";
   byId("feedbackPanel").scrollIntoView({ behavior: "smooth", block: "start" });
   announce(isReplacement ? "请先退出当前 App Store 账号，再尝试下一组。" : "请先下载所需应用，并在完成前退出共享账号。" );
   saveSession();
