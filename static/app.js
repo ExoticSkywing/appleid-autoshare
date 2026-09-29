@@ -551,7 +551,21 @@ function setStoreLink(url, exhausted = false) {
   small.textContent = "购买专属账号，一次解决";
 }
 
-function showResultChoices({ returned = false } = {}) {
+function renderResultCopyProgress() {
+  const el = byId("copyProgress");
+  if (!el) return;
+  const icon = document.createElement("img");
+  icon.className = "inline-account-icon";
+  icon.src = "/assets/assets/appstore-account-guide.png";
+  icon.alt = "账户头像";
+  el.replaceChildren(
+    "进入 App Store 首页右上角点击账户头像 ",
+    icon,
+    "，看是否已显示账号："
+  );
+}
+
+function showResultActions(returned = false) {
   hideCopyConfirmation();
   state.resultsVisible = true;
   byId("credential").classList.remove("is-result-mode");
@@ -563,7 +577,7 @@ function showResultChoices({ returned = false } = {}) {
   panel.classList.toggle("is-returned", returned);
   byId("feedbackStep").textContent = returned ? "欢迎回来" : "核对结果";
   byId("feedbackTitle").textContent = "核对 App Store 登录状态";
-  byId("copyProgress").textContent = "进入 App Store 首页右上角账户，看是否已显示账号：";
+  renderResultCopyProgress();
   byId("accountStep").classList.add("is-complete");
   byId("accountStep").classList.remove("is-current");
   byId("accountStep").querySelector("span").textContent = "✓";
@@ -683,7 +697,7 @@ function updateCopyUI() {
     } else {
       step.textContent = "极速通道";
       title.textContent = "核对 App Store 登录状态";
-      progress.textContent = "进入 App Store 首页右上角账户，看是否已显示账号：";
+      renderResultCopyProgress();
     }
     document.querySelectorAll("[data-login-result], [data-result]").forEach((button) => {
       button.disabled = state.busy || state.feedbackLocked || !passwordCopied;

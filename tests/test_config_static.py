@@ -162,7 +162,8 @@ def test_login_result_uses_observable_account_page_evidence() -> None:
     markup = (root / "static" / "index.html").read_text(encoding="utf-8")
 
     assert "核对 App Store 登录状态" in script
-    assert "进入 App Store 首页右上角账户，看是否已显示账号：" in script
+    assert "进入 App Store 首页右上角点击账户头像" in script
+    assert "appstore-account-guide.png" in script
     assert "appstore-login-success-reference.jpg" in markup
     assert "和截图一致，已显示账号" in markup
     assert "不一致 / 没看到 / 报错" in markup

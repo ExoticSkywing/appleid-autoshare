@@ -526,6 +526,14 @@
   }
   .feedback-heading h2 { color: var(--neutral-100); }
   .feedback-heading p:last-child { color: var(--neutral-400); }
+  .feedback-heading p .inline-account-icon {
+    display: inline-block;
+    vertical-align: -4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.2);
+  }
 
   .account-target-line { color: var(--neutral-400); }
   .account-target-line strong { color: var(--neutral-100); }
