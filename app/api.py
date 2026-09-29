@@ -49,12 +49,14 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: FastAPI, settings: Settings) -> None:
         super().__init__(app)
         origin = turnstile_origin(settings)
-        script_src = "'self'" + (f" {origin}" if origin else "")
-        frame_src = origin or "'none'"
+        chatwoot_origin = "https://chatwoot.1yo.cc"
+        script_src = "'self' 'unsafe-inline' " + (f"{origin} " if origin else "") + chatwoot_origin
+        frame_src = (f"{origin} " if origin else "") + f"{chatwoot_origin} 'self'"
+        connect_src = f"'self' {chatwoot_origin} wss://chatwoot.1yo.cc"
         self.csp = (
             "default-src 'self'; "
             f"script-src {script_src}; "
-            "style-src 'self'; img-src 'self' data:; media-src 'self' data:; connect-src 'self'; "
+            f"style-src 'self' 'unsafe-inline' {chatwoot_origin}; img-src 'self' data: {chatwoot_origin}; media-src 'self' data: {chatwoot_origin}; connect-src {connect_src}; "
             f"frame-src {frame_src}; object-src 'none'; base-uri 'none'; "
             "form-action 'self'; frame-ancestors 'none'"
         )
