@@ -1391,10 +1391,10 @@
   }
   .benefit-comparison-table th,
   .benefit-comparison-table td {
-    padding: 10px 8px;
+    padding: 12px 10px;
     text-align: left;
-    vertical-align: top;
-    border-bottom: 1px solid rgba(255,255,255,.06);
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(255,255,255,.07);
     word-break: break-word;
   }
   .benefit-comparison-table tr:last-child th,
@@ -1402,13 +1402,13 @@
     border-bottom: 0;
   }
   .th-feature {
-    width: 21%;
+    width: 22%;
     color: var(--neutral-400);
     background: rgba(255,255,255,.03);
     font-weight: 700;
   }
   .th-exclusive {
-    width: 41%;
+    width: 40%;
     background: rgba(245,158,11,.08);
     color: #fef08a;
   }
@@ -1422,7 +1422,7 @@
     font-size: .75rem;
   }
   .th-exclusive-head strong {
-    font-size: .72rem;
+    font-size: .74rem;
     font-weight: 800;
   }
   .th-shared {
@@ -1431,36 +1431,25 @@
     background: rgba(255,255,255,.02);
   }
   .th-shared-head strong {
-    font-size: .72rem;
+    font-size: .74rem;
     font-weight: 600;
   }
   .td-feature {
-    color: var(--neutral-300);
-    font-weight: 650;
+    color: var(--neutral-200);
+    font-size: .74rem;
+    font-weight: 700;
     background: rgba(255,255,255,.015);
   }
   .td-exclusive {
-    background: rgba(245,158,11,.03);
-  }
-  .td-exclusive p {
-    margin: 4px 0 0;
-    color: var(--neutral-200);
-    font-size: .67rem;
-    line-height: 1.4;
-  }
-  .td-shared p {
-    margin: 4px 0 0;
-    color: var(--neutral-400);
-    font-size: .67rem;
-    line-height: 1.4;
+    background: rgba(245,158,11,.04);
   }
   .benefit-state-badge {
     display: inline-block;
-    padding: 2px 6px;
-    border-radius: 5px;
-    font-size: .64rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: .7rem;
     font-weight: 700;
-    line-height: 1.35;
+    line-height: 1.4;
   }
   .benefit-state-badge.is-exclusive {
     color: #fef08a;
