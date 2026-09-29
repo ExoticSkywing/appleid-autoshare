@@ -1274,90 +1274,23 @@
     border-top: 0;
   }
   .login-result-evidence {
-    display: grid;
-    grid-template-areas:
-      "entry"
-      "rule"
-      "image"
-      "failure";
-    gap: 12px;
-    padding: 14px;
-    border-radius: 16px;
-    background: linear-gradient(145deg, rgba(32,35,44,.72), rgba(15,17,22,.54));
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.075);
-  }
-  .login-evidence-entry {
-    grid-area: entry;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
-    border-radius: 10px;
-    background: rgba(255,255,255,.04);
-    border: 1px solid rgba(255,255,255,.07);
-  }
-  .login-evidence-entry p {
-    display: inline;
-    margin: 0;
-    color: var(--neutral-300);
-    font-size: .74rem;
-    line-height: 1.45;
-  }
-  .login-evidence-entry .inline-account-icon {
-    display: inline-block;
-    vertical-align: -3px;
-    width: 17px;
-    height: 17px;
-    border-radius: 50%;
-  }
-  .login-evidence-rule {
-    grid-area: rule;
-    display: grid;
-    grid-template-columns: 30px minmax(0, 1fr);
-    align-items: center;
-    gap: 10px;
-  }
-  .login-evidence-icon {
-    display: grid;
-    place-items: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 9px;
-    color: #fff;
-    background: #5865f2;
-    box-shadow: 0 0 0 4px rgba(88,101,242,.12);
-  }
-  .login-evidence-icon svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
-  .login-evidence-rule p { display: grid; gap: 3px; min-width: 0; margin: 0; }
-  .login-evidence-rule strong {
-    color: var(--neutral-100);
-    font-size: .86rem;
-    line-height: 1.32;
-    text-wrap: balance;
-  }
-  .login-evidence-rule small {
-    color: #aab2c1;
-    font-size: .7rem;
-    line-height: 1.42;
-  }
-  .login-failure-rule {
-    grid-area: failure;
-    margin: 0;
-    color: #8f98a8;
-    font-size: .68rem;
-    line-height: 1.5;
+    display: block;
+    width: 100%;
+    padding: 6px;
+    border-radius: 14px;
+    background: rgba(20,22,28,.65);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
   }
   .login-success-reference {
-    grid-area: image;
     position: relative;
     display: block;
     width: 100%;
     padding: 0;
     overflow: hidden;
     border: 0;
-    border-radius: 14px;
+    border-radius: 10px;
     background: #000;
-    box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 16px 32px rgba(0,0,0,.32);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.08);
     cursor: zoom-in;
   }
   .login-success-reference > img {
@@ -1372,12 +1305,14 @@
     inset-block-end: 8px;
     padding: 6px 8px;
     border-radius: 8px;
-    color: #f8fafc;
-    background: rgba(11,13,18,.74);
-    backdrop-filter: blur(12px);
-    font-size: .62rem;
-    font-weight: 720;
+    color: #e5e7eb;
+    background: rgba(15,17,22,.82);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.1);
+    font-size: .68rem;
+    font-weight: 600;
     text-align: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     pointer-events: none;
   }
   .login-success-reference:focus-visible { outline: 2px solid #60a5fa; outline-offset: 3px; }
