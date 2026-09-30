@@ -750,6 +750,7 @@
     position: relative;
     display: block;
     width: 100%;
+    aspect-ratio: 1280 / 937;
     padding: 0;
     border: 0;
     border-radius: 8px;
@@ -757,13 +758,13 @@
     background: #111318;
     box-shadow: 0 0 0 1px rgba(240,201,142,.25), 0 8px 18px rgba(0,0,0,.28);
     cursor: zoom-in;
+    -webkit-touch-callout: none;
   }
   .preflight-example .guide-image-button > img {
     display: block;
     width: 100%;
-    height: auto;
-    max-height: 220px;
-    object-fit: cover;
+    height: 100%;
+    object-fit: contain;
     object-position: center;
     background: #111318;
   }
@@ -2076,6 +2077,35 @@
     font-weight: 760;
   }
   .signout-confirm input { width: 20px; height: 20px; margin: 0; accent-color: #a9874f; }
+  .signout-confirm.needs-attention {
+    position: relative;
+    z-index: 1;
+    color: #fff !important;
+    background: rgba(255,59,48,.24) !important;
+    box-shadow: 0 0 0 2px #ff453a, 0 0 0 5px rgba(255,69,58,.28), 0 0 18px rgba(255,59,48,.28) !important;
+    animation: preflight-confirm-attention 1400ms ease-in-out infinite;
+  }
+  .signout-confirm.needs-attention input {
+    animation: preflight-checkbox-attention 1400ms ease-in-out infinite;
+  }
+  .signout-guide-link.needs-confirmation {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 2px #f59e0b, 0 0 16px rgba(245,158,11,.32) !important;
+    animation: preflight-confirm-attention 1400ms ease-in-out infinite;
+  }
+  .novice-exit-panel > .primary-action.is-blocked {
+    color: #ffffff !important;
+    background: #ff453a !important;
+    border-color: #ff453a !important;
+    box-shadow: 0 0 0 3px rgba(255,69,58,.36), 0 6px 20px rgba(255,59,48,.42) !important;
+    animation: button-shake 420ms cubic-bezier(.36,.07,.19,.97) both;
+  }
+  @keyframes button-shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+  }
   .signout-error { color: #fca5a5; font-size: .72rem; font-weight: 650; }
   .novice-exit-panel > .primary-action { min-height: 48px; }
   #finishAfterSignOutButton.primary-action:not(.is-blocked),

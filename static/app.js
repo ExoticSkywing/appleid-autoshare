@@ -950,8 +950,10 @@ function showNoviceExitGate(result, options = {}) {
   state.signOutGuideOpened = guideWasOpened;
   byId("signOutGuideLink").classList.remove("needs-confirmation");
   byId("signOutCheck").checked = false;
-  byId("finishAfterSignOutButton").disabled = true;
-  byId("replaceAfterSignOutButton").disabled = true;
+  byId("finishAfterSignOutButton").disabled = false;
+  byId("replaceAfterSignOutButton").disabled = false;
+  byId("finishAfterSignOutButton").classList.remove("is-blocked");
+  byId("replaceAfterSignOutButton").classList.remove("is-blocked");
   byId("signOutError").classList.add("hidden");
   const isReplacement = result === "shadowrocket_missing";
   byId("noviceExitPanel").classList.toggle("is-replacement", isReplacement);
@@ -1492,26 +1494,44 @@ byId("signOutGuideLink").addEventListener("click", () => {
 
 byId("signOutCheck").addEventListener("change", (event) => {
   const checked = Boolean(event.currentTarget.checked);
-  if (checked) playSound("check");
-  byId("signOutError").classList.add("hidden");
-  byId("finishAfterSignOutButton").disabled = !checked;
-  byId("replaceAfterSignOutButton").disabled = !checked;
+  if (checked) {
+    playSound("check");
+    byId("signOutError").classList.add("hidden");
+    byId("signOutCheck").closest(".signout-confirm")?.classList.remove("needs-attention");
+    byId("finishAfterSignOutButton").classList.remove("is-blocked");
+    byId("replaceAfterSignOutButton").classList.remove("is-blocked");
+    byId("finishAfterSignOutButton").textContent = "已退出，完成本次使用";
+    byId("replaceAfterSignOutButton").textContent = "已退出，尝试下一个账号";
+  }
 });
 
 async function completeNoviceExit(expectedReplacement) {
-  const result = state.pendingNoviceExitResult;
+  const result = state.pendingNoviceExitResult || (expectedReplacement ? "shadowrocket_missing" : "shadowrocket_available");
   const isReplacement = result === "shadowrocket_missing";
-  if (!result || isReplacement !== expectedReplacement) return;
-  if (!state.signOutGuideOpened || !byId("signOutCheck").checked) {
+  if (isReplacement !== expectedReplacement) return;
+  const isChecked = byId("signOutCheck").checked;
+  const btn = expectedReplacement ? byId("replaceAfterSignOutButton") : byId("finishAfterSignOutButton");
+
+  if (!state.signOutGuideOpened || !isChecked) {
     byId("signOutError").classList.remove("hidden");
+    const confirmBox = byId("signOutCheck").closest(".signout-confirm");
+    if (confirmBox) {
+      confirmBox.classList.remove("needs-attention");
+      void confirmBox.offsetWidth;
+      confirmBox.classList.add("needs-attention");
+    }
     byId("signOutGuideLink").classList.add("needs-confirmation");
-    byId("signOutCheck").focus({ preventScroll: true });
+    btn.classList.add("is-blocked");
+    btn.textContent = !state.signOutGuideOpened ? "请先查看上方第 1 步退出教程 ↑" : "请先勾选上方第 2 步确认框 ↑";
+
     playSound("error");
-    byId("signOutCheck").scrollIntoView({ behavior: "smooth", block: "center" });
-    announce("请先打开退出教程，并确认已经退出当前 App Store 账号。" );
+    confirmBox?.scrollIntoView({ behavior: "smooth", block: "center" });
+    announce("请先查看退出教程并确认已退出。");
     return;
   }
+
   byId("signOutGuideLink").classList.remove("needs-confirmation");
+  btn.classList.remove("is-blocked");
   await submitFeedback(result);
   state.pendingNoviceExitResult = "";
   state.signOutGuideOpened = false;
