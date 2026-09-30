@@ -1866,45 +1866,52 @@
   .app-download-heading > strong { color: #f3f4f6; font-size: .9rem; line-height: 1.35; }
   .need-account-action {
     display: grid;
-    grid-template-columns: 38px minmax(0, 1fr) 18px;
+    grid-template-columns: 40px minmax(0, 1fr) 20px;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     width: 100%;
-    min-height: 58px;
-    padding: 9px 11px;
+    min-height: 64px;
+    padding: 10px 14px;
     border-radius: 12px;
-    color: #f5f3ff;
-    background: linear-gradient(100deg, #22143d 0%, #1a102e 48%, #110a1e 100%);
-    box-shadow: 0 0 0 1px rgba(196,181,253,.14), inset 0 1px rgba(255,255,255,.035);
+    color: #f8fafc;
+    background: linear-gradient(135deg, rgba(37,99,235,.22) 0%, rgba(30,58,138,.32) 50%, rgba(15,23,42,.45) 100%);
+    box-shadow: 0 0 0 1px rgba(96,165,250,.35), inset 0 1px 0 rgba(255,255,255,.12), 0 4px 16px rgba(37,99,235,.16);
     text-align: left;
+    transition: transform 140ms ease, box-shadow 140ms ease;
+  }
+  .need-account-action:active {
+    transform: scale(.985);
   }
   .need-account-action > img {
     display: block;
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     border: 0;
     border-radius: 10px;
-    object-fit: contain;
-    outline: 0;
-    box-shadow: none;
+    object-fit: cover;
+    outline: 1px solid rgba(255,255,255,.2);
+    box-shadow: 0 2px 8px rgba(0,0,0,.35);
   }
   .need-account-action > span { display: grid; gap: 3px; min-width: 0; }
   .need-account-action small {
-    color: #c4b5d8;
-    font-size: .64rem;
-    line-height: 1.1;
+    color: #fbbf24;
+    font-size: .72rem;
+    font-weight: 750;
+    line-height: 1.2;
+    letter-spacing: .01em;
   }
   .need-account-action strong {
     color: #ffffff;
-    font-size: .8rem;
-    line-height: 1.2;
+    font-size: .84rem;
+    font-weight: 700;
+    line-height: 1.25;
   }
   .need-account-action svg {
     justify-self: end;
     width: 18px;
     height: 18px;
-    color: #e9d5ff;
-    stroke-width: 1.8;
+    color: #93c5fd;
+    stroke-width: 2.2;
   }
   .app-download-grid {
     display: grid;
