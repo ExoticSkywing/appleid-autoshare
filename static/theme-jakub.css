@@ -1890,9 +1890,9 @@
   }
   .need-account-action > span { display: grid; gap: 3px; min-width: 0; }
   .need-account-action small {
-    color: #c4b5d8;
+    color: #fbbf24;
     font-size: .64rem;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.1;
   }
   .need-account-action strong {
