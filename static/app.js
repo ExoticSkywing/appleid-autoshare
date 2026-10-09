@@ -1117,7 +1117,7 @@ async function startPowVerification() {
           worker.onmessage = (e) => {
             clearTimeout(timer);
             worker.terminate();
-            if (e.data.ok) resolve(e.data.number);
+            if (e.data.success || e.data.ok) resolve(e.data.solution ?? e.data.number);
             else reject(new Error("pow_failed"));
           };
           worker.onerror = (err) => {
@@ -1186,12 +1186,13 @@ async function startPowVerification() {
       byId("credentialState").textContent = "验证已通过";
       updateVerifyAction();
       announce("验证已完成，可以获取账号。");
-    } catch (_) {
+    } catch (err) {
       solving = false;
       checkCircle.style.borderColor = "#ef4444";
       checkCircle.replaceChildren();
       titleText.textContent = "验证未通过，点击重试";
       titleText.style.color = "#f87171";
+      console.error("PoW verification failed:", err);
     }
   });
 }
