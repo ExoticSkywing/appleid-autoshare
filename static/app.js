@@ -1056,101 +1056,144 @@ async function startVerification() {
 }
 
 async function startPowVerification() {
-  state.turnstileLoading = true;
+  state.turnstileLoading = false;
+  state.turnstileReady = true;
   hideRecovery();
   setPhase("verify", "verifyView");
-  byId("credentialState").textContent = "正在快速安全验证";
-  resetTurnstileHost();
+  byId("credentialState").textContent = "等待人工点击验证";
+  updateVerifyAction();
+
   const host = byId("turnstileWidget");
-  const loadingText = host.querySelector("p");
-  if (loadingText) loadingText.textContent = "安全算力验证中…";
+  host.replaceChildren();
 
-  try {
-    const challenge = await jsonRequest("/api/v2/challenge", { method: "GET" });
-    if (!challenge?.challenge || !challenge?.salt) throw new Error("challenge_failed");
+  // Render Interactive PoW Checkbox Card
+  const box = document.createElement("div");
+  box.className = "pow-interactive-card";
+  box.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:12px;cursor:pointer;user-select:none;transition:all 0.2s;";
 
-    // Worker solver or main thread fallback
-    let solution = null;
-    if (window.Worker) {
-      solution = await new Promise((resolve, reject) => {
-        const worker = new Worker("/assets/pow-worker.js");
-        const timer = setTimeout(() => {
-          worker.terminate();
-          reject(new Error("pow_timeout"));
-        }, 15000);
+  const leftGroup = document.createElement("div");
+  leftGroup.style.cssText = "display:flex;align-items:center;gap:12px;";
 
-        worker.onmessage = (e) => {
-          clearTimeout(timer);
-          worker.terminate();
-          if (e.data.ok) resolve(e.data.number);
-          else reject(new Error("pow_failed"));
-        };
-        worker.onerror = (err) => {
-          clearTimeout(timer);
-          worker.terminate();
-          reject(err);
-        };
-        worker.postMessage({
-          challenge: challenge.challenge,
-          salt: challenge.salt,
-          maxnumber: challenge.maxnumber,
+  const checkCircle = document.createElement("div");
+  checkCircle.style.cssText = "width:24px;height:24px;border:2px solid rgba(255,255,255,0.3);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;background:transparent;";
+
+  const titleText = document.createElement("span");
+  titleText.textContent = "点击完成人机验证";
+  titleText.style.cssText = "font-size:15px;font-weight:600;color:#f3f4f6;";
+
+  leftGroup.append(checkCircle, titleText);
+
+  const rightTag = document.createElement("span");
+  rightTag.textContent = "安全盾";
+  rightTag.style.cssText = "font-size:11px;color:#9ca3af;padding:3px 7px;background:rgba(255,255,255,0.06);border-radius:4px;";
+
+  box.append(leftGroup, rightTag);
+  host.appendChild(box);
+
+  // Click handler: Only start calculation upon real user click
+  let solving = false;
+  box.addEventListener("click", async () => {
+    if (solving || state.token) return;
+    solving = true;
+    checkCircle.replaceChildren();
+    const spinner = document.createElement("span");
+    spinner.style.cssText = "display:inline-block;width:12px;height:12px;border:2px solid #38bdf8;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;";
+    checkCircle.appendChild(spinner);
+    titleText.textContent = "正在校验算力…";
+
+    try {
+      const challenge = await jsonRequest("/api/v2/challenge", { method: "GET" });
+      if (!challenge?.challenge || !challenge?.salt) throw new Error("challenge_failed");
+
+      let solution = null;
+      if (window.Worker) {
+        solution = await new Promise((resolve, reject) => {
+          const worker = new Worker("/assets/pow-worker.js");
+          const timer = setTimeout(() => {
+            worker.terminate();
+            reject(new Error("pow_timeout"));
+          }, 15000);
+
+          worker.onmessage = (e) => {
+            clearTimeout(timer);
+            worker.terminate();
+            if (e.data.ok) resolve(e.data.number);
+            else reject(new Error("pow_failed"));
+          };
+          worker.onerror = (err) => {
+            clearTimeout(timer);
+            worker.terminate();
+            reject(err);
+          };
+          worker.postMessage({
+            challenge: challenge.challenge,
+            salt: challenge.salt,
+            maxnumber: challenge.maxnumber,
+          });
         });
-      });
-    } else {
-      // Inline solver fallback
-      const enc = new TextEncoder();
-      const max = challenge.maxnumber;
-      for (let i = 0; i <= max; i++) {
-        const buf = await crypto.subtle.digest("SHA-256", enc.encode(challenge.salt + i));
-        const hash = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
-        if (hash === challenge.challenge) {
-          solution = i;
-          break;
+      } else {
+        const enc = new TextEncoder();
+        const max = challenge.maxnumber;
+        for (let i = 0; i <= max; i++) {
+          const buf = await crypto.subtle.digest("SHA-256", enc.encode(challenge.salt + i));
+          const hash = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+          if (hash === challenge.challenge) {
+            solution = i;
+            break;
+          }
         }
       }
+
+      if (solution === null || solution === undefined) throw new Error("pow_not_solved");
+
+      const payloadObj = {
+        algorithm: challenge.algorithm,
+        challenge: challenge.challenge,
+        number: solution,
+        salt: challenge.salt,
+        signature: challenge.signature,
+      };
+      const b64Token = btoa(JSON.stringify(payloadObj));
+
+      await jsonRequest("/api/v2/session/verify", {
+        method: "POST",
+        body: JSON.stringify({ token: b64Token }),
+      });
+
+      // Visual success: Turn green and check
+      box.style.background = "rgba(34,197,94,0.08)";
+      box.style.borderColor = "rgba(34,197,94,0.35)";
+      checkCircle.style.borderColor = "#22c55e";
+      checkCircle.style.background = "#22c55e";
+      checkCircle.replaceChildren();
+      const checkSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      checkSvg.setAttribute("viewBox", "0 0 24 24");
+      checkSvg.setAttribute("width", "16");
+      checkSvg.setAttribute("height", "16");
+      checkSvg.setAttribute("stroke", "#000");
+      checkSvg.setAttribute("stroke-width", "3");
+      checkSvg.setAttribute("fill", "none");
+      const checkPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      checkPath.setAttribute("d", "M20 6L9 17l-5-5");
+      checkSvg.appendChild(checkPath);
+      checkCircle.appendChild(checkSvg);
+
+      titleText.textContent = "人机验证已通过";
+      titleText.style.color = "#4ade80";
+
+      state.token = b64Token;
+      state.verified = true;
+      byId("credentialState").textContent = "验证已通过";
+      updateVerifyAction();
+      announce("验证已完成，可以获取账号。");
+    } catch (_) {
+      solving = false;
+      checkCircle.style.borderColor = "#ef4444";
+      checkCircle.replaceChildren();
+      titleText.textContent = "验证未通过，点击重试";
+      titleText.style.color = "#f87171";
     }
-
-    if (solution === null || solution === undefined) throw new Error("pow_not_solved");
-
-    const payloadObj = {
-      algorithm: challenge.algorithm,
-      challenge: challenge.challenge,
-      number: solution,
-      salt: challenge.salt,
-      signature: challenge.signature,
-    };
-    const b64Token = btoa(JSON.stringify(payloadObj));
-
-    // Submit verify immediately to establish session cookie
-    await jsonRequest("/api/v2/session/verify", {
-      method: "POST",
-      body: JSON.stringify({ token: b64Token }),
-    });
-
-    removeTurnstileLoading();
-    host.replaceChildren();
-
-    const badge = document.createElement("div");
-    badge.className = "pow-verified-badge";
-    const badgeText = document.createElement("span");
-    badgeText.textContent = "安全算力验证已通过";
-    badge.appendChild(badgeText);
-    host.appendChild(badge);
-
-    state.turnstileLoading = false;
-    state.turnstileReady = true;
-    state.token = b64Token;
-    state.verified = true;
-    turnstileFailureCount = 0;
-    updateVerifyAction();
-    announce("验证已完成，可以获取账号。");
-  } catch (err) {
-    removeTurnstileLoading();
-    state.turnstileLoading = false;
-    state.turnstileReady = false;
-    byId("credentialState").textContent = "安全验证未通过";
-    showRecovery("算力验证没有完成", "点击重试即可快速重新验证。", () => startVerification(), "重新验证");
-  }
+  });
 }
 
 async function startTurnstile() {

@@ -136,12 +136,12 @@ class Settings:
     proxy_ip_header: str = "CF-Connecting-IP"
 
     rate_window_seconds: int = 60
-    rate_verify_ip_limit: int = 10
-    rate_ticket_ip_limit: int = 10
-    rate_ticket_session_limit: int = 10
-    rate_reveal_ip_limit: int = 10
-    rate_reveal_session_limit: int = 10
-    reveal_max_accounts: int = 10
+    rate_verify_ip_limit: int = 5
+    rate_ticket_ip_limit: int = 5
+    rate_ticket_session_limit: int = 5
+    rate_reveal_ip_limit: int = 5
+    rate_reveal_session_limit: int = 5
+    reveal_max_accounts: int = 5
     store_url: str = ""
     start_pollers: bool = True
 
@@ -215,12 +215,12 @@ class Settings:
             trust_proxy_headers=_bool("TRUST_PROXY_HEADERS", False),
             proxy_ip_header=os.getenv("PROXY_IP_HEADER", "CF-Connecting-IP"),
             rate_window_seconds=_int("RATE_WINDOW_SECONDS", 60),
-            rate_verify_ip_limit=_int("RATE_VERIFY_IP_LIMIT", 10),
-            rate_ticket_ip_limit=_int("RATE_TICKET_IP_LIMIT", 10),
-            rate_ticket_session_limit=_int("RATE_TICKET_SESSION_LIMIT", 10),
-            rate_reveal_ip_limit=_int("RATE_REVEAL_IP_LIMIT", 10),
-            rate_reveal_session_limit=_int("RATE_REVEAL_SESSION_LIMIT", 10),
-            reveal_max_accounts=_int("REVEAL_MAX_ACCOUNTS", 10),
+            rate_verify_ip_limit=_int("RATE_VERIFY_IP_LIMIT", 5),
+            rate_ticket_ip_limit=_int("RATE_TICKET_IP_LIMIT", 5),
+            rate_ticket_session_limit=_int("RATE_TICKET_SESSION_LIMIT", 5),
+            rate_reveal_ip_limit=_int("RATE_REVEAL_IP_LIMIT", 5),
+            rate_reveal_session_limit=_int("RATE_REVEAL_SESSION_LIMIT", 5),
+            reveal_max_accounts=_int("REVEAL_MAX_ACCOUNTS", 5),
             store_url=os.getenv("STORE_URL", "").strip(),
             start_pollers=_bool("START_POLLERS", True),
         ).validated()
