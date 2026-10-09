@@ -59,6 +59,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         self.csp = (
             "default-src 'self'; "
             f"script-src {script_src}; "
+            f"worker-src 'self' blob:; "
             f"style-src 'self' 'unsafe-inline' {chatwoot_origin}; img-src 'self' data: {chatwoot_origin}; media-src 'self' data: {chatwoot_origin}; connect-src {connect_src}; "
             f"frame-src {frame_src}; object-src 'none'; base-uri 'none'; "
             "form-action 'self'; frame-ancestors 'none'"

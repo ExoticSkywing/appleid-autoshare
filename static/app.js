@@ -1121,10 +1121,17 @@ async function startPowVerification() {
     };
     const b64Token = btoa(JSON.stringify(payloadObj));
 
+    // Submit verify immediately to establish session cookie
+    await jsonRequest("/api/v2/session/verify", {
+      method: "POST",
+      body: JSON.stringify({ token: b64Token }),
+    });
+
     removeTurnstileLoading();
     state.turnstileLoading = false;
     state.turnstileReady = true;
     state.token = b64Token;
+    state.verified = true;
     turnstileFailureCount = 0;
     updateVerifyAction();
     announce("验证已完成，可以获取账号。");
