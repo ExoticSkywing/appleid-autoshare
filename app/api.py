@@ -136,7 +136,7 @@ def _require_browser_request(request: Request, settings: Settings) -> None:
         _raise(403, "request_denied")
 
     origin = request.headers.get("Origin")
-    if settings.public_origin and origin != settings.public_origin:
+    if settings.public_origin and origin and origin != settings.public_origin:
         _raise(403, "request_denied")
 
 
