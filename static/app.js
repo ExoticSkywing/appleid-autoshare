@@ -1082,7 +1082,7 @@ async function startPowVerification() {
         worker.onmessage = (e) => {
           clearTimeout(timer);
           worker.terminate();
-          if (e.data.success) resolve(e.data.solution);
+          if (e.data.ok) resolve(e.data.number);
           else reject(new Error("pow_failed"));
         };
         worker.onerror = (err) => {
@@ -1128,6 +1128,15 @@ async function startPowVerification() {
     });
 
     removeTurnstileLoading();
+    host.replaceChildren();
+
+    const badge = document.createElement("div");
+    badge.className = "pow-verified-badge";
+    const badgeText = document.createElement("span");
+    badgeText.textContent = "安全算力验证已通过";
+    badge.appendChild(badgeText);
+    host.appendChild(badge);
+
     state.turnstileLoading = false;
     state.turnstileReady = true;
     state.token = b64Token;
