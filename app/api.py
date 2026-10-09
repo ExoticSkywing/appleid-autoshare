@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import hmac
 import logging
 import secrets
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import RequestValidationError
@@ -32,6 +34,7 @@ from app.models import (
 )
 from app.security import client_ip, turnstile_origin
 from app.services.aggregator import AccountAggregator
+from app.services.pow import PowVerifier
 from app.services.store import AsyncRedis, RedisStore
 from app.services.turnstile import TurnstileVerifier
 
@@ -240,6 +243,7 @@ def create_app(
         app.state.settings = runtime_settings
         app.state.store = store
         app.state.turnstile = turnstile or TurnstileVerifier(runtime_settings)
+        app.state.pow = PowVerifier(runtime_settings)
         app.state.aggregator = runtime_aggregator
         try:
             await store.ping()
@@ -267,6 +271,7 @@ def create_app(
         app.state.settings = runtime_settings
         app.state.store = initial_store
         app.state.turnstile = turnstile or TurnstileVerifier(runtime_settings)
+        app.state.pow = PowVerifier(runtime_settings)
         app.state.aggregator = aggregator or _build_aggregator(runtime_settings, initial_store)
 
     app.add_middleware(SecurityHeadersMiddleware, settings=runtime_settings)
@@ -276,6 +281,7 @@ def create_app(
     if initial_store is not None:
         app.state.store = initial_store
         app.state.turnstile = turnstile or TurnstileVerifier(runtime_settings)
+        app.state.pow = PowVerifier(runtime_settings)
         app.state.aggregator = aggregator or _build_aggregator(runtime_settings, initial_store)
 
     @app.exception_handler(HTTPException)
@@ -322,12 +328,28 @@ def create_app(
         return {"status": "ready"}
 
     @app.get("/api/v2/config", include_in_schema=False)
-    async def browser_config() -> dict[str, str]:
+    async def browser_config() -> dict[str, Any]:
         return {
+            "verify_mode": runtime_settings.verify_mode,
             "turnstile_site_key": runtime_settings.turnstile_site_key,
             "turnstile_script_url": runtime_settings.turnstile_script_url,
             "turnstile_action": runtime_settings.turnstile_expected_action,
         }
+
+    @app.get("/api/v2/challenge", include_in_schema=False)
+    async def generate_challenge(request: Request) -> dict[str, Any]:
+        _require_browser_request(request, runtime_settings)
+        ip = client_ip(request, runtime_settings)
+        try:
+            allowed = await request.app.state.store.allow_rate(
+                "verify-ip", ip, runtime_settings.rate_verify_ip_limit
+            )
+        except Exception:
+            _raise(503, "service_unavailable")
+        if not allowed:
+            _raise(429, "rate_limited")
+        pow_verifier: PowVerifier = request.app.state.pow
+        return pow_verifier.create_challenge()
 
     @app.post("/api/v2/session/verify", status_code=204, response_class=Response)
     async def verify_session(payload: VerifyRequest, request: Request, response: Response) -> Response:
@@ -341,8 +363,22 @@ def create_app(
             _raise(503, "service_unavailable")
         if not allowed:
             _raise(429, "rate_limited")
-        if not await request.app.state.turnstile.verify(payload.token, ip):
-            _raise(403, "verification_failed")
+
+        if runtime_settings.verify_mode == "pow":
+            pow_verifier: PowVerifier = request.app.state.pow
+            # Support test mode bypass in pow mode
+            if runtime_settings.turnstile_test_mode and hmac.compare_digest(
+                payload.token, runtime_settings.turnstile_test_token
+            ):
+                pass
+            else:
+                is_valid, _err = pow_verifier.verify_solution(payload.token)
+                if not is_valid:
+                    _raise(403, "verification_failed")
+        else:
+            if not await request.app.state.turnstile.verify(payload.token, ip):
+                _raise(403, "verification_failed")
+
         raw_session = secrets.token_urlsafe(32)
         try:
             await request.app.state.store.create_session(raw_session)

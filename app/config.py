@@ -122,6 +122,11 @@ class Settings:
     turnstile_test_mode: bool = False
     turnstile_test_token: str = ""
 
+    verify_mode: str = "pow"  # "pow" (self-hosted Altcha PoW) or "turnstile"
+    pow_secret_key: str = ""
+    pow_max_number: int = 40_000
+    pow_expires_seconds: int = 120
+
     session_ttl_seconds: int = 600
     ticket_ttl_seconds: int = 30
     cookie_name: str = "__Host-aid_session"
@@ -198,6 +203,10 @@ class Settings:
             turnstile_expected_action=os.getenv("TURNSTILE_EXPECTED_ACTION", "reveal"),
             turnstile_test_mode=_bool("TURNSTILE_TEST_MODE", False),
             turnstile_test_token=os.getenv("TURNSTILE_TEST_TOKEN", ""),
+            verify_mode=os.getenv("VERIFY_MODE", "pow").strip().lower(),
+            pow_secret_key=os.getenv("POW_SECRET_KEY", ""),
+            pow_max_number=_int("POW_MAX_NUMBER", 40_000),
+            pow_expires_seconds=_int("POW_EXPIRES_SECONDS", 120),
             session_ttl_seconds=_int("SESSION_TTL_SECONDS", 600),
             ticket_ttl_seconds=_int("TICKET_TTL_SECONDS", 30),
             cookie_name=os.getenv("COOKIE_NAME", "__Host-aid_session"),
@@ -349,16 +358,20 @@ class Settings:
             if len(self.turnstile_test_token) < 12:
                 raise ConfigurationError("explicit TURNSTILE_TEST_TOKEN is required in test mode")
         else:
-            for turnstile_name, turnstile_value in (
-                ("TURNSTILE_SITE_KEY", self.turnstile_site_key),
-                ("TURNSTILE_SECRET_KEY", self.turnstile_secret_key),
-                ("TURNSTILE_EXPECTED_HOSTNAME", self.turnstile_expected_hostname),
-                ("TURNSTILE_EXPECTED_ACTION", self.turnstile_expected_action),
-            ):
-                if production and not turnstile_value:
-                    raise ConfigurationError(f"{turnstile_name} is required")
-            _https_url("TURNSTILE_VERIFY_URL", self.turnstile_verify_url, production)
-            _https_url("TURNSTILE_SCRIPT_URL", self.turnstile_script_url, production)
+            if self.verify_mode not in ("pow", "turnstile"):
+                raise ConfigurationError("VERIFY_MODE must be either 'pow' or 'turnstile'")
+
+            if self.verify_mode == "turnstile":
+                for turnstile_name, turnstile_value in (
+                    ("TURNSTILE_SITE_KEY", self.turnstile_site_key),
+                    ("TURNSTILE_SECRET_KEY", self.turnstile_secret_key),
+                    ("TURNSTILE_EXPECTED_HOSTNAME", self.turnstile_expected_hostname),
+                    ("TURNSTILE_EXPECTED_ACTION", self.turnstile_expected_action),
+                ):
+                    if production and not turnstile_value:
+                        raise ConfigurationError(f"{turnstile_name} is required")
+                _https_url("TURNSTILE_VERIFY_URL", self.turnstile_verify_url, production)
+                _https_url("TURNSTILE_SCRIPT_URL", self.turnstile_script_url, production)
 
         if production:
             if len(self.id_hmac_secret) < 32 or len(self.state_hmac_secret) < 32:

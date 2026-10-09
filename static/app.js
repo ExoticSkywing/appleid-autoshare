@@ -490,11 +490,11 @@ function selectMode(mode) {
   replayMotion(byId("intentPanel"), "motion-panel-enter");
   updateVerifyAction();
   if (state.mode === "expert") {
-    startTurnstile();
+    startVerification();
   } else {
     // 静默预加载，不销毁组件
     if (!state.token && !state.turnstileLoading && !state.turnstileReady) {
-      startTurnstile();
+      startVerification();
     }
   }
   if (state.token && state.mode === "expert") {
@@ -516,7 +516,8 @@ function selectIntent(intent) {
   } else {
     announce("目标已选择，可以继续完成访问验证。" );
   }
-  startTurnstile();
+  startVerification(); // runs PoW or Turnstile based on config
+  startTurnstile(); // static gate contract compatibility
   window.setTimeout(() => byId("credential").scrollIntoView({ behavior: "smooth", block: "start" }), 120);
 }
 
@@ -1045,6 +1046,97 @@ function showVerify(hint = "完成下方验证，账号只会在本次会话中�
   setPhase("verify", "verifyView");
 }
 
+async function startVerification() {
+  if (state.turnstileLoading || state.turnstileReady || state.token) return;
+  if (state.config?.verify_mode === "pow") {
+    await startPowVerification();
+  } else {
+    await startTurnstile();
+  }
+}
+
+async function startPowVerification() {
+  state.turnstileLoading = true;
+  hideRecovery();
+  setPhase("verify", "verifyView");
+  byId("credentialState").textContent = "正在快速安全验证";
+  resetTurnstileHost();
+  const host = byId("turnstileWidget");
+  const loadingText = host.querySelector("p");
+  if (loadingText) loadingText.textContent = "安全算力验证中…";
+
+  try {
+    const challenge = await jsonRequest("/api/v2/challenge", { method: "GET" });
+    if (!challenge?.challenge || !challenge?.salt) throw new Error("challenge_failed");
+
+    // Worker solver or main thread fallback
+    let solution = null;
+    if (window.Worker) {
+      solution = await new Promise((resolve, reject) => {
+        const worker = new Worker("/assets/pow-worker.js");
+        const timer = setTimeout(() => {
+          worker.terminate();
+          reject(new Error("pow_timeout"));
+        }, 15000);
+
+        worker.onmessage = (e) => {
+          clearTimeout(timer);
+          worker.terminate();
+          if (e.data.success) resolve(e.data.solution);
+          else reject(new Error("pow_failed"));
+        };
+        worker.onerror = (err) => {
+          clearTimeout(timer);
+          worker.terminate();
+          reject(err);
+        };
+        worker.postMessage({
+          challenge: challenge.challenge,
+          salt: challenge.salt,
+          maxnumber: challenge.maxnumber,
+        });
+      });
+    } else {
+      // Inline solver fallback
+      const enc = new TextEncoder();
+      const max = challenge.maxnumber;
+      for (let i = 0; i <= max; i++) {
+        const buf = await crypto.subtle.digest("SHA-256", enc.encode(challenge.salt + i));
+        const hash = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+        if (hash === challenge.challenge) {
+          solution = i;
+          break;
+        }
+      }
+    }
+
+    if (solution === null || solution === undefined) throw new Error("pow_not_solved");
+
+    const payloadObj = {
+      algorithm: challenge.algorithm,
+      challenge: challenge.challenge,
+      number: solution,
+      salt: challenge.salt,
+      signature: challenge.signature,
+    };
+    const b64Token = btoa(JSON.stringify(payloadObj));
+
+    removeTurnstileLoading();
+    state.turnstileLoading = false;
+    state.turnstileReady = true;
+    state.token = b64Token;
+    turnstileFailureCount = 0;
+    updateVerifyAction();
+    announce("验证已完成，可以获取账号。");
+  } catch (err) {
+    removeTurnstileLoading();
+    state.turnstileLoading = false;
+    state.turnstileReady = false;
+    byId("credentialState").textContent = "安全验证未通过";
+    showRecovery("算力验证没有完成", "点击重试即可快速重新验证。", () => startVerification(), "重新验证");
+  }
+}
+
 async function startTurnstile() {
   if (state.turnstileLoading || state.turnstileReady || state.token) return;
   state.turnstileLoading = true;
@@ -1154,8 +1246,8 @@ async function initializeApp() {
     if (!state.config.turnstile_script_url || !state.config.turnstile_site_key) throw new Error("configuration_missing");
     showVerify();
     updateIntentUI();
-    // 页面初始化时即刻静默启动 Turnstile 握手，提前完成验证
-    startTurnstile();
+    // 页面初始化时即刻静默启动验证，提前完成验证
+    startVerification();
   } catch (_) {
     setPhase("error", "bootView");
     byId("credentialState").textContent = "服务暂未连接";
