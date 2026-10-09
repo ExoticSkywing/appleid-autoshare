@@ -483,7 +483,10 @@ function selectMode(mode) {
   if (state.mode === "expert") {
     startTurnstile();
   } else {
-    stopTurnstile();
+    // 静默预加载，不销毁组件
+    if (!state.token && !state.turnstileLoading && !state.turnstileReady) {
+      startTurnstile();
+    }
   }
   if (state.token && state.mode === "expert") {
     byId("verifyButton").focus({ preventScroll: true });
@@ -1055,6 +1058,7 @@ async function startTurnstile() {
       action: state.config.turnstile_action,
       theme: "dark",
       size: "flexible",
+      "refresh-expired": "auto",
       "before-interactive-callback": () => {
         removeTurnstileLoading();
         state.turnstileLoading = false;
@@ -1140,7 +1144,8 @@ async function initializeApp() {
     if (!state.config.turnstile_script_url || !state.config.turnstile_site_key) throw new Error("configuration_missing");
     showVerify();
     updateIntentUI();
-    if (state.mode === "expert") startTurnstile();
+    // 页面初始化时即刻静默启动 Turnstile 握手，提前完成验证
+    startTurnstile();
   } catch (_) {
     setPhase("error", "bootView");
     byId("credentialState").textContent = "服务暂未连接";
