@@ -304,7 +304,7 @@ function showTurnstileFailure(title, detail) {
 
   let failDetail = detail;
   if (turnstileFailureCount >= 1) {
-    failDetail = "各地区网络运营商访问差异较大。若一直加载超时，建议切换为【移动蜂窝数据】或更换网络后点击重试。";
+    failDetail = "验证加载较慢，建议切换为【移动蜂窝网络】后再试。";
   }
 
   showRecovery(title, failDetail, () => startTurnstile(), "重新加载验证");
