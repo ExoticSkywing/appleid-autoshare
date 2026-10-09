@@ -289,6 +289,8 @@ function resetTurnstileHost() {
   host.appendChild(loading);
 }
 
+let turnstileFailureCount = 0;
+
 function showTurnstileFailure(title, detail) {
   clearTurnstileLoadTimer();
   clearTurnstileFrameObserver();
@@ -297,8 +299,15 @@ function showTurnstileFailure(title, detail) {
   state.turnstileReady = false;
   removeTurnstileLoading();
   updateVerifyAction();
+  turnstileFailureCount += 1;
   byId("credentialState").textContent = "验证组件未连接";
-  showRecovery(title, detail, () => startTurnstile(), "重新加载验证");
+
+  let failDetail = detail;
+  if (turnstileFailureCount >= 1) {
+    failDetail = "各地区网络运营商访问差异较大。若一直加载超时，建议切换为【移动蜂窝数据】或更换网络后点击重试。";
+  }
+
+  showRecovery(title, failDetail, () => startTurnstile(), "重新加载验证");
 }
 
 function watchTurnstileProgress() {
@@ -1073,6 +1082,7 @@ async function startTurnstile() {
         state.turnstileLoading = false;
         state.turnstileReady = true;
         state.token = token;
+        turnstileFailureCount = 0;
         updateVerifyAction();
         announce("验证已完成，可以获取账号。" );
       },
