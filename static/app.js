@@ -1108,7 +1108,7 @@ async function startPowVerification() {
       let solution = null;
       if (window.Worker) {
         solution = await new Promise((resolve, reject) => {
-          const worker = new Worker("/assets/pow-worker.js");
+          const worker = new Worker("/assets/pow-worker.js?v=20260920-2");
           const timer = setTimeout(() => {
             worker.terminate();
             reject(new Error("pow_timeout"));
