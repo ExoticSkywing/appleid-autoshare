@@ -697,7 +697,7 @@ function updateCopyUI() {
   passwordButton.classList.toggle("is-primary-copy", (isExpert && !passwordCopied) || (usernameCopied && !passwordCopied));
 
   const manualFallback = byId("manualFallback");
-  const manualVisible = !isExpert && state.preflightAcknowledged && usernameCopied && !passwordCopied && !state.resultsVisible;
+  const manualVisible = !isExpert && usernameCopied && !state.resultsVisible;
   manualFallback.classList.toggle("hidden", !manualVisible);
   manualFallback.setAttribute("aria-hidden", String(!manualVisible));
 
