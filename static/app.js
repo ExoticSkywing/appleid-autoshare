@@ -725,7 +725,7 @@ function updateCopyUI() {
   byId("appStoreInstruction").classList.toggle("hidden", !usernameCopied || passwordCopied || state.resultsVisible);
   byId("accountEnteredButton").classList.toggle("hidden", usernameEntered);
   const preflight = byId("accountPreflight");
-  const preflightOpen = !isExpert && !state.preflightAcknowledged && !state.resultsVisible;
+  const preflightOpen = !isExpert && state.preflightRevealed && !state.preflightAcknowledged && !state.resultsVisible;
   preflight.classList.toggle("hidden", !preflightOpen);
   preflight.setAttribute("aria-hidden", String(!preflightOpen));
   const preflightCheck = byId("accountPreflightCheck");
