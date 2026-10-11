@@ -746,31 +746,53 @@
     padding-top: 2px;
   }
   .preflight-example p { color: var(--neutral-400); font-size: .71rem; line-height: 1.45; }
-  .preflight-example-tabs {
+  .preflight-dual-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .preflight-card {
+    display: grid;
+    gap: 7px;
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(255,255,255,.03);
+    box-shadow: 0 0 0 1px rgba(255,255,255,.07);
+  }
+  .preflight-card-head {
+    display: flex;
+    align-items: center;
     gap: 8px;
-    margin-bottom: 2px;
   }
-  .preflight-tab-btn {
-    padding: 7px 10px;
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 8px;
-    background: rgba(255,255,255,.04);
-    color: var(--neutral-300);
-    font-size: .68rem;
-    font-weight: 650;
-    cursor: pointer;
-    transition: all .2s ease;
+  .preflight-card-head > strong {
+    color: #f3f4f6;
+    font-size: .78rem;
+    font-weight: 700;
   }
-  .preflight-tab-btn.is-active {
+  .preflight-card-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: .62rem;
+    font-weight: 750;
+    line-height: 1;
+  }
+  .preflight-card-tag.tag-prompt {
+    color: #93c5fd;
     background: rgba(37,99,235,.22);
-    border-color: #3b82f6;
-    color: #fff;
-    box-shadow: 0 0 0 1px #3b82f6;
+    box-shadow: 0 0 0 1px rgba(96,165,250,.3);
   }
-  .preflight-example-item { display: grid; gap: 8px; }
-  .preflight-example-item.hidden { display: none; }
+  .preflight-card-tag.tag-direct {
+    color: #fde68a;
+    background: rgba(217,119,6,.2);
+    box-shadow: 0 0 0 1px rgba(245,158,11,.3);
+  }
+  .preflight-card > p {
+    color: #d1d5db;
+    font-size: .72rem;
+    line-height: 1.4;
+    margin: 0;
+  }
   .preflight-example .guide-image-portrait {
     position: relative;
     display: block;

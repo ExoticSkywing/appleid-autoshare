@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://challenges.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://challenges.cloudflare.com">
   <link rel="stylesheet" href="/assets/app.css?v=20260920-4">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-30">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-31">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260920-40">
   <link rel="stylesheet" href="/assets/motion.css?v=20260827-8">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
@@ -249,37 +249,38 @@
           <section id="accountPreflight" class="store-preflight hidden" aria-labelledby="accountPreflightTitle" aria-hidden="true">
             <div class="store-preflight-heading">
               <span class="guide-badge">登录提示</span>
-              <strong id="accountPreflightTitle">登录时若有弹窗就点击第二个，若没有直接粘贴账号</strong>
-            </div>
-            <div class="store-preflight-cases">
-              <div class="preflight-case preflight-case-prompt"><span>有弹窗</span><p>点击第二个选项</p></div>
-              <div class="preflight-case preflight-case-direct"><span>无弹窗</span><p>直接粘贴账号</p></div>
+              <strong id="accountPreflightTitle">登录时的两种常见情况对照</strong>
             </div>
             <div id="accountPreflightExample" class="preflight-example">
-              <div class="preflight-example-tabs">
-                <button type="button" class="preflight-tab-btn is-active" data-preflight-tab="prompt">有弹窗：点第二个</button>
-                <button type="button" class="preflight-tab-btn" data-preflight-tab="direct">无弹窗：粘贴输入框</button>
-              </div>
+              <div class="preflight-dual-grid">
+                <div class="preflight-card">
+                  <div class="preflight-card-head">
+                    <span class="preflight-card-tag tag-prompt">情况 1</span>
+                    <strong>遇到系统弹窗？</strong>
+                  </div>
+                  <p>点击第 2 个选项，不要点继续。</p>
+                  <button type="button" class="guide-image-button guide-image-landscape" data-guide-image="/assets/assets/appstore-account-choice.jpg" data-guide-caption="有弹窗时，点击第二个选项">
+                    <img src="/assets/assets/appstore-account-choice.jpg" alt="系统弹窗中，点击第二个选项" width="1280" height="937" loading="eager" decoding="sync">
+                    <span>轻触放大</span>
+                  </button>
+                </div>
 
-              <div id="preflightItemPrompt" class="preflight-example-item">
-                <p>不要点“继续”，姓名可能不同。</p>
-                <button type="button" class="guide-image-button guide-image-landscape" data-guide-image="/assets/assets/appstore-account-choice.jpg" data-guide-caption="有弹窗时，点击第二个选项">
-                  <img src="/assets/assets/appstore-account-choice.jpg" alt="系统弹窗中，点击第二个选项" width="1280" height="937" loading="eager" decoding="sync">
-                  <span>轻触放大</span>
-                </button>
-              </div>
-
-              <div id="preflightItemDirect" class="preflight-example-item hidden">
-                <p>无弹窗时，在“电子邮件或电话号码”框内粘贴账号。</p>
-                <button type="button" class="guide-image-button guide-image-portrait" data-guide-image="/assets/assets/appstore-account-input.jpg" data-guide-caption="无弹窗时，在此输入框粘贴账号">
-                  <img src="/assets/assets/appstore-account-input.jpg" alt="Apple 账户登录页，在电子邮件框直接粘贴账号" width="1178" height="1420" loading="eager" decoding="sync">
-                  <span>轻触放大</span>
-                </button>
+                <div class="preflight-card">
+                  <div class="preflight-card-head">
+                    <span class="preflight-card-tag tag-direct">情况 2</span>
+                    <strong>没有密码框？</strong>
+                  </div>
+                  <p>正常。先填账号点回车，下一步才是密码。</p>
+                  <button type="button" class="guide-image-button guide-image-portrait" data-guide-image="/assets/assets/appstore-account-input.jpg" data-guide-caption="此处仅填账号，按回车后输入密码">
+                    <img src="/assets/assets/appstore-account-input.jpg" alt="Apple 账户登录页，仅需输入账号" width="1178" height="1420" loading="eager" decoding="sync">
+                    <span>轻触放大</span>
+                  </button>
+                </div>
               </div>
 
               <label class="preflight-confirm" for="accountPreflightCheck">
                 <input id="accountPreflightCheck" type="checkbox">
-                <span>我已看过对照图，知道弹窗与输入框位置</span>
+                <span>我已看懂上方两种情况</span>
               </label>
               <p id="accountPreflightError" class="preflight-error hidden" role="alert">
                 <span class="preflight-error-icon" aria-hidden="true">!</span>
@@ -562,7 +563,7 @@
   </main>
 
   <script src="/assets/sound.js?v=20260824-17" defer></script>
-  <script src="/assets/app.js?v=20260920-26" defer></script>
+  <script src="/assets/app.js?v=20260920-27" defer></script>
   <script>
     (function(d,t) {
       var BASE_URL="https://chatwoot.1yo.cc";

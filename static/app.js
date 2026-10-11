@@ -1603,17 +1603,6 @@ byId("accountPreflightCheck").addEventListener("change", (event) => {
   saveSession();
   announce(state.preflightAcknowledged ? "已确认 App Store 账户提示的正确操作。" : "打开 App Store 前需要查看示例并勾选确认。" );
 });
-
-document.querySelectorAll("[data-preflight-tab]").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const tab = btn.dataset.preflightTab;
-    document.querySelectorAll("[data-preflight-tab]").forEach((b) => {
-      b.classList.toggle("is-active", b === btn);
-    });
-    byId("preflightItemPrompt").classList.toggle("hidden", tab !== "prompt");
-    byId("preflightItemDirect").classList.toggle("hidden", tab !== "direct");
-  });
-});
 byId("appStoreHomeLink").addEventListener("click", (event) => {
   if (!state.account || !state.copied.username || state.copied.password) {
     event.preventDefault();
