@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://challenges.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://challenges.cloudflare.com">
   <link rel="stylesheet" href="/assets/app.css?v=20260920-4">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-32">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-33">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260920-40">
   <link rel="stylesheet" href="/assets/motion.css?v=20260827-8">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
@@ -480,6 +480,31 @@
       <strong id="copyToastText">复制成功</strong>
     </div>
 
+    <!-- iOS Style Action Sheet for Preflight Confirmation -->
+    <div id="preflightActionSheet" class="action-sheet-modal hidden" role="dialog" aria-modal="true" aria-labelledby="preflightSheetTitle">
+      <div class="action-sheet-backdrop"></div>
+      <div class="action-sheet-container">
+        <div class="action-sheet-card">
+          <div class="action-sheet-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          </div>
+          <h2 id="preflightSheetTitle" class="action-sheet-title">确认已看懂登录要点？</h2>
+          <p class="action-sheet-desc">
+            遇到弹窗<strong>点第 2 项</strong>，进入后只有账号框<strong>属正常现象</strong>。
+          </p>
+          <div class="action-sheet-actions">
+            <button id="preflightConfirmReadBtn" type="button" class="action-sheet-btn action-sheet-btn-primary">
+              <span>我已认真阅读，复制账号</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7"/></svg>
+            </button>
+            <button id="preflightReviewBtn" type="button" class="action-sheet-btn action-sheet-btn-secondary">
+              <span>再看一下对照图</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="benefitModal" class="benefit-modal hidden" role="dialog" aria-modal="true" aria-labelledby="benefitModalTitle">
       <div class="benefit-dialog-backdrop"></div>
       <div class="benefit-dialog-card">
@@ -564,7 +589,7 @@
   </main>
 
   <script src="/assets/sound.js?v=20260824-17" defer></script>
-  <script src="/assets/app.js?v=20260920-30" defer></script>
+  <script src="/assets/app.js?v=20260920-31" defer></script>
   <script>
     (function(d,t) {
       var BASE_URL="https://chatwoot.1yo.cc";

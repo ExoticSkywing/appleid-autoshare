@@ -1583,21 +1583,34 @@ byId("accountEnteredButton").addEventListener("click", () => {
     copyPasswordAndContinue(button);
   }
 });
-byId("accountPreflightCheck").addEventListener("change", async (event) => {
-  state.preflightAcknowledged = Boolean(event.currentTarget.checked);
+function openPreflightActionSheet() {
+  const sheet = byId("preflightActionSheet");
+  if (!sheet) return;
+  sheet.classList.remove("hidden");
+  document.body.classList.add("is-action-sheet-open");
+  byId("preflightConfirmReadBtn")?.focus({ preventScroll: true });
+}
+
+function closePreflightActionSheet() {
+  const sheet = byId("preflightActionSheet");
+  if (!sheet || sheet.classList.contains("hidden")) return;
+  sheet.classList.add("hidden");
+  document.body.classList.remove("is-action-sheet-open");
+}
+
+async function acknowledgePreflightAndCopy() {
+  closePreflightActionSheet();
+  state.preflightAcknowledged = true;
   state.preflightRevealed = true;
-  if (state.preflightAcknowledged) {
-    playSound("check");
-    byId("accountPreflightError").classList.add("hidden");
-    byId("accountPreflightError").classList.remove("motion-preflight-error");
-    byId("accountPreflightCheck").closest(".preflight-confirm")?.classList.remove("needs-attention");
-    byId("accountPreflight").classList.remove("needs-confirmation");
-  } else {
-    startPreflightErrorMotion();
-  }
+  const check = byId("accountPreflightCheck");
+  if (check) check.checked = true;
+  playSound("check");
+  byId("accountPreflightError").classList.add("hidden");
+  byId("accountPreflightError").classList.remove("motion-preflight-error");
+  byId("accountPreflightCheck").closest(".preflight-confirm")?.classList.remove("needs-attention");
+  byId("accountPreflight").classList.remove("needs-confirmation");
   updateCopyUI();
-  if (state.preflightAcknowledged && !state.copied.username && state.account) {
-    // 勾选确认后，自动触发复制 Apple ID，实现丝滑闭环
+  if (!state.copied.username && state.account) {
     state.copied.username = true;
     state.leftForAttempt = true;
     try {
@@ -1615,8 +1628,29 @@ byId("accountPreflightCheck").addEventListener("change", async (event) => {
     }, 150);
   }
   saveSession();
-  announce(state.preflightAcknowledged ? "已确认 App Store 登录两种情况，Apple ID 已复制。" : "复制 Apple ID 前需要查看示例并勾选确认。" );
+  announce("已确认 App Store 登录两种情况，Apple ID 已复制。");
+}
+
+byId("accountPreflightCheck").addEventListener("click", (event) => {
+  if (!state.preflightAcknowledged) {
+    event.preventDefault(); // 拦截盲勾，呼出 Action Sheet
+    openPreflightActionSheet();
+  }
 });
+
+byId("preflightConfirmReadBtn").addEventListener("click", acknowledgePreflightAndCopy);
+
+byId("preflightReviewBtn").addEventListener("click", () => {
+  closePreflightActionSheet();
+  const preflight = byId("accountPreflight");
+  preflight?.scrollIntoView({ behavior: "smooth", block: "start" });
+  preflight?.classList.remove("needs-confirmation");
+  void preflight?.offsetWidth;
+  preflight?.classList.add("needs-confirmation");
+});
+
+byId("preflightActionSheet")?.querySelector(".action-sheet-backdrop")?.addEventListener("click", closePreflightActionSheet);
+
 byId("appStoreHomeLink").addEventListener("click", (event) => {
   if (!state.account || !state.copied.username || state.copied.password) {
     event.preventDefault();
