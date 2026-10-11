@@ -725,18 +725,16 @@ function updateCopyUI() {
   byId("appStoreInstruction").classList.toggle("hidden", !usernameCopied || passwordCopied || state.resultsVisible);
   byId("accountEnteredButton").classList.toggle("hidden", usernameEntered);
   const preflight = byId("accountPreflight");
-  const preflightOpen = state.preflightRevealed && !state.preflightAcknowledged && usernameCopied && !passwordCopied && !state.resultsVisible;
+  const preflightOpen = !isExpert && !state.preflightAcknowledged && !state.resultsVisible;
   preflight.classList.toggle("hidden", !preflightOpen);
   preflight.setAttribute("aria-hidden", String(!preflightOpen));
   const preflightCheck = byId("accountPreflightCheck");
   if (preflightCheck) preflightCheck.checked = state.preflightAcknowledged;
   const storeLink = byId("appStoreHomeLink");
   const storeAvailable = usernameCopied && !passwordCopied && !state.resultsVisible;
-  const storeLocked = !storeAvailable || (state.preflightRevealed && !state.preflightAcknowledged);
-  storeLink.classList.toggle("is-gated", storeLocked);
-  storeLink.classList.toggle("is-attention-ready", storeAvailable && !state.preflightRevealed && !state.preflightAcknowledged);
-  storeLink.classList.toggle("is-unlocked", storeAvailable && state.preflightAcknowledged);
-  storeLink.setAttribute("aria-disabled", String(storeLocked));
+  storeLink.classList.remove("is-gated", "is-attention-ready");
+  storeLink.classList.toggle("is-unlocked", storeAvailable);
+  storeLink.setAttribute("aria-disabled", String(!storeAvailable));
   const securityGuide = byId("securityGuide");
   securityGuide.classList.toggle("hidden", isExpert || passwordCopied || state.resultsVisible || state.loginSucceeded || !usernameCopied || !state.securityRevealed);
   const securityCheck = byId("securityGuideCheck");
@@ -1501,12 +1499,14 @@ function requireAccountPreflightAcknowledgement() {
   state.preflightRevealed = true;
   updateCopyUI();
   const preflight = byId("accountPreflight");
+  preflight.classList.remove("hidden");
   preflight.classList.add("needs-confirmation");
   byId("accountPreflightError").classList.remove("hidden");
   startPreflightErrorMotion();
   byId("accountPreflightCheck").focus({ preventScroll: true });
+  playSound("error");
   byId("accountPreflightCheck").scrollIntoView({ behavior: "smooth", block: "center" });
-  announce("请先查看 App Store 第二项示例，并勾选确认后再继续。" );
+  announce("请先查看登录提示并勾选确认，然后复制 Apple ID。" );
   return false;
 }
 
@@ -1583,7 +1583,7 @@ byId("accountEnteredButton").addEventListener("click", () => {
     copyPasswordAndContinue(button);
   }
 });
-byId("accountPreflightCheck").addEventListener("change", (event) => {
+byId("accountPreflightCheck").addEventListener("change", async (event) => {
   state.preflightAcknowledged = Boolean(event.currentTarget.checked);
   state.preflightRevealed = true;
   if (state.preflightAcknowledged) {
@@ -1596,41 +1596,35 @@ byId("accountPreflightCheck").addEventListener("change", (event) => {
     startPreflightErrorMotion();
   }
   updateCopyUI();
-  if (state.preflightAcknowledged) {
-    byId("appStoreHomeLink").focus({ preventScroll: true });
-    byId("appStoreHomeLink").scrollIntoView({ behavior: "smooth", block: "center" });
+  if (state.preflightAcknowledged && !state.copied.username && state.account) {
+    // 勾选确认后，自动触发复制 Apple ID，实现丝滑闭环
+    state.copied.username = true;
+    state.leftForAttempt = true;
+    try {
+      await copyText(byId("username").textContent || "");
+    } catch (_) {}
+    playSound("copy");
+    updateCopyUI();
+    const userBtn = document.querySelector('[data-copy="username"]');
+    if (userBtn) replayMotion(userBtn, "motion-copy-done");
+    replayStepMotion(byId("accountStep"));
+    showCopyConfirmation("Apple ID复制成功", userBtn || byId("accountPreflightCheck"));
+    window.setTimeout(() => {
+      byId("appStoreHomeLink").focus({ preventScroll: true });
+      byId("appStoreHomeLink").scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 150);
   }
   saveSession();
-  announce(state.preflightAcknowledged ? "已确认 App Store 账户提示的正确操作。" : "打开 App Store 前需要查看示例并勾选确认。" );
+  announce(state.preflightAcknowledged ? "已确认 App Store 登录两种情况，Apple ID 已复制。" : "复制 Apple ID 前需要查看示例并勾选确认。" );
 });
 byId("appStoreHomeLink").addEventListener("click", (event) => {
   if (!state.account || !state.copied.username || state.copied.password) {
     event.preventDefault();
     return;
   }
-  if (!state.preflightRevealed) {
-    event.preventDefault();
-    state.preflightRevealed = true;
-    updateCopyUI();
-    const preflight = byId("accountPreflight");
-    preflight.classList.add("needs-confirmation");
-    byId("accountPreflightError").classList.remove("hidden");
-    startPreflightErrorMotion();
-    byId("accountPreflightCheck").focus({ preventScroll: true });
-    playSound("error");
-    byId("accountPreflightCheck").scrollIntoView({ behavior: "smooth", block: "center" });
-    announce("请先查看 App Store 第二项示例，并勾选确认后再继续。" );
-    saveSession();
-    return;
-  }
-  if (!state.preflightAcknowledged) {
-    event.preventDefault();
-    requireAccountPreflightAcknowledgement();
-    return;
-  }
   state.leftForAttempt = true;
   saveSession();
-  announce("正在打开 App Store Today 首页。若未正常打开，请返回并按手动步骤继续。" );
+  announce("正在打开 App Store Today 首页。若未正常打开，请按下方手动步骤操作。" );
 });
 byId("needAccountButton").addEventListener("click", () => {
   playSound("open");
@@ -1769,7 +1763,7 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
         announce("请先复制 Apple ID，再复制密码。当前账号不会消失。" );
         return;
       }
-      if (key === "password" && !requireAccountPreflightAcknowledgement()) return;
+      if (key === "username" && !requireAccountPreflightAcknowledgement()) return;
       if (key === "password" && !requireSecurityAcknowledgement()) return;
       await copyText(target.textContent || "");
       const wasCopied = Boolean(state.copied[key]);

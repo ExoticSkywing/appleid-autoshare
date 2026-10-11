@@ -562,7 +562,6 @@
     display: grid;
     gap: 12px;
   }
-  .appstore-home-action-wrap > .store-preflight { order: 4; }
   .appstore-home-action-wrap > .appstore-home-action { order: 1; }
   .appstore-home-action-wrap > .manual-fallback { order: 2; }
   .appstore-home-action-wrap > .account-entered-action { order: 3; }

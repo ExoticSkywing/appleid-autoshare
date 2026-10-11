@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://challenges.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://challenges.cloudflare.com">
   <link rel="stylesheet" href="/assets/app.css?v=20260920-4">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-31">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-32">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260920-40">
   <link rel="stylesheet" href="/assets/motion.css?v=20260827-8">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
@@ -191,6 +191,50 @@
             </div>
           </dl>
 
+          <section id="accountPreflight" class="store-preflight hidden" aria-labelledby="accountPreflightTitle" aria-hidden="true">
+            <div class="store-preflight-heading">
+              <span class="guide-badge">登录提示</span>
+              <strong id="accountPreflightTitle">登录时的两种常见情况对照</strong>
+            </div>
+            <div id="accountPreflightExample" class="preflight-example">
+              <div class="preflight-dual-grid">
+                <div class="preflight-card">
+                  <div class="preflight-card-head">
+                    <span class="preflight-card-tag tag-prompt">情况 1</span>
+                    <strong>遇到系统弹窗？</strong>
+                  </div>
+                  <p>点击第 2 个选项，不要点继续。</p>
+                  <button type="button" class="guide-image-button guide-image-landscape" data-guide-image="/assets/assets/appstore-account-choice.jpg" data-guide-caption="有弹窗时，点击第二个选项">
+                    <img src="/assets/assets/appstore-account-choice.jpg" alt="系统弹窗中，点击第二个选项" width="1280" height="937" loading="eager" decoding="sync">
+                    <span>轻触放大</span>
+                  </button>
+                </div>
+
+                <div class="preflight-card">
+                  <div class="preflight-card-head">
+                    <span class="preflight-card-tag tag-direct">情况 2</span>
+                    <strong>没有密码框？</strong>
+                  </div>
+                  <p>正常。先填账号点回车，下一步才是密码。</p>
+                  <button type="button" class="guide-image-button guide-image-portrait" data-guide-image="/assets/assets/appstore-account-input.jpg" data-guide-caption="此处仅填账号，按回车后输入密码">
+                    <img src="/assets/assets/appstore-account-input.jpg" alt="Apple 账户登录页，仅需输入账号" width="1178" height="1420" loading="eager" decoding="sync">
+                    <span>轻触放大</span>
+                  </button>
+                </div>
+              </div>
+
+              <label class="preflight-confirm" for="accountPreflightCheck">
+                <input id="accountPreflightCheck" type="checkbox">
+                <span>我已看懂上方两种情况</span>
+              </label>
+              <p id="accountPreflightError" class="preflight-error hidden" role="alert">
+                <span class="preflight-error-icon" aria-hidden="true">!</span>
+                <span class="preflight-error-copy"><strong>必须先勾选上方确认框</strong><small>才能复制 Apple ID</small></span>
+                <span class="preflight-error-cue" aria-hidden="true">↑</span>
+              </p>
+            </div>
+          </section>
+
           <button id="differentPageButton" class="help-toggle" type="button" aria-expanded="false" aria-controls="differentPageHelp">
             登录页面和预想的不一样？
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
@@ -246,50 +290,7 @@
 
       <div id="appStoreInstruction" class="app-store-instruction hidden">
         <div class="appstore-home-action-wrap">
-          <section id="accountPreflight" class="store-preflight hidden" aria-labelledby="accountPreflightTitle" aria-hidden="true">
-            <div class="store-preflight-heading">
-              <span class="guide-badge">登录提示</span>
-              <strong id="accountPreflightTitle">登录时的两种常见情况对照</strong>
-            </div>
-            <div id="accountPreflightExample" class="preflight-example">
-              <div class="preflight-dual-grid">
-                <div class="preflight-card">
-                  <div class="preflight-card-head">
-                    <span class="preflight-card-tag tag-prompt">情况 1</span>
-                    <strong>遇到系统弹窗？</strong>
-                  </div>
-                  <p>点击第 2 个选项，不要点继续。</p>
-                  <button type="button" class="guide-image-button guide-image-landscape" data-guide-image="/assets/assets/appstore-account-choice.jpg" data-guide-caption="有弹窗时，点击第二个选项">
-                    <img src="/assets/assets/appstore-account-choice.jpg" alt="系统弹窗中，点击第二个选项" width="1280" height="937" loading="eager" decoding="sync">
-                    <span>轻触放大</span>
-                  </button>
-                </div>
-
-                <div class="preflight-card">
-                  <div class="preflight-card-head">
-                    <span class="preflight-card-tag tag-direct">情况 2</span>
-                    <strong>没有密码框？</strong>
-                  </div>
-                  <p>正常。先填账号点回车，下一步才是密码。</p>
-                  <button type="button" class="guide-image-button guide-image-portrait" data-guide-image="/assets/assets/appstore-account-input.jpg" data-guide-caption="此处仅填账号，按回车后输入密码">
-                    <img src="/assets/assets/appstore-account-input.jpg" alt="Apple 账户登录页，仅需输入账号" width="1178" height="1420" loading="eager" decoding="sync">
-                    <span>轻触放大</span>
-                  </button>
-                </div>
-              </div>
-
-              <label class="preflight-confirm" for="accountPreflightCheck">
-                <input id="accountPreflightCheck" type="checkbox">
-                <span>我已看懂上方两种情况</span>
-              </label>
-              <p id="accountPreflightError" class="preflight-error hidden" role="alert">
-                <span class="preflight-error-icon" aria-hidden="true">!</span>
-                <span class="preflight-error-copy"><strong>必须先勾选上方确认框</strong><small>才能打开 App Store</small></span>
-                <span class="preflight-error-cue" aria-hidden="true">↑</span>
-              </p>
-            </div>
-          </section>
-          <a id="appStoreHomeLink" class="appstore-home-action" href="itms-apps://itunes.apple.com/today" aria-describedby="accountPreflightTitle manualFallbackSteps">
+          <a id="appStoreHomeLink" class="appstore-home-action" href="itms-apps://itunes.apple.com/today" aria-describedby="manualFallbackSteps">
             <img src="/assets/assets/appstore-app-icon.png" alt="" aria-hidden="true">
             <span><strong>点击打开 App Store</strong><small>跳转到系统商店</small></span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
@@ -563,7 +564,7 @@
   </main>
 
   <script src="/assets/sound.js?v=20260824-17" defer></script>
-  <script src="/assets/app.js?v=20260920-27" defer></script>
+  <script src="/assets/app.js?v=20260920-29" defer></script>
   <script>
     (function(d,t) {
       var BASE_URL="https://chatwoot.1yo.cc";
