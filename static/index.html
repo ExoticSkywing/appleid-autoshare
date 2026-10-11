@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://challenges.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://challenges.cloudflare.com">
   <link rel="stylesheet" href="/assets/app.css?v=20260920-4">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-44">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-55">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260920-40">
   <link rel="stylesheet" href="/assets/motion.css?v=20260827-11">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
@@ -401,7 +401,7 @@
         <p class="target-app-hint">在应用页面寻找右侧的云朵下载图标。</p>
         <a id="targetAppLink" class="appstore-action target-app-link" href="https://apps.apple.com/us/app/id932747118">
           <img class="target-link-icon" src="/assets/assets/appstore-app-icon.png" alt="" aria-hidden="true">
-          <span><strong>打开小火箭 App Store 页面</strong><small>重开 App Store 后，也点这里重试</small></span>
+          <span><strong>点击打开小火箭 App Store 页面</strong><small>重开 App Store 后，也点这里重试</small></span>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
         </a>
         <section class="target-region-recovery" aria-labelledby="targetRegionRecoveryTitle">
@@ -433,19 +433,66 @@
             <strong id="downloadWindowTitle">点应用，直达 App Store</strong>
           </div>
           <div class="app-download-grid" aria-label="可直接下载的应用">
-            <a class="app-download-item" href="https://apps.apple.com/us/app/turrit-a-plus-messenger/id6471781238" aria-label="打开 Turrit App Store 页面"><img src="/assets/assets/social-apps/turrit.jpg" alt=""><span>Turrit</span></a>
-            <a class="app-download-item" href="https://apps.apple.com/us/app/telegram-messenger/id686449807" aria-label="打开 Telegram App Store 页面"><img src="/assets/assets/social-apps/telegram.gif" alt=""><span>Telegram</span></a>
-            <a class="app-download-item" href="https://apps.apple.com/us/app/x/id333903271" aria-label="打开 X App Store 页面"><img src="/assets/assets/social-apps/x.svg" alt=""><span>X</span></a>
-            <a class="app-download-item" href="https://apps.apple.com/us/app/instagram/id389801252" aria-label="打开 Instagram App Store 页面"><img src="/assets/assets/social-apps/instagram.png" alt=""><span>Instagram</span></a>
-            <a class="app-download-item" href="https://apps.apple.com/us/app/tiktok-videos-shop-live/id835599320" aria-label="打开 TikTok App Store 页面"><img src="/assets/assets/social-apps/tiktok.png" alt=""><span>TikTok</span></a>
-            <a class="app-download-item" href="https://apps.apple.com/us/app/youtube/id544007664" aria-label="打开 YouTube App Store 页面"><img src="/assets/assets/social-apps/youtube.png" alt=""><span>YouTube</span></a>
-            <a class="app-download-item" href="https://apps.apple.com/us/app/discord-talk-play-hang-out/id985746746" aria-label="打开 Discord App Store 页面"><img src="/assets/assets/social-apps/discord.png" alt=""><span>Discord</span></a>
-            <a class="app-download-item" href="https://apps.apple.com/us/app/spotify-music-and-podcasts/id324684580" aria-label="打开 Spotify App Store 页面"><img src="/assets/assets/social-apps/spotify.jpg" alt=""><span>Spotify</span></a>
-            <a class="app-download-item" href="https://apps.apple.com/us/app/gmail-email-by-google/id422689480" aria-label="打开 Gmail App Store 页面"><img src="/assets/assets/social-apps/gmail.png" alt=""><span>Gmail</span></a>
+            <a class="app-download-item app-download-bundled" href="https://apps.apple.com/us/app/turrit-a-plus-messenger/id6471781238" aria-label="打开 Turrit App Store 页面（必下）">
+              <div class="app-download-icon-wrapper">
+                <img src="/assets/assets/social-apps/turrit.jpg" alt="">
+                <span class="app-download-tag" aria-hidden="true">必</span>
+              </div>
+              <span>Turrit</span>
+            </a>
+            <a class="app-download-item app-download-bundled" href="https://apps.apple.com/us/app/telegram-messenger/id686449807" aria-label="打开 Telegram App Store 页面（必下）">
+              <div class="app-download-icon-wrapper">
+                <img src="/assets/assets/social-apps/telegram.gif" alt="">
+                <span class="app-download-tag" aria-hidden="true">必</span>
+              </div>
+              <span>Telegram</span>
+            </a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/x/id333903271" aria-label="打开 X App Store 页面">
+              <div class="app-download-icon-wrapper">
+                <img src="/assets/assets/social-apps/x.svg" alt="">
+              </div>
+              <span>X</span>
+            </a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/instagram/id389801252" aria-label="打开 Instagram App Store 页面">
+              <div class="app-download-icon-wrapper">
+                <img src="/assets/assets/social-apps/instagram.png" alt="">
+              </div>
+              <span>Instagram</span>
+            </a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/tiktok-videos-shop-live/id835599320" aria-label="打开 TikTok App Store 页面">
+              <div class="app-download-icon-wrapper">
+                <img src="/assets/assets/social-apps/tiktok.png" alt="">
+              </div>
+              <span>TikTok</span>
+            </a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/youtube/id544007664" aria-label="打开 YouTube App Store 页面">
+              <div class="app-download-icon-wrapper">
+                <img src="/assets/assets/social-apps/youtube.png" alt="">
+              </div>
+              <span>YouTube</span>
+            </a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/discord-talk-play-hang-out/id985746746" aria-label="打开 Discord App Store 页面">
+              <div class="app-download-icon-wrapper">
+                <img src="/assets/assets/social-apps/discord.png" alt="">
+              </div>
+              <span>Discord</span>
+            </a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/spotify-music-and-podcasts/id324684580" aria-label="打开 Spotify App Store 页面">
+              <div class="app-download-icon-wrapper">
+                <img src="/assets/assets/social-apps/spotify.jpg" alt="">
+              </div>
+              <span>Spotify</span>
+            </a>
+            <a class="app-download-item" href="https://apps.apple.com/us/app/gmail-email-by-google/id422689480" aria-label="打开 Gmail App Store 页面">
+              <div class="app-download-icon-wrapper">
+                <img src="/assets/assets/social-apps/gmail.png" alt="">
+              </div>
+              <span>Gmail</span>
+            </a>
           </div>
-          <button id="needAccountButton" class="need-account-action" type="button" aria-label="TG 收不到验证码，没有 TG 账号？获取海外社交应用专属账号">
+          <button id="needAccountButton" class="need-account-action" type="button" aria-label="Telegram / 电报 (纸飞机) 注册难、无账号？获取海外社交应用专属账号">
             <img src="/assets/assets/store-logo.png" alt="" aria-hidden="true">
-            <span><small>TG 收不到验证码，没有 TG 账号？</small><strong>获取海外社交应用专属账号</strong></span>
+            <span><small>Telegram / 电报 (纸飞机) 注册难、无账号？</small><strong>获取海外社交应用专属账号</strong></span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-9 9"/></svg>
           </button>
         </section>
@@ -565,7 +612,7 @@
                 </td>
               </tr>
               <tr>
-                <th scope="row" class="td-feature">可以更新app</th>
+                <th scope="row" class="td-feature">应用更新</th>
                 <td class="td-exclusive">
                   <span class="benefit-state-badge is-exclusive">不仅小火箭还有其他所有海外应用均可更新</span>
                 </td>
@@ -575,6 +622,14 @@
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class="benefit-overview-card">
+          <div class="benefit-overview-badge">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>永久账号 · 随时直更</span>
+          </div>
+          <p class="benefit-overview-lead">拥有专属账号相当于拥有自己的<strong>永久外区 Apple ID</strong>。更新免卸载，避免<strong>聊天记录与本地数据全部丢失</strong>。</p>
+          <p class="benefit-overview-note"><span class="note-prefix">注：</span>只是单独的 Apple ID 账号，非上述各平台海外社交应用账号。</p>
         </div>
         <div class="benefit-dialog-footer">
           <a id="benefitModalShopLink" class="benefit-modal-shop-btn" rel="noopener noreferrer nofollow" target="_blank">
