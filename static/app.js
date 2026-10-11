@@ -572,9 +572,9 @@ function renderResultCopyProgress() {
   icon.src = "/assets/assets/appstore-account-guide.png";
   icon.alt = "账户头像";
   el.replaceChildren(
-    "进入 App Store 首页右上角点击账户头像 ",
+    "打开 App Store 右上角的账户头像 ",
     icon,
-    "，看是否已显示账号："
+    "，对照下方两种情况，选择对应操作。"
   );
 }
 
@@ -1583,23 +1583,83 @@ byId("accountEnteredButton").addEventListener("click", () => {
     copyPasswordAndContinue(button);
   }
 });
+let preflightSheetCloseTimer = null;
+let preflightSheetCloseCleanup = null;
+let preflightSheetTrigger = null;
+
+function cancelPreflightSheetClose() {
+  window.clearTimeout(preflightSheetCloseTimer);
+  preflightSheetCloseTimer = null;
+  preflightSheetCloseCleanup?.();
+  preflightSheetCloseCleanup = null;
+}
+
 function openPreflightActionSheet() {
   const sheet = byId("preflightActionSheet");
-  if (!sheet) return;
-  sheet.classList.remove("hidden");
+  if (!sheet || sheet.classList.contains("is-open")) return;
+  cancelPreflightSheetClose();
+  preflightSheetTrigger = byId("accountPreflightCheck");
+  sheet.classList.remove("hidden", "is-closing");
+  sheet.inert = false;
   document.body.classList.add("is-action-sheet-open");
-  byId("preflightConfirmReadBtn")?.focus({ preventScroll: true });
+  byId("workspace").inert = true;
+  document.querySelector(".skip-link").inert = true;
+  void sheet.offsetWidth;
+  sheet.classList.add("is-open");
+  byId("preflightReviewBtn").focus({ preventScroll: true });
 }
 
-function closePreflightActionSheet() {
+function closePreflightActionSheet({ restoreFocus = true, afterClose = null } = {}) {
   const sheet = byId("preflightActionSheet");
-  if (!sheet || sheet.classList.contains("hidden")) return;
-  sheet.classList.add("hidden");
-  document.body.classList.remove("is-action-sheet-open");
+  if (!sheet || !sheet.classList.contains("is-open")) return;
+  sheet.classList.remove("is-open");
+  sheet.classList.add("is-closing");
+  sheet.inert = true;
+  // Release interaction immediately: clipboard writes retain their click gesture.
+  byId("workspace").inert = false;
+  document.querySelector(".skip-link").inert = false;
+  if (restoreFocus) preflightSheetTrigger?.focus({ preventScroll: true });
+  const panel = sheet.querySelector(".action-sheet-container");
+  const finish = () => {
+    if (!sheet.classList.contains("is-closing")) return;
+    cancelPreflightSheetClose();
+    sheet.classList.add("hidden");
+    sheet.classList.remove("is-closing");
+    document.body.classList.remove("is-action-sheet-open");
+    if (afterClose) afterClose();
+  };
+  const duration = Math.max(0, ...getComputedStyle(panel).transitionDuration.split(",").map((value) => {
+    const time = value.trim();
+    return parseFloat(time) * (time.endsWith("ms") ? 1 : 1000);
+  }));
+  if (motionQuery.matches || duration === 0) {
+    finish();
+    return;
+  }
+  // Only the surface exit owns unmounting; inner text fades must not cut it off.
+  const onExitEnd = (event) => {
+    if (event.target === panel && event.propertyName === "transform") finish();
+  };
+  panel.addEventListener("transitionend", onExitEnd);
+  preflightSheetCloseCleanup = () => panel.removeEventListener("transitionend", onExitEnd);
+  // Background tabs or changed motion preferences can suppress transitionend.
+  preflightSheetCloseTimer = window.setTimeout(finish, duration + 100);
 }
+
+byId("preflightActionSheet").addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closePreflightActionSheet();
+  } else if (event.key === "Tab") {
+    event.preventDefault();
+    const next = document.activeElement === byId("preflightReviewBtn")
+      ? byId("preflightConfirmReadBtn") : byId("preflightReviewBtn");
+    next.focus({ preventScroll: true });
+  }
+});
 
 async function acknowledgePreflightAndCopy() {
-  closePreflightActionSheet();
+  closePreflightActionSheet({ restoreFocus: false });
   state.preflightAcknowledged = true;
   state.preflightRevealed = true;
   const check = byId("accountPreflightCheck");
@@ -1611,11 +1671,18 @@ async function acknowledgePreflightAndCopy() {
   byId("accountPreflight").classList.remove("needs-confirmation");
   updateCopyUI();
   if (!state.copied.username && state.account) {
-    state.copied.username = true;
-    state.leftForAttempt = true;
     try {
       await copyText(byId("username").textContent || "");
-    } catch (_) {}
+    } catch (_) {
+      updateCopyUI();
+      saveSession();
+      showRecovery("没有复制成功", "请再点一次账号旁的“复制”按钮。", null);
+      document.querySelector('[data-copy="username"]')?.focus({ preventScroll: true });
+      announce("已确认阅读，但账号没有复制成功。请再点一次复制按钮。");
+      return;
+    }
+    state.copied.username = true;
+    state.leftForAttempt = true;
     playSound("copy");
     updateCopyUI();
     const userBtn = document.querySelector('[data-copy="username"]');
@@ -1641,12 +1708,12 @@ byId("accountPreflightCheck").addEventListener("click", (event) => {
 byId("preflightConfirmReadBtn").addEventListener("click", acknowledgePreflightAndCopy);
 
 byId("preflightReviewBtn").addEventListener("click", () => {
-  closePreflightActionSheet();
-  const preflight = byId("accountPreflight");
-  preflight?.scrollIntoView({ behavior: "smooth", block: "start" });
-  preflight?.classList.remove("needs-confirmation");
-  void preflight?.offsetWidth;
-  preflight?.classList.add("needs-confirmation");
+  closePreflightActionSheet({ restoreFocus: false, afterClose: () => {
+    const example = byId("accountPreflightExample");
+    example.focus({ preventScroll: true });
+    example.scrollIntoView({ behavior: motionQuery.matches ? "auto" : "smooth", block: "start" });
+    replayMotion(example);
+  } });
 });
 
 byId("preflightActionSheet")?.querySelector(".action-sheet-backdrop")?.addEventListener("click", closePreflightActionSheet);
