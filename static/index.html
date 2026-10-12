@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://challenges.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://challenges.cloudflare.com">
   <link rel="stylesheet" href="/assets/app.css?v=20260920-4">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-55">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-58">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260920-40">
   <link rel="stylesheet" href="/assets/motion.css?v=20260827-11">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
@@ -406,10 +406,14 @@
         </a>
         <section class="target-region-recovery" aria-labelledby="targetRegionRecoveryTitle">
           <details class="target-region-disclosure">
-            <summary id="targetRegionRecoveryTitle" aria-label="看到「App 不可用」？">
+            <summary id="targetRegionRecoveryTitle" aria-label="看到「App 不可用」？点此查看解决方法">
               <span class="target-region-heading">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
                 <span class="t-shimmer" data-text="看到「App 不可用」？" aria-hidden="true">看到「App 不可用」？</span>
+              </span>
+              <span class="target-region-trigger-badge">
+                <span class="target-region-trigger-text">查看解决方法</span>
+                <svg class="target-region-trigger-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
               </span>
             </summary>
             <div class="target-region-body">
@@ -503,7 +507,7 @@
         </div>
         <a id="signOutGuideLink" class="signout-guide-link" href="https://pxkjjc.tsmoe.com/#ios?phase=1&amp;step=1&amp;stepId=open-settings" rel="noopener noreferrer nofollow" target="_blank">
           <span class="signout-guide-step" aria-hidden="true">1</span>
-          <span class="signout-guide-copy"><strong>查看快速退出教程</strong><small>在新页面按步骤退出当前 App Store 账号</small></span>
+          <span class="signout-guide-copy"><strong>查看快速退出教程</strong><small>完成第一阶段的 1-5 步即可</small></span>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M19 5l-9 9M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
         </a>
         <label class="signout-confirm" for="signOutCheck">
@@ -653,6 +657,32 @@
   </main>
 
   <!-- Viewport-anchored sheet: independent of the task column and its focus scope. -->
+  <div id="returnTutorialActionSheet" class="action-sheet-modal hidden" role="dialog" aria-modal="true" aria-labelledby="returnTutorialSheetTitle" aria-describedby="returnTutorialSheetDescription" inert>
+    <div class="action-sheet-backdrop"></div>
+    <div class="action-sheet-container">
+      <div class="action-sheet-card">
+        <div class="action-sheet-heading">
+          <svg class="action-sheet-heading-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <polyline points="9 14 4 9 9 4" />
+            <path d="M20 20v-7a4 4 0 0 0-4-4H4" />
+          </svg>
+          <h2 id="returnTutorialSheetTitle" class="action-sheet-title">别忘了回到刚刚的教程继续操作</h2>
+        </div>
+        <div id="returnTutorialSheetDescription" class="return-tutorial-sheet-body">
+          <p class="return-tutorial-lead">在退出当前 App Store 共享账号后，请务必返回原教程页面完成后续步骤：</p>
+          <figure class="return-tutorial-figure">
+            <img src="/assets/assets/tutorial-return-reference.jpg" alt="教程提醒参考：做完之后，请务必回到这里继续后续步骤" width="1062" height="742" loading="eager">
+          </figure>
+        </div>
+        <div class="action-sheet-actions">
+          <button id="returnTutorialReviewBtn" type="button" class="action-sheet-btn action-sheet-btn-secondary">再看一下</button>
+          <button id="returnTutorialConfirmBtn" type="button" class="action-sheet-btn action-sheet-btn-primary">我已回到教程 / 确认完成</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Viewport-anchored sheet: independent of the task column and its focus scope. -->
   <div id="preflightActionSheet" class="action-sheet-modal hidden" role="dialog" aria-modal="true" aria-labelledby="preflightSheetTitle" aria-describedby="preflightSheetDescription" inert>
     <div class="action-sheet-backdrop"></div>
     <div class="action-sheet-container">
@@ -695,7 +725,7 @@
   </div>
 
   <script src="/assets/sound.js?v=20260824-17" defer></script>
-  <script src="/assets/app.js?v=20260920-35" defer></script>
+  <script src="/assets/app.js?v=20260920-37" defer></script>
   <script>
     (function(d,t) {
       var BASE_URL="https://chatwoot.1yo.cc";

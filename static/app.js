@@ -1586,6 +1586,10 @@ byId("accountEnteredButton").addEventListener("click", () => {
 let preflightSheetCloseTimer = null;
 let preflightSheetCloseCleanup = null;
 let preflightSheetTrigger = null;
+let returnTutorialSheetTrigger = null;
+let returnTutorialSheetCloseTimer = null;
+let returnTutorialSheetCloseCleanup = null;
+let returnTutorialPendingCallback = null;
 
 function cancelPreflightSheetClose() {
   window.clearTimeout(preflightSheetCloseTimer);
@@ -1593,6 +1597,96 @@ function cancelPreflightSheetClose() {
   preflightSheetCloseCleanup?.();
   preflightSheetCloseCleanup = null;
 }
+
+function cancelReturnTutorialSheetClose() {
+  window.clearTimeout(returnTutorialSheetCloseTimer);
+  returnTutorialSheetCloseTimer = null;
+  returnTutorialSheetCloseCleanup?.();
+  returnTutorialSheetCloseCleanup = null;
+}
+
+function openReturnTutorialActionSheet(triggerElement, onConfirm) {
+  const sheet = byId("returnTutorialActionSheet");
+  if (!sheet || sheet.classList.contains("is-open")) return;
+  cancelReturnTutorialSheetClose();
+  returnTutorialSheetTrigger = triggerElement || document.activeElement;
+  returnTutorialPendingCallback = onConfirm;
+  sheet.classList.remove("hidden", "is-closing");
+  sheet.inert = false;
+  document.body.classList.add("is-action-sheet-open");
+  byId("workspace").inert = true;
+  document.querySelector(".skip-link").inert = true;
+  void sheet.offsetWidth;
+  sheet.classList.add("is-open");
+  byId("returnTutorialReviewBtn").focus({ preventScroll: true });
+}
+
+function closeReturnTutorialActionSheet({ restoreFocus = true, afterClose = null } = {}) {
+  const sheet = byId("returnTutorialActionSheet");
+  if (!sheet || !sheet.classList.contains("is-open")) return;
+  sheet.classList.remove("is-open");
+  sheet.classList.add("is-closing");
+  sheet.inert = true;
+  byId("workspace").inert = false;
+  document.querySelector(".skip-link").inert = false;
+  if (restoreFocus) returnTutorialSheetTrigger?.focus({ preventScroll: true });
+  const panel = sheet.querySelector(".action-sheet-container");
+  const finish = () => {
+    if (!sheet.classList.contains("is-closing")) return;
+    cancelReturnTutorialSheetClose();
+    sheet.classList.add("hidden");
+    sheet.classList.remove("is-closing");
+    document.body.classList.remove("is-action-sheet-open");
+    if (afterClose) afterClose();
+  };
+  const duration = Math.max(0, ...getComputedStyle(panel).transitionDuration.split(",").map((value) => {
+    const time = value.trim();
+    return parseFloat(time) * (time.endsWith("ms") ? 1 : 1000);
+  }));
+  if (motionQuery.matches || duration === 0) {
+    finish();
+    return;
+  }
+  const onExitEnd = (event) => {
+    if (event.target === panel && event.propertyName === "transform") finish();
+  };
+  panel.addEventListener("transitionend", onExitEnd);
+  returnTutorialSheetCloseCleanup = () => panel.removeEventListener("transitionend", onExitEnd);
+  returnTutorialSheetCloseTimer = window.setTimeout(finish, duration + 100);
+}
+
+byId("returnTutorialActionSheet")?.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeReturnTutorialActionSheet();
+  } else if (event.key === "Tab") {
+    event.preventDefault();
+    const next = document.activeElement === byId("returnTutorialReviewBtn")
+      ? byId("returnTutorialConfirmBtn") : byId("returnTutorialReviewBtn");
+    next.focus({ preventScroll: true });
+  }
+});
+
+byId("returnTutorialReviewBtn")?.addEventListener("click", () => {
+  playSound("press");
+  closeReturnTutorialActionSheet();
+});
+
+byId("returnTutorialConfirmBtn")?.addEventListener("click", () => {
+  playSound("check");
+  const cb = returnTutorialPendingCallback;
+  returnTutorialPendingCallback = null;
+  closeReturnTutorialActionSheet({
+    restoreFocus: false,
+    afterClose: () => {
+      cb?.();
+    }
+  });
+});
+
+byId("returnTutorialActionSheet")?.querySelector(".action-sheet-backdrop")?.addEventListener("click", () => {
+  closeReturnTutorialActionSheet();
+});
 
 function openPreflightActionSheet() {
   const sheet = byId("preflightActionSheet");
@@ -1793,9 +1887,22 @@ async function completeNoviceExit(expectedReplacement) {
 
   byId("signOutGuideLink").classList.remove("needs-confirmation");
   btn.classList.remove("is-blocked");
-  await submitFeedback(result);
-  state.pendingNoviceExitResult = "";
-  state.signOutGuideOpened = false;
+
+  // 关键业务动线分流：
+  // 1. 如果是「没有小火箭 / 尝试下一个账号」(isReplacement = true)，用户当前就在本站继续换号操作，不需要返回上游教程，直接提交换号！
+  // 2. 只有当用户「已成功下载完成 / 完成本次使用」(isReplacement = false)，才需要弹窗提醒用户别忘了回到上游原教程。
+  if (isReplacement) {
+    await submitFeedback(result);
+    state.pendingNoviceExitResult = "";
+    state.signOutGuideOpened = false;
+    return;
+  }
+
+  openReturnTutorialActionSheet(btn, async () => {
+    await submitFeedback(result);
+    state.pendingNoviceExitResult = "";
+    state.signOutGuideOpened = false;
+  });
 }
 
 byId("finishAfterSignOutButton").addEventListener("click", () => { playSound("press"); completeNoviceExit(false); });
