@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import secrets
 import time
@@ -32,6 +33,9 @@ class RedisStore:
 
     def _state_digest(self, value: str, namespace: str) -> str:
         return keyed_digest(value, self.settings.state_hmac_secret, namespace)
+
+    def _password_digest(self, password: str) -> str:
+        return hashlib.sha256(password.strip().encode("utf-8")).hexdigest()[:16]
 
     async def ping(self) -> bool:
         return bool(await self.redis.ping())
@@ -233,10 +237,23 @@ class RedisStore:
             and issued_at <= current <= valid_until
         )
 
-    async def mark_account_shown(self, session_digest: str, account_id: str) -> None:
+    async def mark_account_shown(
+        self,
+        session_digest: str,
+        account_id: str,
+        *,
+        password: str = "",
+    ) -> None:
         key = self._key("session-shown", session_digest)
         await self.redis.sadd(key, account_id)
         await self.redis.expire(key, self.settings.session_ttl_seconds)
+        if password:
+            pwd_digest = self._password_digest(password)
+            await self.redis.set(
+                self._key("session-account-pwd", session_digest, account_id),
+                pwd_digest,
+                ex=self.settings.session_ttl_seconds,
+            )
 
     async def select_account_for_session(
         self,
@@ -251,7 +268,10 @@ class RedisStore:
         for account in accounts:
             if await self.redis.sismember(self._key("session-shown", session_digest), account.id):
                 continue
-            raw_quality = await self.redis.get(self._key("account-quality", account.id))
+            pwd_digest = self._password_digest(account.password)
+            raw_quality = await self.redis.get(self._key("account-quality", f"{account.id}:{pwd_digest}"))
+            if raw_quality is None:
+                raw_quality = await self.redis.get(self._key("account-quality", account.id))
             quality = raw_quality.decode() if isinstance(raw_quality, bytes) else raw_quality
             rank = {
                 "shadowrocket_available": 0,
@@ -266,12 +286,16 @@ class RedisStore:
                     intent_rank = 0
                 elif quality in {"login_success", None} and has_feature:
                     intent_rank = 1
-                elif quality in {"login_success", None}:
+                elif quality == "shadowrocket_missing" and has_feature:
                     intent_rank = 2
-                elif quality == "shadowrocket_missing":
+                elif quality == "login_failed" and has_feature:
                     intent_rank = 3
-                else:
+                elif quality in {"login_success", None}:
                     intent_rank = 4
+                elif quality == "shadowrocket_missing":
+                    intent_rank = 5
+                else:
+                    intent_rank = 6
             else:
                 if quality == "shadowrocket_available":
                     intent_rank = 0
@@ -281,10 +305,12 @@ class RedisStore:
                     intent_rank = 2
                 elif quality is None:
                     intent_rank = 3
-                elif quality == "shadowrocket_missing":
+                elif has_feature:
                     intent_rank = 4
-                else:
+                elif quality == "shadowrocket_missing":
                     intent_rank = 5
+                else:
+                    intent_rank = 6
             ranked.append((intent_rank, rank, -account.last_synced_at, account.id, account))
         if not ranked:
             return None
@@ -309,7 +335,25 @@ class RedisStore:
         accepted = await self.redis.set(once_key, result, nx=True, ex=self.settings.session_ttl_seconds)
         if not accepted:
             return False
-        await self.redis.set(self._key("account-quality", account_id), result)
+
+        # TTL strategy based on upstream sync freshness:
+        # Success states persist longer (1 hour); failures expire quickly (matching source freshness window, 180s)
+        # so when upstream updates or skew passes, it quickly unlocks.
+        quality_ttl = 3600 if result in {"shadowrocket_available", "login_success"} else min(self.settings.source_freshness_seconds * 3, 180)
+
+        # Retrieve password digest recorded when shown to scope feedback to specific password version
+        pwd_digest = await self.redis.get(self._key("session-account-pwd", session_digest, account_id))
+        if isinstance(pwd_digest, bytes):
+            pwd_digest = pwd_digest.decode()
+
+        if pwd_digest:
+            await self.redis.set(
+                self._key("account-quality", f"{account_id}:{pwd_digest}"),
+                result,
+                ex=quality_ttl,
+            )
+        # Also maintain base key with TTL
+        await self.redis.set(self._key("account-quality", account_id), result, ex=quality_ttl)
         return True
 
     async def allow_request(

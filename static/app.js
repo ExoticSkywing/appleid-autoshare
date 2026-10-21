@@ -572,7 +572,7 @@ function renderResultCopyProgress() {
   icon.src = "/assets/assets/appstore-account-guide.png";
   icon.alt = "账户头像";
   el.replaceChildren(
-    "打开 App Store 右上角的账户头像 ",
+    "进入 App Store 首页右上角点击账户头像 ",
     icon,
     "，对照下方两种情况，选择对应操作。"
   );

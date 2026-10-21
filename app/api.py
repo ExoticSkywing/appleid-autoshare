@@ -489,7 +489,7 @@ def create_app(
                     exhausted=True,
                     purchase_link=runtime_settings.store_url or None,
                 )
-            await store.mark_account_shown(session_digest, selected.id)
+            await store.mark_account_shown(session_digest, selected.id, password=selected.password)
         except HTTPException:
             raise
         except Exception:
