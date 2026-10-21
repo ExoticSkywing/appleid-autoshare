@@ -1,4 +1,4 @@
-@layer reset, base, components, states, responsive;
+@layer reset, base, components, states, responsive, jakub-theme;
 
 @layer reset {
   .shell *, .shell *::before, .shell *::after { box-sizing: border-box; }

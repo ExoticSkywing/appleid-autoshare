@@ -2127,7 +2127,14 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
     .result-action:hover { background: var(--neutral-750) !important; }
   }
   .result-action:active { transform: scale(.96); }
-  .result-action strong { color: var(--neutral-100); }
+  .result-action strong {
+    color: var(--neutral-100);
+    white-space: nowrap;
+    letter-spacing: -0.015em;
+  }
+  .result-action[data-result="login_failed"] strong {
+    font-size: .84rem;
+  }
   .result-action small { color: var(--neutral-500); }
   .result-icon {
     width: 32px;
