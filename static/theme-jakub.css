@@ -2087,6 +2087,10 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
     font-size: .75rem;
     line-height: 1.5;
   }
+  .login-result-example:not(.login-result-example-error) .login-result-example-hint {
+    color: var(--login-result-status);
+    font-weight: 500;
+  }
   @media (max-width: 350px) {
     .login-result-evidence { gap: 10px; }
     .login-result-example-title { align-items: flex-start; }
@@ -2786,7 +2790,7 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
     min-height: 66px !important;
     margin: 0 !important;
     padding: 10px 10px !important;
-    padding-right: 110px !important;
+    padding-right: 132px !important;
     grid-template-columns: 38px minmax(0, 1fr) !important;
     gap: 8px !important;
     border: 1px solid rgba(196,181,253,.15) !important;
@@ -2803,18 +2807,26 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
     max-width: 38px !important;
   }
   .result-store-bar .store-arrow-icon {
-    display: none !important;
+    display: block !important;
+    position: absolute !important;
+    top: 50% !important;
+    right: 10px !important;
+    transform: translateY(-50%) !important;
+    width: 14px !important;
+    height: 14px !important;
+    color: var(--neutral-400) !important;
+    pointer-events: none !important;
   }
   .result-store-bar .store-benefit-pill {
-    right: 10px !important;
-    height: 26px !important;
-    padding: 0 8px !important;
-    font-size: .64rem !important;
+    right: 30px !important;
+    height: 25px !important;
+    padding: 0 7px !important;
+    font-size: .62rem !important;
     gap: 3px !important;
   }
   .result-store-bar .store-benefit-pill .pill-icon {
-    width: 11px !important;
-    height: 11px !important;
+    width: 10px !important;
+    height: 10px !important;
   }
   .result-store-bar .store-benefit-pill span {
     letter-spacing: -0.02em;
@@ -2823,14 +2835,14 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
     min-width: 0;
   }
   .result-store-bar .store-text-group strong {
-    font-size: .75rem !important;
+    font-size: .74rem !important;
     white-space: nowrap !important;
     letter-spacing: -0.02em !important;
     line-height: 1.3 !important;
     margin-bottom: 2px !important;
   }
   .result-store-bar .store-text-group small {
-    font-size: .66rem !important;
+    font-size: .64rem !important;
     white-space: nowrap !important;
     letter-spacing: -0.025em !important;
     line-height: 1.25 !important;
