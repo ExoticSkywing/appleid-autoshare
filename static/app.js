@@ -560,8 +560,8 @@ function setStoreLink(url, exhausted = false) {
   resultBar.classList.remove("is-attention-entry");
   const strong = link.querySelector("strong");
   const small = link.querySelector("small");
-  strong.textContent = "不想继续尝试？";
-  small.textContent = "购买专属账号，一次解决";
+  strong.textContent = "不想继续尝试换号流程？";
+  small.textContent = "购买专属小火箭账号，一次解决";
 }
 
 function renderResultCopyProgress() {

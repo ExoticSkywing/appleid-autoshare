@@ -1343,7 +1343,7 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
   .update-tradeoff-container .update-tradeoff-store,
   .empty-store-container .empty-store-link {
     width: 100% !important;
-    padding-right: 142p...[truncated]
+    padding-right: 142px !important;
   }
   .store-link > svg,
   .result-store-link .store-arrow-icon,
@@ -2765,12 +2765,56 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
     width: 100% !important;
     min-height: 66px !important;
     margin: 0 !important;
+    padding: 10px 10px !important;
+    padding-right: 110px !important;
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+    gap: 8px !important;
     border: 1px solid rgba(196,181,253,.15) !important;
     background: linear-gradient(100deg, #1b1427 0%, #18131f 54%, #131116 100%) !important;
     box-shadow: 0 0 0 1px rgba(139,107,216,.07), inset 0 1px rgba(255,255,255,.035) !important;
     position: relative;
     overflow: hidden;
     isolation: isolate;
+  }
+  .result-store-bar .store-brand-icon {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+  }
+  .result-store-bar .store-arrow-icon {
+    display: none !important;
+  }
+  .result-store-bar .store-benefit-pill {
+    right: 10px !important;
+    height: 26px !important;
+    padding: 0 8px !important;
+    font-size: .64rem !important;
+    gap: 3px !important;
+  }
+  .result-store-bar .store-benefit-pill .pill-icon {
+    width: 11px !important;
+    height: 11px !important;
+  }
+  .result-store-bar .store-benefit-pill span {
+    letter-spacing: -0.02em;
+  }
+  .result-store-bar .store-text-group {
+    min-width: 0;
+  }
+  .result-store-bar .store-text-group strong {
+    font-size: .75rem !important;
+    white-space: nowrap !important;
+    letter-spacing: -0.02em !important;
+    line-height: 1.3 !important;
+    margin-bottom: 2px !important;
+  }
+  .result-store-bar .store-text-group small {
+    font-size: .66rem !important;
+    white-space: nowrap !important;
+    letter-spacing: -0.025em !important;
+    line-height: 1.25 !important;
+    color: #9ca3af !important;
   }
   .result-store-bar .result-store-link::after {
     content: "";
