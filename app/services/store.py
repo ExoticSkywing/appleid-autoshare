@@ -68,9 +68,12 @@ class RedisStore:
             alias,
             (self.settings.source_freshness_seconds, self.settings.source_slice_ttl_seconds),
         )
-        valid_until = fetched_at + freshness
-        if source_valid_until is not None:
-            valid_until = min(valid_until, source_valid_until)
+        # If upstream provides an authoritative valid_until (e.g. iKuuu expire_time), respect it directly!
+        # Do not artificially clamp it with freshness.
+        if source_valid_until is not None and source_valid_until > fetched_at:
+            valid_until = source_valid_until
+        else:
+            valid_until = fetched_at + freshness
         if valid_until <= fetched_at:
             return False
         payload = SourceSlice(

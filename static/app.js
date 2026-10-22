@@ -861,6 +861,19 @@ function showExhausted(purchaseLink) {
   byId("feedbackPanel").classList.add("hidden");
   byId("credentialState").textContent = "没有更多共享凭证";
   byId("attemptCount").textContent = `已尝试 ${state.attempt} 组`;
+  if (state.intent === "target_app") {
+    byId("emptyTitle").textContent = "小火箭专属账号正在同步刷新中";
+    const desc = byId("emptyView").querySelector("p:not(.empty-label)");
+    if (desc) desc.textContent = "当前轮次小火箭特权账号正在更新同步。可选择底部获取小火箭专属账号，1秒快速解决。";
+    const storeBtnSpan = byId("emptyStoreLink")?.querySelector("span");
+    if (storeBtnSpan) storeBtnSpan.textContent = "获取小火箭专属账号（1秒解决）";
+  } else {
+    byId("emptyTitle").textContent = "共享账号已经试完";
+    const desc = byId("emptyView").querySelector("p:not(.empty-label)");
+    if (desc) desc.textContent = "这一轮没有找到能达成目标的账号。你可以重新开始，或直接购买专属账号。";
+    const storeBtnSpan = byId("emptyStoreLink")?.querySelector("span");
+    if (storeBtnSpan) storeBtnSpan.textContent = "购买专属账号";
+  }
   setPhase("empty", "emptyView");
   replayMotion(byId("emptyView"), "motion-empty-enter");
   replayTextMotion(byId("emptyView"));
