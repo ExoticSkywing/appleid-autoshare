@@ -2184,20 +2184,12 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
   .result-action[data-login-result="success"] .result-arrow { color: var(--neutral-600); }
   .result-action[data-result="login_failed"] {
     color: var(--neutral-200);
-    background: rgba(245, 158, 11, 0.08) !important;
-    border: 1px solid rgba(245, 158, 11, 0.35) !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,.35), inset 0 1px 0 rgba(251, 191, 36, 0.12) !important;
-  }
-  .result-action[data-result="login_failed"] strong {
-    color: #fbbf24 !important;
-  }
-  .result-action[data-result="login_failed"] small {
-    color: rgba(251, 191, 36, 0.72) !important;
+    background: var(--neutral-800) !important;
   }
   .result-action[data-result="login_failed"] .result-icon {
-    color: #1c1917 !important;
-    background: #fbbf24 !important;
-    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18) !important;
+    color: #e5e7eb;
+    background: #475569;
+    box-shadow: 0 0 0 4px rgba(148,163,184,.06);
   }
 
   .result-arrow { color: var(--neutral-500); }

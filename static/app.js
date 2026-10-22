@@ -680,7 +680,7 @@ function updateCopyUI() {
   const progress = byId("copyProgress");
   const step = byId("feedbackStep");
   panel.classList.toggle("is-ready", isExpert || usernameCopied);
-  byId("loginSuccessHint").textContent = isExpert ? "完成并结束" : "仅限已出现左图账号";
+  byId("loginSuccessHint").textContent = isExpert ? "完成并结束" : (state.intent === "target_app" ? "继续检查下载" : "完成并结束");
   byId("targetAppCheck").classList.toggle("hidden", !state.loginSucceeded);
 
   byId("accountStep").classList.toggle("is-current", !isExpert && !usernameEntered);
