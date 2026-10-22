@@ -1524,9 +1524,29 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
   .action-sheet-title {
     margin: 0;
     color: var(--sheet-text);
-    font-size: 1.125rem;
+    font-size: 1.05rem;
     font-weight: 600;
     line-height: 1.4;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .action-sheet-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: rgba(245,158,11,.16);
+    border: 1px solid rgba(245,158,11,.36);
+    color: #fbbf24;
+    font-size: .68rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: .02em;
+    vertical-align: middle;
+  }
     letter-spacing: 0;
     text-wrap: balance;
   }
