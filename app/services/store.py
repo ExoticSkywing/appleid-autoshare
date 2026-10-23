@@ -267,7 +267,7 @@ class RedisStore:
         now: int | None = None,
     ) -> InternalAccount | None:
         del now
-        ranked: list[tuple[int, int, int, str, InternalAccount]] = []
+        ranked: list[tuple[int, int, int, int, str, InternalAccount]] = []
         for account in accounts:
             if await self.redis.sismember(self._key("session-shown", session_digest), account.id):
                 continue
@@ -283,42 +283,59 @@ class RedisStore:
                 "shadowrocket_missing": 3,
                 "login_failed": 4,
             }.get(quality, 1)
+
+            # --- 站长核心权威品质分级 (Source Tier) ---
+            # 无论是否被反馈过登录失败，iKuuu 永远享有绝对的第一顺位 (Tier 0)
+            if "source_ikuuu" in account.features:
+                source_tier = 0
+            elif "source_qingfeng" in account.features:
+                source_tier = 1
+            elif "shadowrocket_purchased" in account.features:
+                source_tier = 2
+            else:
+                source_tier = 3
+
             has_feature = "shadowrocket_purchased" in account.features
             if intent == "target_app":
-                if quality == "shadowrocket_available":
+                if source_tier == 0:
+                    # iKuuu 账号在小火箭通道内永远是最高优先级 intent_rank = 0
                     intent_rank = 0
-                elif quality in {"login_success", None} and has_feature:
+                elif quality == "shadowrocket_available":
                     intent_rank = 1
+                elif quality in {"login_success", None} and has_feature:
+                    intent_rank = 2
                 elif quality == "shadowrocket_missing" and has_feature:
-                    intent_rank = 2
+                    intent_rank = 3
                 elif quality == "login_failed" and has_feature:
-                    intent_rank = 3
+                    intent_rank = 4
                 elif quality in {"login_success", None}:
-                    intent_rank = 4
-                elif quality == "shadowrocket_missing":
                     intent_rank = 5
-                else:
+                elif quality == "shadowrocket_missing":
                     intent_rank = 6
+                else:
+                    intent_rank = 7
             else:
-                if quality == "shadowrocket_available":
+                if source_tier == 0:
                     intent_rank = 0
-                elif quality in {"login_success", None} and has_feature:
+                elif quality == "shadowrocket_available":
                     intent_rank = 1
-                elif quality in {"login_success", "shadowrocket_missing"}:
+                elif quality in {"login_success", None} and has_feature:
                     intent_rank = 2
-                elif quality is None:
+                elif quality in {"login_success", "shadowrocket_missing"}:
                     intent_rank = 3
-                elif has_feature:
+                elif quality is None:
                     intent_rank = 4
-                elif quality == "shadowrocket_missing":
+                elif has_feature:
                     intent_rank = 5
-                else:
+                elif quality == "shadowrocket_missing":
                     intent_rank = 6
-            ranked.append((intent_rank, rank, -account.last_synced_at, account.id, account))
+                else:
+                    intent_rank = 7
+            ranked.append((source_tier, intent_rank, rank, -account.last_synced_at, account.id, account))
         if not ranked:
             return None
-        ranked.sort(key=lambda item: (item[0], item[1], item[2], item[3]))
-        return ranked[0][4]
+        ranked.sort(key=lambda item: (item[0], item[1], item[2], item[3], item[4]))
+        return ranked[0][5]
 
     async def record_account_feedback(
         self,

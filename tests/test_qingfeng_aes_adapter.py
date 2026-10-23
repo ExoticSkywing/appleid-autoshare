@@ -94,7 +94,7 @@ async def test_request_uses_exact_referer_and_fixed_generic_browser_headers() ->
     assert [(item.username, item.password) for item in records] == [
         ("valid@example.invalid", "synthetic-password")
     ]
-    assert records[0].features == ("shadowrocket_purchased",)
+    assert records[0].features == ("shadowrocket_purchased", "source_qingfeng")
 
 
 @pytest.mark.asyncio

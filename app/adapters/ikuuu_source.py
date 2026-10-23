@@ -143,7 +143,7 @@ class IkuuuSourceAdapter(BaseAdapter):
                 username=username.strip(),
                 password=password,
                 region="US",
-                features=("shadowrocket_purchased",),
+                features=("shadowrocket_purchased", "source_ikuuu"),
                 source_valid_until=expire_time,
             )
         ]

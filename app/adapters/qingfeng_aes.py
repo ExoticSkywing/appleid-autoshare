@@ -434,7 +434,7 @@ def _parse_card(card: Tag, seed: str) -> CandidateAccount | None:
         username=username,
         password=password,
         region="US",
-        features=("shadowrocket_purchased",),
+        features=("shadowrocket_purchased", "source_qingfeng"),
     )
 
 
