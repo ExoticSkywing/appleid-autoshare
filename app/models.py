@@ -79,6 +79,20 @@ class FeedbackRequest(BaseModel):
     ]
 
 
+class RestartAccountRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    account_id: str = Field(min_length=8, max_length=128)
+
+
+class RestartAccountResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    ok: bool
+    msg: str = ""
+    account: PublicAccount | None = None
+
+
 class PublicAccount(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 

@@ -51,6 +51,10 @@ class RedisStore:
         if not accounts:
             return False
         source_limits = {
+            "appleauto": (
+                self.settings.source_appleauto_freshness_seconds,
+                self.settings.source_appleauto_slice_ttl_seconds,
+            ),
             "reserve_c": (
                 self.settings.source_c_freshness_seconds,
                 self.settings.source_c_slice_ttl_seconds,
@@ -160,10 +164,13 @@ class RedisStore:
 
     async def get_fresh_pool(self, *, now: int | None = None) -> AggregatePool | None:
         aliases_by_mode = {
-            "all": ("source_a", "source_b")
-            + (("reserve_c",) if self.settings.source_c_enabled else ())
-            + (("reserve_d",) if self.settings.source_d_enabled else ())
-            + (("qingfeng",) if self.settings.source_qingfeng_enabled else ()),
+            "all": (
+                (("appleauto",) if self.settings.source_appleauto_enabled else ())
+                + ("source_a", "source_b")
+                + (("reserve_c",) if self.settings.source_c_enabled else ())
+                + (("reserve_d",) if self.settings.source_d_enabled else ())
+                + (("qingfeng",) if self.settings.source_qingfeng_enabled else ())
+            ),
             "primary_only": ("source_a", "source_b"),
             "source_a_only": ("source_a",),
             "source_b_only": ("source_b",),
@@ -285,15 +292,20 @@ class RedisStore:
             }.get(quality, 1)
 
             # --- 站长核心权威品质分级 (Source Tier) ---
-            # 无论是否被反馈过登录失败，iKuuu 永远享有绝对的第一顺位 (Tier 0)
-            if "source_ikuuu" in account.features:
+            # 0. 自营 AppleAuto：无上至尊级，自托管自动化解锁重置，最高绝对优先级
+            # 1. iKuuu：特权源，霸榜第二顺位
+            # 2. 清风：加密源，第三顺位
+            # 3. 通用第三方源：兜底
+            if "source_appleauto" in account.features:
                 source_tier = 0
-            elif "source_qingfeng" in account.features:
+            elif "source_ikuuu" in account.features:
                 source_tier = 1
-            elif "shadowrocket_purchased" in account.features:
+            elif "source_qingfeng" in account.features:
                 source_tier = 2
-            else:
+            elif "shadowrocket_purchased" in account.features:
                 source_tier = 3
+            else:
+                source_tier = 4
 
             has_feature = "shadowrocket_purchased" in account.features
             if intent == "target_app":

@@ -96,6 +96,12 @@ class Settings:
     source_qingfeng_interval_seconds: int = 60
     source_qingfeng_freshness_seconds: int = 90
     source_qingfeng_slice_ttl_seconds: int = 180
+    source_appleauto_enabled: bool = False
+    source_appleauto_url: str = field(default="", repr=False)
+    source_appleauto_api_key: str = field(default="", repr=False)
+    source_appleauto_interval_seconds: int = 30
+    source_appleauto_freshness_seconds: int = 120
+    source_appleauto_slice_ttl_seconds: int = 300
     delivery_source_mode: str = "all"
     upstream_timeout_seconds: float = 8.0
     upstream_max_response_bytes: int = 1_000_000
@@ -187,6 +193,12 @@ class Settings:
             source_qingfeng_interval_seconds=_int("SOURCE_QINGFENG_POLL_SECONDS", 60),
             source_qingfeng_freshness_seconds=_int("SOURCE_QINGFENG_FRESHNESS_SECONDS", 90),
             source_qingfeng_slice_ttl_seconds=_int("SOURCE_QINGFENG_SLICE_TTL_SECONDS", 180),
+            source_appleauto_enabled=_bool("SOURCE_APPLEAUTO_ENABLED", False),
+            source_appleauto_url=os.getenv("SOURCE_APPLEAUTO_URL", ""),
+            source_appleauto_api_key=os.getenv("SOURCE_APPLEAUTO_API_KEY", ""),
+            source_appleauto_interval_seconds=_int("SOURCE_APPLEAUTO_POLL_SECONDS", 30),
+            source_appleauto_freshness_seconds=_int("SOURCE_APPLEAUTO_FRESHNESS_SECONDS", 120),
+            source_appleauto_slice_ttl_seconds=_int("SOURCE_APPLEAUTO_SLICE_TTL_SECONDS", 300),
             delivery_source_mode=os.getenv("DELIVERY_SOURCE_MODE", "all").strip().lower(),
             upstream_timeout_seconds=_float("UPSTREAM_TIMEOUT_SECONDS", 8.0),
             upstream_max_response_bytes=_int("UPSTREAM_MAX_RESPONSE_BYTES", 1_000_000),

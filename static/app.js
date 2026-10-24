@@ -775,6 +775,14 @@ function updateCopyUI() {
   }
 }
 
+function updateAccountUI(account) {
+  const isAppleAuto = Array.isArray(account?.features) && account.features.includes("source_appleauto");
+  const subActions = byId("appleautoActions");
+  if (subActions) subActions.classList.add("hidden");
+  const failedBtn = byId("loginFailedBtn");
+  if (failedBtn) failedBtn.classList.remove("hidden");
+}
+
 function showAccount(account, options = {}) {
   state.account = account;
   state.leftForAttempt = false;
@@ -794,6 +802,7 @@ function showAccount(account, options = {}) {
   byId("attemptCount").classList.toggle("hidden", state.resultsVisible);
   state.feedbackLocked = Boolean(options.feedbackLocked);
   byId("feedbackPanel").classList.remove("hidden");
+  updateAccountUI(account);
   updateIntentUI();
   byId("archiveEdge").classList.remove("hidden");
   setPhase("ready", "accountView");
@@ -1969,9 +1978,58 @@ resultButtons().forEach((button) => {
       showNoviceExitGate(result);
       return;
     }
+    // If user clicked login_failed on an AppleAuto account, expand sub-actions!
+    const isAppleAuto = Array.isArray(state.account?.features) && state.account.features.includes("source_appleauto");
+    if (result === "login_failed" && isAppleAuto) {
+      const sub = byId("appleautoActions");
+      if (sub && sub.classList.contains("hidden")) {
+        sub.classList.remove("hidden");
+        announce("已展开：可选择一键刷新状态或直接更换下一个账号。");
+        return;
+      }
+    }
     submitFeedback(result);
   });
 });
+
+const restartBtn = byId("appleautoRestartBtn");
+if (restartBtn) {
+  restartBtn.addEventListener("click", async () => {
+    if (!state.account || state.busy) return;
+    setBusy(true);
+    announce("正在请求云端净化解锁并刷新账号...");
+    restartBtn.disabled = true;
+    const oldText = restartBtn.querySelector("strong")?.textContent || "";
+    if (restartBtn.querySelector("strong")) restartBtn.querySelector("strong").textContent = "正在云端解锁...";
+    try {
+      const res = await jsonRequest("/api/v2/accounts/restart", {
+        method: "POST",
+        body: JSON.stringify({ account_id: state.account.id }),
+      });
+      if (res && res.ok && res.account) {
+        showAccount(res.account, { restored: true });
+        announce("云端解锁完成，密码已更新，请重新复制并尝试登录！");
+        showRecovery("账号已净化解锁", "云端已完成账号状态刷新，请重新复制密码登录！", null);
+      } else {
+        showRecovery("刷新暂未完成", "正在自动更换下一个可用账号...", () => submitFeedback("login_failed"));
+        await submitFeedback("login_failed");
+      }
+    } catch (_) {
+      showRecovery("网络超时", "云端刷新请求超时，点击可直接更换下一组账号", () => submitFeedback("login_failed"));
+    } finally {
+      if (restartBtn.querySelector("strong")) restartBtn.querySelector("strong").textContent = oldText;
+      restartBtn.disabled = false;
+      setBusy(false);
+    }
+  });
+}
+
+const skipBtn = byId("appleautoSkipBtn");
+if (skipBtn) {
+  skipBtn.addEventListener("click", () => {
+    submitFeedback("login_failed");
+  });
+}
 
 document.querySelectorAll("[data-copy]").forEach((button) => {
   button.addEventListener("click", async () => {

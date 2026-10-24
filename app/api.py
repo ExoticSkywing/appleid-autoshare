@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import hmac
 import logging
 import secrets
@@ -18,6 +19,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from app.adapters.authenticated_dom_source import AuthenticatedDomSourceAdapter
+from app.adapters.appleauto_source import AppleAutoSourceAdapter
 from app.adapters.base import BaseAdapter
 from app.adapters.dom_source import DomSourceAdapter
 from app.adapters.json_source import JsonSourceAdapter
@@ -25,10 +27,12 @@ from app.adapters.ikuuu_source import IkuuuSourceAdapter
 from app.adapters.qingfeng_aes import QingfengAesAdapter
 from app.config import Settings
 from app.models import (
+    FeedbackRequest,
     PublicAccount,
+    RestartAccountRequest,
+    RestartAccountResponse,
     RevealRequest,
     RevealResponse,
-    FeedbackRequest,
     TicketResponse,
     VerifyRequest,
 )
@@ -160,6 +164,20 @@ def _build_aggregator(settings: Settings, store: RedisStore) -> AccountAggregato
         (source_a, settings.source_a_interval_seconds),
         (source_b, settings.source_b_interval_seconds),
     ]
+    if settings.source_appleauto_enabled:
+        adapters.append(
+            (
+                AppleAutoSourceAdapter(
+                    alias="appleauto",
+                    url=settings.source_appleauto_url,
+                    api_key=settings.source_appleauto_api_key,
+                    timeout_seconds=settings.upstream_timeout_seconds,
+                    max_response_bytes=settings.upstream_max_response_bytes,
+                    unhealthy_markers=settings.unhealthy_markers,
+                ),
+                settings.source_appleauto_interval_seconds,
+            )
+        )
     if settings.source_c_enabled:
         adapters.append(
             (
@@ -536,5 +554,73 @@ def create_app(
         except Exception:
             _raise(503, "service_unavailable")
         return Response(status_code=204)
+
+    @app.post("/api/v2/accounts/restart", response_model=RestartAccountResponse)
+    async def restart_account(payload: RestartAccountRequest, request: Request) -> RestartAccountResponse:
+        _require_browser_request(request, runtime_settings)
+        store: RedisStore = request.app.state.store
+        aggregator: AccountAggregator = request.app.state.aggregator
+        raw_session = request.cookies.get(runtime_settings.cookie_name)
+        session_digest = await store.session_digest_if_valid(raw_session)
+        if session_digest is None:
+            _raise(403, "request_denied")
+
+        pool = await store.get_fresh_pool()
+        if pool is None:
+            return RestartAccountResponse(ok=False, msg="pool_empty")
+
+        # Find target account in pool
+        target_account = next((a for a in pool.accounts if a.id == payload.account_id), None)
+        if not target_account or "source_appleauto" not in target_account.features:
+            return RestartAccountResponse(ok=False, msg="not_appleauto_account")
+
+        # Extract upstream id from features
+        upstream_id: int | None = None
+        for f in target_account.features:
+            if f.startswith("appleauto_id_"):
+                try:
+                    upstream_id = int(f.replace("appleauto_id_", ""))
+                    break
+                except ValueError:
+                    pass
+
+        if upstream_id is None:
+            return RestartAccountResponse(ok=False, msg="missing_upstream_id")
+
+        # Find appleauto adapter
+        appleauto_adapter: AppleAutoSourceAdapter | None = None
+        for adapter, _ in aggregator.adapters:
+            if isinstance(adapter, AppleAutoSourceAdapter):
+                appleauto_adapter = adapter
+                break
+
+        if not appleauto_adapter:
+            return RestartAccountResponse(ok=False, msg="adapter_unavailable")
+
+        restarted = await appleauto_adapter.restart_account(upstream_id)
+        if not restarted:
+            return RestartAccountResponse(ok=False, msg="restart_rejected")
+
+        # Give the upstream worker 1.5s to run unlock/reset and poll immediately
+        await asyncio.sleep(1.5)
+        await aggregator.poll_once(appleauto_adapter)
+
+        # Re-fetch fresh pool to return the refreshed credentials
+        new_pool = await store.get_fresh_pool()
+        fresh_account = next((a for a in new_pool.accounts if a.id == payload.account_id), target_account) if new_pool else target_account
+
+        return RestartAccountResponse(
+            ok=True,
+            msg="restarted",
+            account=PublicAccount(
+                id=fresh_account.id,
+                username=fresh_account.username,
+                password=fresh_account.password,
+                region=fresh_account.region,
+                status=fresh_account.status,
+                last_synced_at=fresh_account.last_synced_at,
+                features=fresh_account.features,
+            ),
+        )
 
     return app

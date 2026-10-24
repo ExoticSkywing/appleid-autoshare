@@ -385,9 +385,19 @@
             <span class="result-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span>
             <span><strong>已显示账号，继续</strong><small id="loginSuccessHint">仅限已出现左图账号</small></span>
           </button>
-          <button type="button" data-result="login_failed" class="result-action">
+          <button type="button" data-result="login_failed" id="loginFailedBtn" class="result-action">
             <span class="result-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17"/></svg></span>
             <span><strong>要验证码 / 重复输密码 / 报错 → 更换账号</strong><small>不用取验证码。关闭验证页后务必回到这里，点此换号</small></span>
+          </button>
+        </div>
+        <div id="appleautoActions" class="appleauto-sub-actions hidden">
+          <button type="button" id="appleautoRestartBtn" class="appleauto-action appleauto-primary">
+            <span class="appleauto-btn-icon">✨</span>
+            <span><strong>刷新账号状态重新尝试</strong><small>云端自动解锁/净化，秒级修复</small></span>
+          </button>
+          <button type="button" id="appleautoSkipBtn" class="appleauto-action appleauto-secondary">
+            <span class="appleauto-btn-icon">⏭️</span>
+            <span><strong>直接更换下一个账号</strong><small>跳过当前账号尝试备用</small></span>
           </button>
         </div>
       </div>
@@ -727,7 +737,7 @@
   </div>
 
   <script src="/assets/sound.js?v=20260824-17" defer></script>
-  <script src="/assets/app.js?v=20260920-39" defer></script>
+  <script src="/assets/app.js?v=20260920-40" defer></script>
   <script>
     (function(d,t) {
       var BASE_URL="https://chatwoot.1yo.cc";

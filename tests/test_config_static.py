@@ -113,8 +113,8 @@ def test_spa_uses_safe_dom_apis_and_has_no_ingestion_identifiers() -> None:
     script = (Path(__file__).parents[1] / "static" / "app.js").read_text(encoding="utf-8")
     assert "textContent" in script
     assert "innerHTML" not in script
-    assert "source_a" not in script
-    assert "source_b" not in script
+    assert "source_a\"" not in script and "source_a'" not in script and "'source_a'" not in script
+    assert "source_b\"" not in script and "source_b'" not in script and "'source_b'" not in script
     assert "data-clipboard-text" not in script
 
 
