@@ -33,6 +33,7 @@ const state = {
   resultsVisible: false,
   turnstileLoading: false,
   turnstileReady: false,
+  restartedAccounts: new Set(),
 };
 
 const byId = (id) => document.getElementById(id);
@@ -814,6 +815,7 @@ function showAccount(account, options = {}) {
   state.feedbackLocked = Boolean(options.feedbackLocked);
   byId("feedbackPanel").classList.remove("hidden");
   updateAccountUI(account);
+  updateRestartBtnState();
   updateIntentUI();
   byId("archiveEdge").classList.remove("hidden");
   setPhase("ready", "accountView");
@@ -2004,35 +2006,83 @@ resultButtons().forEach((button) => {
   });
 });
 
+function openRestartConfirm() {
+  const drawer = byId("restartConfirmDrawer");
+  if (!drawer) return;
+  drawer.classList.remove("hidden");
+  document.body.classList.add("is-benefit-modal-open");
+}
+
+function closeRestartConfirm() {
+  const drawer = byId("restartConfirmDrawer");
+  if (!drawer || drawer.classList.contains("hidden")) return;
+  drawer.classList.add("hidden");
+  document.body.classList.remove("is-benefit-modal-open");
+}
+
+byId("restartConfirmClose")?.addEventListener("click", closeRestartConfirm);
+byId("restartConfirmBackdrop")?.addEventListener("click", closeRestartConfirm);
+byId("restartConfirmCancelBtn")?.addEventListener("click", closeRestartConfirm);
+
+byId("restartConfirmSubmitBtn")?.addEventListener("click", async () => {
+  closeRestartConfirm();
+  await executeRestartAccount();
+});
+
+async function executeRestartAccount() {
+  if (!state.account || state.busy) return;
+  const restartBtn = byId("appleautoRestartBtn");
+  setBusy(true);
+  announce("正在重置并获取新密码...");
+  if (restartBtn) {
+    restartBtn.disabled = true;
+    const strong = restartBtn.querySelector("strong");
+    if (strong) strong.textContent = "正在获取新密码...";
+  }
+  try {
+    const res = await jsonRequest("/api/v2/accounts/restart", {
+      method: "POST",
+      body: JSON.stringify({ account_id: state.account.id }),
+    });
+    if (res && res.ok && res.account) {
+      state.restartedAccounts.add(state.account.id);
+      showAccount(res.account, { restored: true });
+      announce("新密码已就绪，请重新复制并登录。");
+      showRecovery("新密码已就绪", "已生成最新密码，请重新复制密码在 App Store 登录。", null);
+    } else {
+      showRecovery("当前账号维护中", "正在为你更换下一个可用账号...", () => submitFeedback("login_failed"));
+      await submitFeedback("login_failed");
+    }
+  } catch (_) {
+    showRecovery("网络连接不稳定", "获取新密码超时，点击下方可直接更换下一个账号", () => submitFeedback("login_failed"));
+  } finally {
+    setBusy(false);
+    updateRestartBtnState();
+  }
+}
+
+function updateRestartBtnState() {
+  const restartBtn = byId("appleautoRestartBtn");
+  if (!restartBtn) return;
+  const isAlreadyRestarted = state.account && state.restartedAccounts.has(state.account.id);
+  const strong = restartBtn.querySelector("strong");
+  const small = restartBtn.querySelector("small");
+  if (isAlreadyRestarted) {
+    restartBtn.disabled = true;
+    if (strong) strong.textContent = "密码已更新";
+    if (small) small.textContent = "已是最新，若仍无法登录请换号";
+  } else {
+    restartBtn.disabled = false;
+    if (strong) strong.textContent = "重新获取密码";
+    if (small) small.textContent = "系统重置后用新密码再试";
+  }
+}
+
 const restartBtn = byId("appleautoRestartBtn");
 if (restartBtn) {
-  restartBtn.addEventListener("click", async () => {
-    if (!state.account || state.busy) return;
-    setBusy(true);
-    announce("正在重置并获取新密码...");
-    restartBtn.disabled = true;
-    const oldText = restartBtn.querySelector("strong")?.textContent || "";
-    if (restartBtn.querySelector("strong")) restartBtn.querySelector("strong").textContent = "正在获取新密码...";
-    try {
-      const res = await jsonRequest("/api/v2/accounts/restart", {
-        method: "POST",
-        body: JSON.stringify({ account_id: state.account.id }),
-      });
-      if (res && res.ok && res.account) {
-        showAccount(res.account, { restored: true });
-        announce("新密码已就绪，请重新复制并登录。");
-        showRecovery("新密码已就绪", "已生成最新密码，请重新复制密码在 App Store 登录。", null);
-      } else {
-        showRecovery("当前账号维护中", "正在为你更换下一个可用账号...", () => submitFeedback("login_failed"));
-        await submitFeedback("login_failed");
-      }
-    } catch (_) {
-      showRecovery("网络连接不稳定", "获取新密码超时，点击下方可直接更换下一个账号", () => submitFeedback("login_failed"));
-    } finally {
-      if (restartBtn.querySelector("strong")) restartBtn.querySelector("strong").textContent = oldText;
-      restartBtn.disabled = false;
-      setBusy(false);
-    }
+  restartBtn.addEventListener("click", () => {
+    if (!state.account || state.busy || restartBtn.disabled) return;
+    openRestartConfirm();
   });
 }
 

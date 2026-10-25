@@ -2159,7 +2159,14 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
     cursor: pointer;
     transition: transform .15s ease, filter .15s ease;
   }
-  .appleauto-action:active { transform: scale(0.97); }
+  .appleauto-action[disabled] {
+    opacity: 0.38 !important;
+    filter: grayscale(0.85) !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
   .appleauto-btn-icon {
     display: inline-flex;
     align-items: center;
