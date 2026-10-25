@@ -1997,10 +1997,10 @@ if (restartBtn) {
   restartBtn.addEventListener("click", async () => {
     if (!state.account || state.busy) return;
     setBusy(true);
-    announce("正在请求云端净化解锁并刷新账号...");
+    announce("正在获取新密码...");
     restartBtn.disabled = true;
     const oldText = restartBtn.querySelector("strong")?.textContent || "";
-    if (restartBtn.querySelector("strong")) restartBtn.querySelector("strong").textContent = "正在云端解锁...";
+    if (restartBtn.querySelector("strong")) restartBtn.querySelector("strong").textContent = "正在刷新密码...";
     try {
       const res = await jsonRequest("/api/v2/accounts/restart", {
         method: "POST",
@@ -2008,14 +2008,14 @@ if (restartBtn) {
       });
       if (res && res.ok && res.account) {
         showAccount(res.account, { restored: true });
-        announce("云端解锁完成，密码已更新，请重新复制并尝试登录！");
-        showRecovery("账号已净化解锁", "云端已完成账号状态刷新，请重新复制密码登录！", null);
+        announce("密码已更新，请重新复制并登录。");
+        showRecovery("新密码已就绪", "账号状态已更新，请重新复制密码在 App Store 登录。", null);
       } else {
-        showRecovery("刷新暂未完成", "正在自动更换下一个可用账号...", () => submitFeedback("login_failed"));
+        showRecovery("当前账号维护中", "正在为你更换下一个可用账号...", () => submitFeedback("login_failed"));
         await submitFeedback("login_failed");
       }
     } catch (_) {
-      showRecovery("网络超时", "云端刷新请求超时，点击可直接更换下一组账号", () => submitFeedback("login_failed"));
+      showRecovery("网络连接不稳定", "刷新超时，点击下方可直接更换下一个账号", () => submitFeedback("login_failed"));
     } finally {
       if (restartBtn.querySelector("strong")) restartBtn.querySelector("strong").textContent = oldText;
       restartBtn.disabled = false;

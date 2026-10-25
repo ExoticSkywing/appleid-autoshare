@@ -2160,7 +2160,18 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
     transition: transform .15s ease, filter .15s ease;
   }
   .appleauto-action:active { transform: scale(0.97); }
-  .appleauto-btn-icon { font-size: 1.25rem; margin-bottom: 4px; }
+  .appleauto-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-bottom: 6px;
+  }
+  .appleauto-btn-icon svg {
+    width: 20px;
+    height: 20px;
+  }
   .appleauto-primary {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
     color: #ffffff !important;
