@@ -780,7 +780,17 @@ function updateAccountUI(account) {
   const subActions = byId("appleautoActions");
   if (subActions) subActions.classList.add("hidden");
   const failedBtn = byId("loginFailedBtn");
-  if (failedBtn) failedBtn.classList.remove("hidden");
+  if (failedBtn) {
+    failedBtn.classList.remove("hidden");
+    const strong = failedBtn.querySelector("strong");
+    if (strong) {
+      if (isAppleAuto) {
+        strong.textContent = "要验证码 / 报错，只要没出现左图登录成功 → 一律点我";
+      } else {
+        strong.textContent = "要验证码 / 重复输密码 / 报错 → 更换账号";
+      }
+    }
+  }
 }
 
 function showAccount(account, options = {}) {
