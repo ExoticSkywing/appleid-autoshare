@@ -2203,6 +2203,7 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
   .appleauto-secondary strong { color: var(--neutral-200) !important; }
   .appleauto-secondary small { color: var(--neutral-500) !important; }
   .result-action {
+    display: grid;
     grid-template-columns: 30px minmax(0, 1fr);
     gap: 9px;
     min-height: 62px;
@@ -2212,6 +2213,7 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
     color: var(--neutral-200);
     background: var(--neutral-800) !important;
     box-shadow: 0 0 0 1px rgba(255,255,255,.09);
+    align-items: center;
   }
   @media (hover: hover) {
     .result-action:hover { background: var(--neutral-750) !important; }
@@ -2219,11 +2221,13 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
   .result-action:active { transform: scale(.96); }
   .result-action strong {
     color: var(--neutral-100);
-    white-space: nowrap;
     letter-spacing: -0.015em;
   }
   .result-action[data-result="login_failed"] strong {
-    font-size: .84rem;
+    font-size: .82rem;
+    line-height: 1.35;
+    white-space: normal;
+    word-break: break-word;
   }
   .result-action small { color: var(--neutral-500); }
   .result-icon {
