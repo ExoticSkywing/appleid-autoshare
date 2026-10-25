@@ -2029,7 +2029,7 @@ function openRestartConfirm() {
   document.querySelector(".skip-link").inert = true;
   void sheet.offsetWidth;
   sheet.classList.add("is-open");
-  byId("restartConfirmSubmitBtn").focus({ preventScroll: true });
+  byId("restartConfirmCancelBtn").focus({ preventScroll: true });
 }
 
 function closeRestartConfirm({ restoreFocus = true, afterClose = null } = {}) {
