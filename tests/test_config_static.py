@@ -50,6 +50,12 @@ def test_environment_runtime_controls_are_not_silently_ignored(monkeypatch) -> N
         "SOURCE_QINGFENG_POLL_SECONDS": "61",
         "SOURCE_QINGFENG_FRESHNESS_SECONDS": "91",
         "SOURCE_QINGFENG_SLICE_TTL_SECONDS": "181",
+        "SOURCE_APPLEAUTO_ENABLED": "true",
+        "SOURCE_APPLEAUTO_URL": "https://appleauto.example.invalid",
+        "SOURCE_APPLEAUTO_API_KEY": "synthetic-test-key",
+        "SOURCE_APPLEAUTO_POLL_SECONDS": "32",
+        "SOURCE_APPLEAUTO_FRESHNESS_SECONDS": "121",
+        "SOURCE_APPLEAUTO_SLICE_TTL_SECONDS": "301",
         "UPSTREAM_TIMEOUT_SECONDS": "9",
         "SOURCE_FRESHNESS_SECONDS": "42",
         "SOURCE_SLICE_TTL_SECONDS": "77",
@@ -77,6 +83,12 @@ def test_environment_runtime_controls_are_not_silently_ignored(monkeypatch) -> N
     assert settings.source_qingfeng_interval_seconds == 61
     assert settings.source_qingfeng_freshness_seconds == 91
     assert settings.source_qingfeng_slice_ttl_seconds == 181
+    assert settings.source_appleauto_enabled is True
+    assert settings.source_appleauto_url == "https://appleauto.example.invalid"
+    assert settings.source_appleauto_api_key == "synthetic-test-key"
+    assert settings.source_appleauto_interval_seconds == 32
+    assert settings.source_appleauto_freshness_seconds == 121
+    assert settings.source_appleauto_slice_ttl_seconds == 301
     assert settings.upstream_timeout_seconds == 9
     assert settings.source_freshness_seconds == 42
     assert settings.source_slice_ttl_seconds == 77
@@ -87,6 +99,45 @@ def test_environment_runtime_controls_are_not_silently_ignored(monkeypatch) -> N
     assert settings.rate_window_seconds == 53
     assert settings.cookie_name == "test-cookie"
     assert settings.public_origin == "https://share.example.invalid"
+
+
+def test_appleauto_deployment_template_matches_runtime_defaults() -> None:
+    text = (Path(__file__).parents[1] / ".env.example").read_text(encoding="utf-8")
+    entries = [line.split("=", 1) for line in text.splitlines() if line.startswith("SOURCE_APPLEAUTO_")]
+    values = dict(entries)
+    defaults = Settings()
+    assert len(entries) == len(values) == 6
+    assert values == {
+        "SOURCE_APPLEAUTO_ENABLED": str(defaults.source_appleauto_enabled).lower(),
+        "SOURCE_APPLEAUTO_URL": "",
+        "SOURCE_APPLEAUTO_API_KEY": "",
+        "SOURCE_APPLEAUTO_POLL_SECONDS": str(defaults.source_appleauto_interval_seconds),
+        "SOURCE_APPLEAUTO_FRESHNESS_SECONDS": str(defaults.source_appleauto_freshness_seconds),
+        "SOURCE_APPLEAUTO_SLICE_TTL_SECONDS": str(defaults.source_appleauto_slice_ttl_seconds),
+    }
+
+
+def test_appleauto_requires_endpoint_and_key_when_enabled() -> None:
+    base = Settings(
+        environment="test",
+        start_pollers=False,
+        source_appleauto_enabled=True,
+        source_appleauto_url="https://appleauto.example.invalid",
+        turnstile_test_mode=True,
+        turnstile_test_token="explicit-local-token",
+    )
+    with pytest.raises(ConfigurationError, match="SOURCE_APPLEAUTO_API_KEY"):
+        base.validated()
+    with pytest.raises(ConfigurationError, match="SOURCE_APPLEAUTO_API_KEY"):
+        base.with_overrides(source_appleauto_api_key="   ")
+    with pytest.raises(ConfigurationError, match="SOURCE_APPLEAUTO_URL"):
+        base.with_overrides(source_appleauto_url="", source_appleauto_api_key="synthetic-test-key")
+    with pytest.raises(ConfigurationError, match="SOURCE_APPLEAUTO_URL"):
+        base.with_overrides(
+            source_appleauto_url="http://appleauto.example.invalid",
+            source_appleauto_api_key="synthetic-test-key",
+        )
+    base.with_overrides(source_appleauto_api_key="synthetic-test-key").validated()
 
 
 def test_production_requires_origin_and_host_prefixed_cookie() -> None:

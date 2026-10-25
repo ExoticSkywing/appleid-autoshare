@@ -65,6 +65,25 @@ async def test_all_intents_prefer_feature_declared_accounts_over_general(redis_c
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("intent", ["target_app", "other_app", "expert"])
+async def test_appleauto_is_selected_before_newer_ikuuu(redis_client, settings, intent) -> None:
+    store = RedisStore(redis_client, settings)
+    appleauto = account(
+        "acc_appleauto", "self-hosted@example.invalid", synced=100,
+        features=["source_appleauto", "shadowrocket_purchased"],
+    )
+    ikuuu = account(
+        "acc_ikuuu", "reserve@example.invalid", synced=200,
+        features=["source_ikuuu", "shadowrocket_purchased"],
+    )
+    session = await store.create_session(f"appleauto-priority-{intent}", now=200)
+    selected = await store.select_account_for_session(
+        session, [ikuuu, appleauto], intent=intent, now=201,
+    )
+    assert selected == appleauto
+
+
+@pytest.mark.asyncio
 async def test_no_shadowrocket_is_after_unknown_but_before_login_failed(redis_client, settings) -> None:
     store = RedisStore(redis_client, settings)
     session_a = await store.create_session("session-a", now=100)

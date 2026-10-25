@@ -363,6 +363,9 @@ class Settings:
             raise ConfigurationError("SOURCE_D_COOKIE is required")
         _https_url("SOURCE_QINGFENG_URL", self.source_qingfeng_url, self.source_qingfeng_enabled)
         _https_url("SOURCE_QINGFENG_REFERER", self.source_qingfeng_referer, self.source_qingfeng_enabled)
+        _https_url("SOURCE_APPLEAUTO_URL", self.source_appleauto_url, self.source_appleauto_enabled)
+        if self.source_appleauto_enabled and not self.source_appleauto_api_key.strip():
+            raise ConfigurationError("SOURCE_APPLEAUTO_API_KEY is required")
 
         if self.turnstile_test_mode:
             if production:
