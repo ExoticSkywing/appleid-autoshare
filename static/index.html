@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://challenges.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://challenges.cloudflare.com">
   <link rel="stylesheet" href="/assets/app.css?v=20260920-5">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-66">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-67">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260920-40">
   <link rel="stylesheet" href="/assets/motion.css?v=20260827-11">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
@@ -587,10 +587,11 @@
       <strong id="copyToastText">复制成功</strong>
     </div>
 
-    <!-- 重新获取密码防误触确认抽屉 -->
-    <div id="restartConfirmDrawer" class="benefit-modal hidden" role="dialog" aria-modal="true" aria-labelledby="restartConfirmTitle">
-      <div class="benefit-dialog-backdrop" id="restartConfirmBackdrop"></div>
-      <div class="benefit-dialog-card" style="max-width: 400px; padding: 22px 20px 20px;">
+    <!-- 重新获取密码防误触确认：原生 iOS 底部抽屉 (Bottom Sheet) -->
+    <div id="restartConfirmDrawer" class="bottom-sheet-modal hidden" role="dialog" aria-modal="true" aria-labelledby="restartConfirmTitle">
+      <div class="bottom-sheet-backdrop" id="restartConfirmBackdrop"></div>
+      <div class="bottom-sheet-card">
+        <div class="bottom-sheet-handle" aria-hidden="true"></div>
         <div class="benefit-dialog-header" style="border-bottom: none; padding-bottom: 0;">
           <div class="benefit-dialog-badge-line">
             <span class="benefit-dialog-badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">操作确认</span>
