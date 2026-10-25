@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://challenges.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://challenges.cloudflare.com">
   <link rel="stylesheet" href="/assets/app.css?v=20260920-5">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-67">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-68">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260920-40">
   <link rel="stylesheet" href="/assets/motion.css?v=20260827-11">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
@@ -587,31 +587,6 @@
       <strong id="copyToastText">复制成功</strong>
     </div>
 
-    <!-- 重新获取密码防误触确认：原生 iOS 底部抽屉 (Bottom Sheet) -->
-    <div id="restartConfirmDrawer" class="bottom-sheet-modal hidden" role="dialog" aria-modal="true" aria-labelledby="restartConfirmTitle">
-      <div class="bottom-sheet-backdrop" id="restartConfirmBackdrop"></div>
-      <div class="bottom-sheet-card">
-        <div class="bottom-sheet-handle" aria-hidden="true"></div>
-        <div class="benefit-dialog-header" style="border-bottom: none; padding-bottom: 0;">
-          <div class="benefit-dialog-badge-line">
-            <span class="benefit-dialog-badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">操作确认</span>
-          </div>
-          <h2 id="restartConfirmTitle" class="benefit-modal-title" style="margin-top: 8px; font-size: 1.15rem;">确定要重新生成密码吗？</h2>
-          <p class="benefit-modal-subtitle" style="margin-top: 8px; line-height: 1.5; font-size: 0.88rem; color: var(--neutral-300);">只有在 App Store 明确提示密码错误或需要验证码时才需点击。若只是输错，建议再试一次当前密码。</p>
-          <button id="restartConfirmClose" class="benefit-modal-close" type="button" aria-label="关闭确认">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
-          </button>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
-          <button type="button" id="restartConfirmSubmitBtn" style="padding: 13px; border-radius: 12px; border: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; font-size: 0.92rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);">
-            确认重置并获取新密码
-          </button>
-          <button type="button" id="restartConfirmCancelBtn" style="padding: 12px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.05); color: var(--neutral-200); font-size: 0.88rem; font-weight: 500; cursor: pointer;">
-            再试一次当前密码
-          </button>
-        </div>
-      </div>
-    </div>
 
     <div id="benefitModal" class="benefit-modal hidden" role="dialog" aria-modal="true" aria-labelledby="benefitModalTitle">
       <div class="benefit-dialog-backdrop"></div>
@@ -774,8 +749,29 @@
     </div>
   </div>
 
+  <!-- 复用项目原有 Action Sheet 结构、样式、动效和焦点管理 -->
+  <div id="restartConfirmActionSheet" class="action-sheet-modal hidden" role="dialog" aria-modal="true" aria-labelledby="restartConfirmTitle" aria-describedby="restartConfirmDescription" inert>
+    <div class="action-sheet-backdrop"></div>
+    <div class="action-sheet-container">
+      <div class="action-sheet-card">
+        <div class="action-sheet-heading">
+          <svg class="action-sheet-heading-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M12 8v4l3 3" />
+            <circle cx="12" cy="12" r="10" />
+          </svg>
+          <h2 id="restartConfirmTitle" class="action-sheet-title">确定要重新生成密码吗？</h2>
+        </div>
+        <p id="restartConfirmDescription" class="action-sheet-desc">只有在 App Store 明确提示密码错误或需要验证码时才需点击。若只是输错，请再试一次当前密码。</p>
+        <div class="action-sheet-actions">
+          <button id="restartConfirmCancelBtn" type="button" class="action-sheet-btn action-sheet-btn-secondary">再试一次当前密码</button>
+          <button id="restartConfirmSubmitBtn" type="button" class="action-sheet-btn action-sheet-btn-primary">确认重置并获取新密码</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="/assets/sound.js?v=20260824-17" defer></script>
-  <script src="/assets/app.js?v=20260920-45" defer></script>
+  <script src="/assets/app.js?v=20260920-46" defer></script>
   <script>
     (function(d,t) {
       var BASE_URL="https://chatwoot.1yo.cc";

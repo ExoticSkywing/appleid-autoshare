@@ -2167,54 +2167,6 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
     transform: none !important;
     box-shadow: none !important;
   }
-
-  /* Bottom Sheet Drawer for Confirmations */
-  .bottom-sheet-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 0;
-    isolation: isolate;
-  }
-  .bottom-sheet-modal.hidden { display: none; }
-  .bottom-sheet-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    animation: sheet-fade-in 200ms ease both;
-  }
-  .bottom-sheet-card {
-    position: relative;
-    width: 100%;
-    max-width: 520px;
-    margin: 0 auto;
-    padding: 16px 20px calc(max(20px, env(safe-area-inset-bottom)) + 10px);
-    border-radius: 24px 24px 0 0;
-    background: #18191f;
-    box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
-    animation: sheet-slide-up 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-  .bottom-sheet-handle {
-    width: 40px;
-    height: 4px;
-    border-radius: 2px;
-    background: rgba(255, 255, 255, 0.25);
-    margin: 0 auto 16px;
-  }
-  @keyframes sheet-fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes sheet-slide-up {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-  }
   .appleauto-btn-icon {
     display: inline-flex;
     align-items: center;

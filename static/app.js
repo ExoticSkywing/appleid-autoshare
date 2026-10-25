@@ -2006,27 +2006,84 @@ resultButtons().forEach((button) => {
   });
 });
 
+let restartSheetCloseTimer = null;
+let restartSheetCloseCleanup = null;
+let restartSheetTrigger = null;
+
+function cancelRestartSheetClose() {
+  window.clearTimeout(restartSheetCloseTimer);
+  restartSheetCloseTimer = null;
+  restartSheetCloseCleanup?.();
+  restartSheetCloseCleanup = null;
+}
+
 function openRestartConfirm() {
-  const drawer = byId("restartConfirmDrawer");
-  if (!drawer) return;
-  drawer.classList.remove("hidden");
-  document.body.classList.add("is-benefit-modal-open");
+  const sheet = byId("restartConfirmActionSheet");
+  if (!sheet || sheet.classList.contains("is-open")) return;
+  cancelRestartSheetClose();
+  restartSheetTrigger = document.activeElement;
+  sheet.classList.remove("hidden", "is-closing");
+  sheet.inert = false;
+  document.body.classList.add("is-action-sheet-open");
+  byId("workspace").inert = true;
+  document.querySelector(".skip-link").inert = true;
+  void sheet.offsetWidth;
+  sheet.classList.add("is-open");
+  byId("restartConfirmSubmitBtn").focus({ preventScroll: true });
 }
 
-function closeRestartConfirm() {
-  const drawer = byId("restartConfirmDrawer");
-  if (!drawer || drawer.classList.contains("hidden")) return;
-  drawer.classList.add("hidden");
-  document.body.classList.remove("is-benefit-modal-open");
+function closeRestartConfirm({ restoreFocus = true, afterClose = null } = {}) {
+  const sheet = byId("restartConfirmActionSheet");
+  if (!sheet || !sheet.classList.contains("is-open")) return;
+  sheet.classList.remove("is-open");
+  sheet.classList.add("is-closing");
+  sheet.inert = true;
+  byId("workspace").inert = false;
+  document.querySelector(".skip-link").inert = false;
+  if (restoreFocus) restartSheetTrigger?.focus({ preventScroll: true });
+  const panel = sheet.querySelector(".action-sheet-container");
+  const finish = () => {
+    if (!sheet.classList.contains("is-closing")) return;
+    cancelRestartSheetClose();
+    sheet.classList.add("hidden");
+    sheet.classList.remove("is-closing");
+    document.body.classList.remove("is-action-sheet-open");
+    afterClose?.();
+  };
+  const duration = Math.max(0, ...getComputedStyle(panel).transitionDuration.split(",").map((value) => {
+    const time = value.trim();
+    return parseFloat(time) * (time.endsWith("ms") ? 1 : 1000);
+  }));
+  if (motionQuery.matches || duration === 0) {
+    finish();
+    return;
+  }
+  const onExitEnd = (event) => {
+    if (event.target === panel && event.propertyName === "transform") finish();
+  };
+  panel.addEventListener("transitionend", onExitEnd);
+  restartSheetCloseCleanup = () => panel.removeEventListener("transitionend", onExitEnd);
+  restartSheetCloseTimer = window.setTimeout(finish, duration + 100);
 }
 
-byId("restartConfirmClose")?.addEventListener("click", closeRestartConfirm);
-byId("restartConfirmBackdrop")?.addEventListener("click", closeRestartConfirm);
-byId("restartConfirmCancelBtn")?.addEventListener("click", closeRestartConfirm);
+byId("restartConfirmActionSheet")?.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeRestartConfirm();
+  } else if (event.key === "Tab") {
+    event.preventDefault();
+    const next = document.activeElement === byId("restartConfirmSubmitBtn")
+      ? byId("restartConfirmCancelBtn") : byId("restartConfirmSubmitBtn");
+    next.focus({ preventScroll: true });
+  }
+});
 
-byId("restartConfirmSubmitBtn")?.addEventListener("click", async () => {
+byId("restartConfirmActionSheet")?.querySelector(".action-sheet-backdrop")?.addEventListener("click", () => {
   closeRestartConfirm();
-  await executeRestartAccount();
+});
+byId("restartConfirmCancelBtn")?.addEventListener("click", () => closeRestartConfirm());
+byId("restartConfirmSubmitBtn")?.addEventListener("click", () => {
+  closeRestartConfirm({ restoreFocus: false, afterClose: executeRestartAccount });
 });
 
 async function executeRestartAccount() {
