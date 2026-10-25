@@ -783,12 +783,13 @@ function updateAccountUI(account) {
   if (failedBtn) {
     failedBtn.classList.remove("hidden");
     const strong = failedBtn.querySelector("strong");
-    if (strong) {
-      if (isAppleAuto) {
-        strong.textContent = "要验证码 / 报错，只要没出现左图登录成功 → 一律点我";
-      } else {
-        strong.textContent = "要验证码 / 重复输密码 / 报错 → 更换账号";
-      }
+    const small = failedBtn.querySelector("small");
+    if (isAppleAuto) {
+      if (strong) strong.textContent = "未出现左图，遇到验证码或报错";
+      if (small) small.textContent = "不用取验证码，点击查看解决办法";
+    } else {
+      if (strong) strong.textContent = "要验证码 / 重复输密码 / 报错 → 更换账号";
+      if (small) small.textContent = "不用取验证码。关闭验证页后务必回到这里，点此换号";
     }
   }
 }
@@ -1988,13 +1989,14 @@ resultButtons().forEach((button) => {
       showNoviceExitGate(result);
       return;
     }
-    // If user clicked login_failed on an AppleAuto account, expand sub-actions!
+    // If user clicked login_failed on an AppleAuto account, transform/expand sub-actions!
     const isAppleAuto = Array.isArray(state.account?.features) && state.account.features.includes("source_appleauto");
     if (result === "login_failed" && isAppleAuto) {
       const sub = byId("appleautoActions");
-      if (sub && sub.classList.contains("hidden")) {
+      if (sub) {
+        button.classList.add("hidden");
         sub.classList.remove("hidden");
-        announce("已展开：可选择一键刷新状态或直接更换下一个账号。");
+        announce("请选择：重新获取密码重试，或更换下一个账号。");
         return;
       }
     }
