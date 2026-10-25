@@ -2177,15 +2177,31 @@ body:has(#targetAppCheck:not(.hidden)) .cw-bubble-tooltip {
     color: #ffffff !important;
     box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
   }
-  .appleauto-primary strong { color: #ffffff !important; font-size: 0.88rem; display: block; }
-  .appleauto-primary small { color: rgba(255,255,255,0.85) !important; font-size: 0.72rem; }
+  .appleauto-primary strong,
+  .appleauto-secondary strong {
+    font-size: 0.88rem;
+    display: block;
+    white-space: nowrap;
+    line-height: 1.25;
+  }
+  .appleauto-primary small,
+  .appleauto-secondary small {
+    font-size: 0.68rem;
+    display: block;
+    white-space: nowrap;
+    line-height: 1.25;
+    margin-top: 2px;
+    letter-spacing: -0.02em;
+  }
+  .appleauto-primary strong { color: #ffffff !important; }
+  .appleauto-primary small { color: rgba(255,255,255,0.88) !important; }
   .appleauto-secondary {
     background: var(--neutral-800) !important;
     color: var(--neutral-300) !important;
     box-shadow: 0 0 0 1px rgba(255,255,255,.1);
   }
-  .appleauto-secondary strong { color: var(--neutral-200) !important; font-size: 0.88rem; display: block; }
-  .appleauto-secondary small { color: var(--neutral-500) !important; font-size: 0.72rem; }
+  .appleauto-secondary strong { color: var(--neutral-200) !important; }
+  .appleauto-secondary small { color: var(--neutral-500) !important; }
   .result-action {
     grid-template-columns: 30px minmax(0, 1fr);
     gap: 9px;
