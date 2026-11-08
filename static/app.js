@@ -24,6 +24,7 @@ const state = {
   preflightRevealed: false,
   securityRevealed: false,
   lightboxTrigger: null,
+  dedicatedCompareReturn: false,
   pendingNoviceExitResult: "",
   signOutGuideOpened: false,
   toastTimer: null,
@@ -31,6 +32,7 @@ const state = {
   intent: "",
   verified: false,
   resultsVisible: false,
+  unknownErrorStage: "",
   turnstileLoading: false,
   turnstileReady: false,
   restartedAccounts: new Set(),
@@ -151,6 +153,7 @@ function saveSession() {
       intent: state.intent,
       loginSucceeded: state.loginSucceeded,
       resultsVisible: state.resultsVisible,
+      unknownErrorStage: state.unknownErrorStage,
     }));
   } catch (_) {
     // The current page remains fully usable when sessionStorage is unavailable.
@@ -186,13 +189,17 @@ function restoreSession() {
     state.mode = state.intent === "expert" ? "expert" : "novice";
     state.loginSucceeded = Boolean(payload.loginSucceeded);
     state.resultsVisible = Boolean(payload.resultsVisible);
+    state.unknownErrorStage = ["video", "fallback"].includes(payload.unknownErrorStage) ? payload.unknownErrorStage : "";
     updateIntentUI();
-    showAccount(state.account, { restored: true, feedbackLocked: state.feedbackLocked, resultsVisible: state.resultsVisible });
+    showAccount(state.account, { restored: true, feedbackLocked: state.feedbackLocked, resultsVisible: state.resultsVisible, unknownErrorStage: state.unknownErrorStage });
     if (state.pendingNoviceExitResult && state.mode === "novice") {
       const pendingResult = state.pendingNoviceExitResult;
       showNoviceExitGate(pendingResult, { restored: true });
     } else if (state.resultsVisible) {
       showResultChoices();
+      if (state.unknownErrorStage === "fallback") {
+        window.setTimeout(showDedicatedAccountSheet, 0);
+      }
     }
     return true;
   } catch (_) {
@@ -424,7 +431,7 @@ function updateVerifyAction() {
 function setBusy(busy) {
   state.busy = busy;
   updateVerifyAction();
-  document.querySelectorAll("[data-login-result], [data-result]").forEach((button) => {
+  document.querySelectorAll("[data-login-result], [data-result], [data-login-unknown-error], .unknown-error-actions button").forEach((button) => {
     button.disabled = busy || state.feedbackLocked || !state.copied.password;
   });
   document.querySelectorAll("[data-copy]").forEach((button) => { button.setAttribute("aria-disabled", String(busy)); });
@@ -575,12 +582,140 @@ function renderResultCopyProgress() {
   el.replaceChildren(
     "进入 App Store 首页右上角点击账户头像 ",
     icon,
-    "，对照下方两种情况，选择对应操作。"
+    "，对照下方现象，选择对应操作。"
   );
 }
 
 function showResultChoices({ returned = false } = {}) {
   showResultActions(returned);
+}
+
+function syncUnknownErrorRecovery() {
+  const active = Boolean(state.unknownErrorStage);
+  const actions = byId("resultActions");
+  byId("unknownErrorRecovery").classList.toggle("hidden", !active);
+  actions.querySelector(".login-result-evidence").classList.toggle("hidden", active);
+  actions.querySelector(".result-choice-grid").classList.toggle("hidden", active);
+  byId("unknownErrorBtn").setAttribute("aria-expanded", String(active));
+  if (active) {
+    byId("appleautoActions").classList.add("hidden");
+    byId("resultStoreBar").classList.add("hidden");
+    byId("feedbackStep").textContent = "未知错误处理";
+    byId("feedbackTitle").textContent = "遇到未知错误，先按视频重试";
+    byId("copyProgress").textContent = "先不用换账号。按视频重试，做完后务必回到这里确认结果。";
+  } else {
+    byId("unknownErrorVideo").pause();
+  }
+}
+
+function showUnknownErrorRecovery() {
+  if (!state.account || state.busy || state.feedbackLocked || !state.copied.password) return;
+  state.unknownErrorStage = "video";
+  syncUnknownErrorRecovery();
+  saveSession();
+  playSound("open");
+  byId("unknownErrorVideo").load();
+  byId("feedbackTitle").focus({ preventScroll: true });
+  byId("feedbackPanel").scrollIntoView({ behavior: motionQuery.matches ? "auto" : "smooth", block: "start" });
+  announce("按视频重试后务必回到这里。已显示账号可继续原流程；仍未成功可自主选择备用方案。" );
+}
+
+function showUnknownErrorFallback() {
+  if (!state.account || state.busy || state.feedbackLocked) return;
+  byId("unknownErrorVideo").pause();
+  state.unknownErrorStage = "fallback";
+  saveSession();
+  showDedicatedAccountSheet();
+}
+
+function returnFromUnknownErrorRecovery() {
+  state.unknownErrorStage = "";
+  byId("unknownErrorVideo").pause();
+  updateAccountUI(state.account);
+  showResultChoices();
+  byId("unknownErrorBtn").focus({ preventScroll: true });
+  saveSession();
+  announce("已返回登录状态核对。请按现象选择操作。" );
+}
+
+function showUnknownErrorSuccessPath() {
+  if (!state.account || state.busy || state.feedbackLocked) return;
+  state.unknownErrorStage = "";
+  byId("unknownErrorVideo").pause();
+  syncUnknownErrorRecovery();
+  // One success contract: reuse the existing success action.
+  byId("resultActions").querySelector("[data-login-result=\"success\"]").click();
+}
+
+// Reuse the established bottom-sheet visuals without altering older sheet controllers.
+let dedicatedSheetCleanup = null;
+let dedicatedSheetClosing = false;
+function openDedicatedSheet(id, focusId) {
+  if (dedicatedSheetClosing || byId(id).classList.contains("is-open")) return;
+  dedicatedSheetCleanup?.();
+  dedicatedSheetClosing = false;
+  const sheet = byId(id);
+  sheet.classList.remove("hidden", "is-closing");
+  sheet.inert = false;
+  document.body.classList.add("is-action-sheet-open");
+  byId("workspace").inert = true;
+  document.querySelector(".skip-link").inert = true;
+  void sheet.offsetWidth;
+  sheet.classList.add("is-open");
+  byId(focusId).focus({ preventScroll: true });
+}
+
+function closeDedicatedSheet(id, afterClose) {
+  const sheet = byId(id);
+  if (!sheet.classList.contains("is-open") || dedicatedSheetClosing) return;
+  dedicatedSheetClosing = true;
+  sheet.classList.remove("is-open");
+  sheet.classList.add("is-closing");
+  const panel = sheet.querySelector(".action-sheet-container");
+  let timer;
+  const finish = () => {
+    dedicatedSheetCleanup?.();
+    dedicatedSheetClosing = false;
+    sheet.classList.add("hidden");
+    sheet.classList.remove("is-closing");
+    sheet.inert = true;
+    document.body.classList.remove("is-action-sheet-open");
+    byId("workspace").inert = false;
+    document.querySelector(".skip-link").inert = false;
+    afterClose?.();
+  };
+  const onEnd = (event) => {
+    if (event.target === panel && event.propertyName === "transform") finish();
+  };
+  dedicatedSheetCleanup = () => {
+    window.clearTimeout(timer);
+    panel.removeEventListener("transitionend", onEnd);
+    dedicatedSheetCleanup = null;
+  };
+  if (motionQuery.matches) {
+    finish();
+  } else {
+    panel.addEventListener("transitionend", onEnd);
+    const duration = Math.max(0, ...getComputedStyle(panel).transitionDuration.split(",").map((value) => parseFloat(value) * (value.trim().endsWith("ms") ? 1 : 1000)));
+    timer = window.setTimeout(finish, duration + 100);
+  }
+}
+
+function showDedicatedAccountSheet() {
+  openDedicatedSheet("dedicatedAccountActionSheet", "dedicatedAccountSheetTitle");
+}
+
+function dismissDedicatedAccountSheet() {
+  closeDedicatedSheet("dedicatedAccountActionSheet", () => {
+    state.unknownErrorStage = "video";
+    saveSession();
+    byId("unknownErrorGiveUpBtn").focus({ preventScroll: true });
+  });
+}
+
+function openDedicatedContactSheet() {
+  openDedicatedSheet("dedicatedContactActionSheet", "dedicatedContactSheetTitle");
+  announce("点击“好的”返回首页，再点右下角客服获取独享账号。" );
 }
 
 function showResultActions(returned = false) {
@@ -612,11 +747,12 @@ function showResultActions(returned = false) {
   const revealStoreLink = Boolean(state.purchaseLink);
   storeBar.classList.toggle("hidden", !revealStoreLink);
   if (revealStoreLink) replayMotion(storeBar, "is-attention-entry");
+  syncUnknownErrorRecovery();
   replayMotion(panel, "motion-panel-enter");
   replayTextMotion(panel);
   replayStepMotion(byId("resultStep"));
   playSound("result");
-  document.querySelectorAll("[data-login-result], [data-result]").forEach((button) => {
+  document.querySelectorAll("[data-login-result], [data-result], [data-login-unknown-error], .unknown-error-actions button").forEach((button) => {
     button.disabled = state.busy || state.feedbackLocked;
   });
   saveSession();
@@ -717,7 +853,7 @@ function updateCopyUI() {
       title.textContent = "核对 App Store 登录状态";
       renderResultCopyProgress();
     }
-    document.querySelectorAll("[data-login-result], [data-result]").forEach((button) => {
+    document.querySelectorAll("[data-login-result], [data-result], [data-login-unknown-error], .unknown-error-actions button").forEach((button) => {
       button.disabled = state.busy || state.feedbackLocked || !passwordCopied;
     });
     return;
@@ -748,12 +884,12 @@ function updateCopyUI() {
   byId("showResultsButton").classList.toggle("hidden", !passwordCopied || state.resultsVisible);
   byId("resultActions").classList.toggle("hidden", !state.resultsVisible || state.loginSucceeded);
   if (state.resultsVisible) {
-    document.querySelectorAll("[data-login-result], [data-result]").forEach((button) => {
+    document.querySelectorAll("[data-login-result], [data-result], [data-login-unknown-error], .unknown-error-actions button").forEach((button) => {
       button.disabled = state.busy || state.feedbackLocked || !passwordCopied;
     });
     return;
   }
-  document.querySelectorAll("[data-login-result], [data-result]").forEach((button) => {
+  document.querySelectorAll("[data-login-result], [data-result], [data-login-unknown-error], .unknown-error-actions button").forEach((button) => {
     button.disabled = state.busy || state.feedbackLocked || !passwordCopied;
   });
 
@@ -786,10 +922,10 @@ function updateAccountUI(account) {
     const strong = failedBtn.querySelector("strong");
     const small = failedBtn.querySelector("small");
     if (isAppleAuto) {
-      if (strong) strong.textContent = "未出现左图，遇到验证码或报错";
+      if (strong) strong.textContent = "要验证码 / 重复输密码";
       if (small) small.textContent = "不用取验证码，点击查看解决办法";
     } else {
-      if (strong) strong.textContent = "要验证码 / 重复输密码 / 报错 → 更换账号";
+      if (strong) strong.textContent = "要验证码 / 重复输密码 → 更换账号";
       if (small) small.textContent = "不用取验证码。关闭验证页后务必回到这里，点此换号";
     }
   }
@@ -798,6 +934,7 @@ function updateAccountUI(account) {
 function showAccount(account, options = {}) {
   state.account = account;
   state.leftForAttempt = false;
+  state.unknownErrorStage = ["video", "fallback"].includes(options.unknownErrorStage) ? options.unknownErrorStage : "";
   state.resultsVisible = Boolean(options.resultsVisible);
   byId("credential").classList.toggle("is-result-mode", state.resultsVisible);
   byId("accountView").classList.toggle("is-summary", state.resultsVisible);
@@ -859,6 +996,7 @@ function showSuccess() {
   state.signOutGuideOpened = false;
   state.loginSucceeded = false;
   state.resultsVisible = false;
+  state.unknownErrorStage = "";
   clearSession();
   hideRecovery();
   runScanner();
@@ -879,6 +1017,7 @@ function showExhausted(purchaseLink) {
   state.signOutGuideOpened = false;
   state.loginSucceeded = false;
   state.resultsVisible = false;
+  state.unknownErrorStage = "";
   clearSession();
   byId("feedbackPanel").classList.add("hidden");
   byId("credentialState").textContent = "没有更多共享凭证";
@@ -952,7 +1091,7 @@ async function revealOne({ replacement = false } = {}) {
   } catch (error) {
     byId("relayStage").classList.remove("is-handoff-out");
     if (state.account) {
-      showAccount(state.account, { restored: true, feedbackLocked: state.feedbackLocked });
+      showAccount(state.account, { restored: true, feedbackLocked: state.feedbackLocked, unknownErrorStage: "" });
       showRecovery("换号没有完成", "当前账号还在，网络恢复后可以继续重试换号。", () => revealOne({ replacement: true }));
     } else if (error.status === 403) {
       showVerify("会话已失效，请重新完成验证。" );
@@ -1052,7 +1191,7 @@ async function submitFeedback(result) {
     }
   } catch (_) {
     if (state.account && state.account.id === currentAccountId) {
-      showAccount(state.account, { restored: true, feedbackLocked: state.feedbackLocked });
+      showAccount(state.account, { restored: true, feedbackLocked: state.feedbackLocked, unknownErrorStage: "" });
       showRecovery(
         state.feedbackLocked ? "结果已记录，但换号未完成" : "反馈没有提交",
         state.feedbackLocked ? "不要重复反馈；点击重试只会继续获取下一组账号。" : "当前账号还在，点击重试即可继续。",
@@ -1457,14 +1596,16 @@ document.querySelectorAll("[data-intent]").forEach((button) => {
   button.addEventListener("click", () => selectIntent(button.dataset.intent));
 });
 byId("intentSummary").addEventListener("click", changeIntent);
-function openBenefitModal() {
+function openBenefitModal({ fromDedicated = false } = {}) {
   const modal = byId("benefitModal");
   if (!modal) return;
+  state.dedicatedCompareReturn = fromDedicated;
   const link = byId("benefitModalShopLink");
   if (link) {
     const url = state.purchaseLink || byId("storeLink")?.getAttribute("href") || "#";
     link.setAttribute("href", url);
-    link.classList.toggle("hidden", !url || url === "#");
+    link.classList.toggle("hidden", !fromDedicated && (!url || url === "#"));
+    link.querySelector("span").textContent = fromDedicated ? "获取独享账号" : "前往获取小火箭专属账号";
   }
   modal.classList.remove("hidden");
   document.body.classList.add("is-benefit-modal-open");
@@ -1476,6 +1617,10 @@ function closeBenefitModal() {
   if (!modal || modal.classList.contains("hidden")) return;
   modal.classList.add("hidden");
   document.body.classList.remove("is-benefit-modal-open");
+  if (state.dedicatedCompareReturn) {
+    state.dedicatedCompareReturn = false;
+    window.setTimeout(showDedicatedAccountSheet, 0);
+  }
 }
 
 function closeGuideLightbox() {
@@ -1507,6 +1652,31 @@ byId("guideLightboxClose").addEventListener("click", closeGuideLightbox);
 byId("guideLightbox").addEventListener("click", (event) => {
   if (event.target === byId("guideLightbox")) closeGuideLightbox();
 });
+byId("dedicatedAccountCompareBtn")?.addEventListener("click", () => {
+  playSound("open");
+  closeDedicatedSheet("dedicatedAccountActionSheet", () => openBenefitModal({ fromDedicated: true }));
+});
+byId("dedicatedAccountGetBtn")?.addEventListener("click", () => {
+  playSound("open");
+  closeDedicatedSheet("dedicatedAccountActionSheet", openDedicatedContactSheet);
+});
+byId("dedicatedAccountActionSheet")?.querySelector(".action-sheet-backdrop")?.addEventListener("click", dismissDedicatedAccountSheet);
+byId("dedicatedAccountCloseBtn")?.addEventListener("click", dismissDedicatedAccountSheet);
+byId("dedicatedContactConfirmBtn")?.addEventListener("click", () => {
+  playSound("check");
+  closeDedicatedSheet("dedicatedContactActionSheet", returnHome);
+});
+const returnToDedicatedAccount = () => closeDedicatedSheet("dedicatedContactActionSheet", showDedicatedAccountSheet);
+byId("dedicatedContactActionSheet")?.querySelector(".action-sheet-backdrop")?.addEventListener("click", returnToDedicatedAccount);
+byId("dedicatedContactCloseBtn")?.addEventListener("click", returnToDedicatedAccount);
+byId("benefitModalShopLink")?.addEventListener("click", (event) => {
+  if (!state.dedicatedCompareReturn) return;
+  event.preventDefault();
+  state.dedicatedCompareReturn = false;
+  closeBenefitModal();
+  openDedicatedContactSheet();
+});
+
 byId("benefitModalClose")?.addEventListener("click", closeBenefitModal);
 byId("benefitModal")?.querySelector(".benefit-dialog-backdrop")?.addEventListener("click", closeBenefitModal);
 document.querySelectorAll(".store-benefit-pill").forEach((button) => {
@@ -1517,7 +1687,31 @@ document.querySelectorAll(".store-benefit-pill").forEach((button) => {
   });
 });
 document.addEventListener("keydown", (event) => {
+  const dedicatedSheet = [byId("dedicatedAccountActionSheet"), byId("dedicatedContactActionSheet")].find((sheet) => sheet.classList.contains("is-open"));
+  const dedicatedCompare = state.dedicatedCompareReturn && !byId("benefitModal").classList.contains("hidden");
+  if (event.key === "Tab" && (dedicatedSheet || dedicatedCompare)) {
+    const surface = dedicatedSheet || byId("benefitModal");
+    const focusable = [...surface.querySelectorAll('button:not(:disabled), a[href], video[controls]')].filter((el) => el.getClientRects().length);
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (!surface.contains(document.activeElement) || document.activeElement.tabIndex < 0) {
+      event.preventDefault();
+      (event.shiftKey ? last : first)?.focus();
+    } else if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last?.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first?.focus();
+    }
+  }
   if (event.key === "Escape") {
+    if (dedicatedSheet) {
+      event.preventDefault();
+      if (dedicatedSheet.id === "dedicatedContactActionSheet") returnToDedicatedAccount();
+      else dismissDedicatedAccountSheet();
+      return;
+    }
     if (!byId("benefitModal")?.classList.contains("hidden")) {
       closeBenefitModal();
       return;
@@ -1983,15 +2177,15 @@ document.querySelectorAll("[data-login-result]").forEach((button) => {
   });
 });
 
-resultButtons().forEach((button) => {
+document.querySelectorAll("[data-result]").forEach((button) => {
   button.addEventListener("click", () => {
+    if (state.busy || state.feedbackLocked) return;
     playSound("result");
     const result = button.dataset.result;
     if (state.mode === "novice" && (result === "shadowrocket_available" || result === "shadowrocket_missing")) {
       showNoviceExitGate(result);
       return;
     }
-    // If user clicked login_failed on an AppleAuto account, transform/expand sub-actions!
     const isAppleAuto = Array.isArray(state.account?.features) && state.account.features.includes("source_appleauto");
     if (result === "login_failed" && isAppleAuto) {
       const sub = byId("appleautoActions");
@@ -2005,6 +2199,11 @@ resultButtons().forEach((button) => {
     submitFeedback(result);
   });
 });
+
+byId("unknownErrorBtn")?.addEventListener("click", showUnknownErrorRecovery);
+byId("unknownErrorSuccessBtn")?.addEventListener("click", showUnknownErrorSuccessPath);
+byId("unknownErrorGiveUpBtn")?.addEventListener("click", showUnknownErrorFallback);
+byId("unknownErrorBackBtn")?.addEventListener("click", returnFromUnknownErrorRecovery);
 
 let restartSheetCloseTimer = null;
 let restartSheetCloseCleanup = null;

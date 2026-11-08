@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#050606">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>获取可用账号</title>
-  <script src="/assets/altcha.min.js" defer></script>
+
   <link rel="preconnect" href="https://challenges.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://challenges.cloudflare.com">
   <link rel="stylesheet" href="/assets/app.css?v=20260920-5">
-  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-68">
+  <link rel="stylesheet" href="/assets/theme-jakub.css?v=20260920-70">
   <link rel="stylesheet" href="/assets/theme-discord-colorway.css?v=20260920-40">
   <link rel="stylesheet" href="/assets/motion.css?v=20260827-11">
   <link rel="stylesheet" href="/assets/sound.css?v=20260823-2">
@@ -366,7 +366,7 @@
               <img src="/assets/assets/appstore-login-success-reference.jpg" alt="正常参照：App Store 账户页显示昵称与 Apple ID" width="1269" height="1280">
               <span>轻触放大</span>
             </button>
-            <p class="login-result-example-hint">必须已出现账号才算成功，否则点击更换账号</p>
+            <p class="login-result-example-hint">必须已出现账号才算成功；<br>未出现时，请按下方现象选择</p>
           </figure>
           <figure class="login-result-example login-result-example-error">
             <figcaption class="login-result-example-title">
@@ -377,8 +377,9 @@
               <img src="/assets/assets/appstore-two-factor-reference.jpg" alt="异常参照：双重认证页面要求短信验证码，右上角有 × 关闭入口" width="1178" height="1178">
               <span>轻触放大</span>
             </button>
-            <p class="login-result-example-hint">不用取验证码，先点右上角 ×</p>
+            <p class="login-result-example-hint">不用取验证码，先点右上角 <span aria-label="关闭">×</span></p>
           </figure>
+
         </div>
         <div class="result-choice-grid">
           <button type="button" data-login-result="success" class="result-action result-success">
@@ -387,8 +388,31 @@
           </button>
           <button type="button" data-result="login_failed" id="loginFailedBtn" class="result-action">
             <span class="result-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17"/></svg></span>
-            <span><strong>要验证码 / 重复输密码 / 报错 → 更换账号</strong><small>不用取验证码。关闭验证页后务必回到这里，点此换号</small></span>
+            <span><strong>要验证码 / 重复输密码 → 更换账号</strong><small>关闭验证页后务必回到这里，点此换号</small></span>
           </button>
+          <button type="button" data-login-unknown-error id="unknownErrorBtn" class="result-action result-action-unknown" aria-controls="unknownErrorRecovery" aria-expanded="false">
+            <span class="result-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></span>
+            <span><strong>验证失败 / 发生未知错误</strong><small>先不要换号，查看视频处理</small></span>
+          </button>
+        </div>
+        <div id="unknownErrorRecovery" class="unknown-error-recovery hidden">
+          <div class="unknown-error-recovery-heading">
+            <h3>30 秒操作演示</h3>
+          </div>
+          <video id="unknownErrorVideo" class="unknown-error-video" controls playsinline preload="none" poster="/assets/assets/apple-login-unknown-error-poster.jpg" aria-label="关闭未知错误提示后再次尝试登录的实操录屏" aria-describedby="unknownErrorSteps">
+            <source src="/assets/assets/apple-login-unknown-error.mp4" type="video/mp4">
+            当前浏览器无法播放视频，请按下方操作继续。
+          </video>
+          <ol id="unknownErrorSteps" class="unknown-error-steps">
+            <li><span>1</span><strong>点“好”关闭错误提示</strong></li>
+            <li><span>2</span><strong>回到登录页，点“继续”</strong></li>
+            <li><span>3</span><strong>做完后务必回到这里确认结果</strong></li>
+          </ol>
+          <div class="unknown-error-actions">
+            <button type="button" id="unknownErrorSuccessBtn" class="unknown-error-success"><strong>已显示账号，继续</strong><small>仅限 App Store 账户页已显示账号</small></button>
+            <button type="button" id="unknownErrorGiveUpBtn" class="unknown-error-give-up" aria-haspopup="dialog"><strong>放弃重试，开启专享备用方案</strong><small>付费独享 Apple ID · 已购小火箭</small></button>
+          </div>
+          <button type="button" id="unknownErrorBackBtn" class="unknown-error-back">返回核对状态</button>
         </div>
         <div id="appleautoActions" class="appleauto-sub-actions hidden">
           <button type="button" id="appleautoRestartBtn" class="appleauto-action appleauto-primary">
@@ -707,6 +731,57 @@
     </div>
   </div>
 
+  <!-- Dedicated fallback: a calm paid alternative after the user chooses to stop retrying. -->
+  <div id="dedicatedAccountActionSheet" class="action-sheet-modal dedicated-account-sheet hidden" role="dialog" aria-modal="true" aria-labelledby="dedicatedAccountSheetTitle" aria-describedby="dedicatedAccountSheetDescription" inert>
+    <div class="action-sheet-backdrop"></div>
+    <div class="action-sheet-container">
+      <div class="action-sheet-card">
+        <div class="action-sheet-heading">
+          <svg class="action-sheet-heading-icon dedicated-sheet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M12 3v18M3 12h18" />
+            <circle cx="12" cy="12" r="9" />
+          </svg>
+          <h2 id="dedicatedAccountSheetTitle" class="action-sheet-title" tabindex="-1"><span class="action-sheet-badge dedicated-sheet-badge">专享备用方案 · 付费</span>不用再反复尝试，换用自己的小火箭账号</h2>
+          <button id="dedicatedAccountCloseBtn" class="dedicated-sheet-close" type="button" aria-label="关闭备用方案，返回视频"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+        </div>
+        <div id="dedicatedAccountSheetDescription" class="dedicated-sheet-body">
+          <p>按视频尝试后仍未成功，可以先停下来，不必继续轮换共享账号。</p>
+          <p>这里提供<strong>非共享、仅你使用的 Apple ID，已购小火箭</strong>。你可以先查看权益，再决定是否购买。</p>
+        </div>
+        <div class="action-sheet-actions">
+          <button id="dedicatedAccountCompareBtn" type="button" class="action-sheet-btn action-sheet-btn-secondary">查看权益对比</button>
+          <button id="dedicatedAccountGetBtn" type="button" class="action-sheet-btn action-sheet-btn-primary dedicated-get-btn">获取独享账号</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated fallback handoff: point to the persistent Chatwoot widget, then return home. -->
+  <div id="dedicatedContactActionSheet" class="action-sheet-modal dedicated-account-sheet hidden" role="dialog" aria-modal="true" aria-labelledby="dedicatedContactSheetTitle" aria-describedby="dedicatedContactSheetDescription" inert>
+    <div class="action-sheet-backdrop"></div>
+    <div class="action-sheet-container">
+      <div class="action-sheet-card">
+        <div class="action-sheet-heading">
+          <svg class="action-sheet-heading-icon dedicated-sheet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M21 11.5a8.38 8.38 0 0 1-9 8.5 9.9 9.9 0 0 1-4-.9L3 21l1.9-4.1A8.5 8.5 0 1 1 21 11.5Z" />
+            <path d="M8 12h.01M12 12h.01M16 12h.01" />
+          </svg>
+          <h2 id="dedicatedContactSheetTitle" class="action-sheet-title" tabindex="-1">点击右下角客服，获取独享账号</h2>
+          <button id="dedicatedContactCloseBtn" class="dedicated-sheet-close" type="button" aria-label="返回备用方案"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+        </div>
+        <div id="dedicatedContactSheetDescription" class="dedicated-sheet-body">
+          <p>返回首页后，点击右下角的客服图标，发送：</p>
+          <strong class="dedicated-contact-phrase">获取小火箭独享账号</strong>
+          <p class="dedicated-contact-widget-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.5 9.9 9.9 0 0 1-4-.9L3 21l1.9-4.1A8.5 8.5 0 1 1 21 11.5Z"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg><span>点击“好的”返回首页后，右下角客服入口会恢复显示。</span></p>
+          <p>客服会为你说明价格与获取方式。本轮共享尝试将在返回首页后结束。</p>
+        </div>
+        <div class="action-sheet-actions dedicated-contact-actions">
+          <button id="dedicatedContactConfirmBtn" type="button" class="action-sheet-btn action-sheet-btn-primary">好的，返回首页</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Viewport-anchored sheet: independent of the task column and its focus scope. -->
   <div id="preflightActionSheet" class="action-sheet-modal hidden" role="dialog" aria-modal="true" aria-labelledby="preflightSheetTitle" aria-describedby="preflightSheetDescription" inert>
     <div class="action-sheet-backdrop"></div>
@@ -771,7 +846,7 @@
   </div>
 
   <script src="/assets/sound.js?v=20260824-17" defer></script>
-  <script src="/assets/app.js?v=20260920-47" defer></script>
+  <script src="/assets/app.js?v=20260920-48" defer></script>
   <script>
     (function(d,t) {
       var BASE_URL="https://chatwoot.1yo.cc";
