@@ -601,8 +601,8 @@ function syncUnknownErrorRecovery() {
     byId("appleautoActions").classList.add("hidden");
     byId("resultStoreBar").classList.add("hidden");
     byId("feedbackStep").textContent = "未知错误处理";
-    byId("feedbackTitle").textContent = "遇到未知错误，先按视频重试";
-    byId("copyProgress").textContent = "先不用换账号。按视频重试，做完后务必回到这里确认结果。";
+    byId("feedbackTitle").textContent = "遇到未知错误，按视频连续重试";
+    byId("copyProgress").textContent = "关闭报错后，回到登录页连续重新登录；通常要试几次，某一次可能会成功。看到账号后务必回到这里确认。";
   } else {
     byId("unknownErrorVideo").pause();
   }
@@ -617,7 +617,7 @@ function showUnknownErrorRecovery() {
   byId("unknownErrorVideo").load();
   byId("feedbackTitle").focus({ preventScroll: true });
   byId("feedbackPanel").scrollIntoView({ behavior: motionQuery.matches ? "auto" : "smooth", block: "start" });
-  announce("按视频重试后务必回到这里。已显示账号可继续原流程；仍未成功可自主选择备用方案。" );
+  announce("关闭报错后连续重新登录，通常要试几次；看到账号后务必回到这里确认。仍未成功可自主选择备用方案。" );
 }
 
 function showUnknownErrorFallback() {

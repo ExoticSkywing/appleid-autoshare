@@ -21,8 +21,9 @@ Give the newly observed Apple temporary-risk / unknown-error case its own path. 
 ## Copy contract
 
 - Result warning: `验证失败 / 发生未知错误` with supporting copy `这是 Apple 的临时验证异常，不是换号入口`.
-- Video heading: `遇到未知错误，先按视频重试`.
-- Video instruction: `按视频关闭错误提示，再回到登录页点击“继续”重试。完成后务必回到这里。`
+- Video heading: `视频演示：关闭报错后连续重新登录`.
+- Video instruction: `关闭报错后，回到登录页连续重新登录；通常要试几次，某一次可能会成功。看到账号后务必回到这里确认。`
+- Recovery steps: `关闭报错：点“好”` → `回到登录页：点“继续”重新登录` → `还在报错？重复前两步，连续试几次；看到账号后回到这里`.
 - Recovery success: `已显示账号，继续` / `仅限 App Store 已显示左图账号`.
 - Recovery abandon: `放弃重试，开启专享备用方案` / `非共享 Apple ID · 已购小火箭`.
 - Fallback sheet: `不用再反复尝试，换用自己的小火箭账号`.
